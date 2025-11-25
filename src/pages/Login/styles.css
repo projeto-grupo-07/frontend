@@ -1,0 +1,60 @@
+
+.login-page-container {
+    max-height: 100vh;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.login-header {
+    display: flex;
+    justify-content: space-between; 
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 120px; 
+    height: auto;
+}
+
+
+.header-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex; 
+}
+
+
+.header-icon-btn img {
+    width: 30px; 
+    height: 30px;
+    object-fit: contain; 
+}
+
+.back-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex; 
+}
+
+
+.icon-arrow {
+    width: 40px; 
+    height: 40px; 
+    object-fit: contain; 
+}
+
+
+.login-content {
+    flex: 1; 
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    width: 100%;
+}

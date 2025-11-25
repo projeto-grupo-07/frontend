@@ -1,0 +1,44 @@
+
+.login-form-card {
+    background-color: #BACBF2;
+    padding: 40px; 
+    border-radius: 20px; 
+    width: 100%;
+    max-width: 400px; 
+    height: 70vh;
+    
+   
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    margin: auto; 
+}
+
+
+
+.form-title {
+    color: #1A2B4C; 
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.forgot-password {
+    text-align: left;
+    font-size: 0.9rem;
+    margin-top: -10px;
+    margin-left: 5px;
+}
+
+.forgot-password a {
+    color: #4A6587;
+    text-decoration: underline;
+}
+
+.titleForm {
+    color: #203462;
+}

@@ -1,0 +1,36 @@
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.input-wrapper label {
+    color: #203462;
+    font-weight: bold;
+    font-size: 1rem;
+    text-align: left;
+    margin-left: 5px;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background-color: #EBEBEB; 
+    font-size: 1rem;
+    color: #333;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.custom-input:focus {
+    background-color: #FFFFFF;
+    box-shadow: inset 0 0 0 2px #B0C4DE;
+}
+
+.lblInput {
+    
+    
+}
