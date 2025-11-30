@@ -11,10 +11,6 @@ const authService = {
       console.log("RESPOSTA DA API:", response);
       console.log("DADOS:", response.data)
 
-      if (response.token) {
-        localStorage.setItem("user_token", response.token);
-      }
-
       return response;
 
     } catch (error) {
@@ -45,15 +41,6 @@ const authService = {
         throw new Error("Erro ao tentar realizar o login.");
       }
     }
-  },
-
-  logout: () => {
-    localStorage.removeItem("user_token");
-    localStorage.removeItem("user_data");
-  },
-
-  getCurrentUser: () => {
-    return JSON.parse(localStorage.getItem("user_data"));
   }
 }
 

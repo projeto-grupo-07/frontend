@@ -1,16 +1,17 @@
 import './styles.css'
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"; 
-import authService from "../../../services/AuthService";
 import api from "../../../services/api/api"
 import Input from "../../common/Input/Index"
 import Button from "../../common/Button/index"
+import { AuthContext } from "../../../contexts/AuthContext";
 
 
 
 function FormularioLogin() {
     const [usuario, setUsuario] = useState("")
     const [senha, setSenha] = useState("")
+    const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     async function autenticar(e) {
@@ -23,12 +24,12 @@ function FormularioLogin() {
         }
         
        try {
-            await authService.login(usuario, senha);
+            await login(usuario, senha);
             navigate("/vendas"); 
 
         } catch (error) {
-            console.error(error);
-            alert("Email ou senha inválidos!");
+            console.error("Erro aqui: ", error);
+            alert(error)
         }
     }
 
