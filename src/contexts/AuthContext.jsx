@@ -45,9 +45,16 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
-    setUser(null);
-    window.location.href = "/login";
+    try {
+      await api.post("/funcionarios/logout", {}); 
+    } catch (error) {
+      console.error("Erro ao tentar invalidar cookie no backend:", error);
+    } finally {
+      setUser(null);
+      window.location.href = "/login";
+    }
   }
+
 
   return (
     <AuthContext.Provider value={{ 
