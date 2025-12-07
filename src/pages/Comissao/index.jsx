@@ -1,3 +1,5 @@
+import './styles.css'
+
 function Comissao() {
 return (
         <h1>Comissao</h1>

@@ -1,0 +1,40 @@
+
+.page-container {
+    padding: 20px;
+    font-family: sans-serif; 
+}
+
+.page-title {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+
+.header-actions {
+    display: flex;
+    align-items: center; 
+    gap: 20px;           
+    width: 100%;       
+}
+
+.button-wrapper {
+    flex-shrink: 0; 
+}
+
+
+.search-wrapper {
+    flex: 1; 
+}
+
+.filters-wrapper {
+    flex-shrink: 0;
+}
+
+.empty-table-placeholder {
+    padding: 20px;
+    text-align: center;
+    color: #aaa;
+    font-style: italic;
+}

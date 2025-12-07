@@ -1,0 +1,73 @@
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-container {
+    width: 420px;
+    background: #dbe8ff; 
+    border-radius: 22px;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.modal-header {
+    background: #4f6786; 
+    padding: 14px;
+    text-align: center;
+    position: relative;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.modal-close {
+    position: absolute;
+    right: 14px;
+    top: 9px;
+    border: none;
+    background: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    color: #2a3550;
+    font-weight: 600;
+}
+
+.form-input {
+    border: none;
+    background: white;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+}

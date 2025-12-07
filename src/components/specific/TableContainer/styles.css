@@ -1,0 +1,26 @@
+.table-container {
+    background-color: #ffe4f0; /* Rosa claro do fundo */
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.table-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffcce6; /* Rosa um pouco mais escuro para o header */
+    padding: 15px 20px;
+    border-radius: 10px 10px 0 0; /* Arredonda só em cima se quiser colar na tabela, ou tudo se for separado */
+    border-radius: 12px;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.table-content {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    overflow-x: auto; /* Para rolagem em telas pequenas */
+}

@@ -1,6 +1,8 @@
 import { useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext.jsx';
+import Button from '../../common/Button'
+import './styles.css'
 
 
 
@@ -44,13 +46,13 @@ export const Navbar = ({ logo, actions, children }) => {
 
         {/* LADO DIREITO: PERFIL E SAIR */}
         <div className="navbar-actions">
-          <div className="user-info">
+          {/* <div className="user-info">
             <p className="user-name">{user?.nome || 'Usuário'}</p>
             <p className="user-role">{user?.perfil || 'Perfil'}</p>
-          </div>
-          <button onClick={handleLogout} className="btn-logout">
+          </div> */}
+          <Button onClick={handleLogout} className="btn-logout">
             Sair
-          </button>
+          </Button>
         </div>
 
       </div>
