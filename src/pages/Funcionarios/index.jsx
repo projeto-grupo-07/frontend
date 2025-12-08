@@ -1,8 +1,13 @@
 import './styles.css'
+import FuncionalidadeNaoDesenvolvida from "../FuncionalidadeNaoDesenvolvida"  
 
 function Funcionarios() {
 return (
-        <h1>Funcionarios</h1>
+        <h1>
+            <title>Funcionários</title>
+            <FuncionalidadeNaoDesenvolvida/>
+            
+        </h1>
     );
 }
 

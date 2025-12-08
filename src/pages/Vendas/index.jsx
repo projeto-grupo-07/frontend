@@ -1,8 +1,12 @@
 import './styles.css'
+import FuncionalidadeNaoDesenvolvida from "../FuncionalidadeNaoDesenvolvida"  
 
 function Vendas() {
 return (
-        <h1>Olá, vendas</h1>
+        <h1>
+            <title>Vendas</title>
+            <FuncionalidadeNaoDesenvolvida/>
+        </h1>
     );
 }
 

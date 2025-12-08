@@ -167,6 +167,7 @@ function Produtos() {
 
     return (
         <div className="page-container">
+            <title>Produtos</title>
             <TableContainer
                 header={
                     <div className="header-actions">
