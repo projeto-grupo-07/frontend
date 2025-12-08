@@ -72,3 +72,13 @@
 .btn-logout:hover {
     background-color: #d9363e;
 }
+
+.navbar-brand .brand-link {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  height: 64px; 
+  object-fit: contain;
+}

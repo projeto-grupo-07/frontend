@@ -7,10 +7,6 @@ import { DynamicRoutes } from "./components/common/DynamicRoutes/DynamicRoutes";
 import Login from './pages/Login';
 import AcessoNegado from './pages/AcessoNegado';
 
-// --- COMPONENTE INTERNO: GERENCIADOR DE ESTADO ---
-// Precisamos deste componente "filho" porque o 'useContext' só funciona
-// DENTRO de um componente que está envolvido pelo Provider.
-// O 'App' cria o Provider, logo ele mesmo não consegue consumir o contexto.
 function AppManager() {
   const { signed, loading } = useContext(AuthContext);
   if (loading) {

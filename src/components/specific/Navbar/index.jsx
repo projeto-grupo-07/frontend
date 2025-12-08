@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext.jsx';
 import Button from '../../common/Button'
 import './styles.css'
+import logoBrink from '../../../assets/images/logo-brink.png'; 
 
 
 
@@ -28,7 +29,13 @@ export const Navbar = ({ logo, actions, children }) => {
       <div className="navbar-content">
         
         <div className="navbar-brand">
-          <Link to="/">Brink Calçados</Link>
+          <Link to="/" className="brand-link">
+            <img 
+              src={logoBrink} 
+              alt="Logo Brink Calçados" 
+              className="navbar-logo"
+            />
+          </Link>
         </div>
 
         <ul className="navbar-links">

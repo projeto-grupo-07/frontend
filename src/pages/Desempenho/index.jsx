@@ -1,8 +1,11 @@
 import './styles.css'
+import Dashboard from "../../components/common/Dashboard/Dashboard"
 
 function Desempenho() {
 return (
-        <h1>Desempenho</h1>
+        <div className='desempenho-page'>
+            <Dashboard />
+        </div>
     );
 }
 

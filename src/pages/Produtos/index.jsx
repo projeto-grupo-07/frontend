@@ -10,6 +10,7 @@ import { DataTable } from '../../components/common/DataTable';
 import CreateProductModal from "../../components/common/CreateProductModal";
 import FilterModal from "../../components/common/FilterModal";
 import { CategoriesService } from "../../services/CategoriaService";
+import EditarProdutoModal from "../../components/common/EditarProdutoModal"
 
 function Produtos() {
     const [produtos, setProdutos] = useState([]);
@@ -29,8 +30,6 @@ function Produtos() {
 
     const [categorias, setCategorias] = useState([]);
     const [subcategorias, setSubcategorias] = useState([]);
-
-    // ---------------- FETCH DE PRODUTOS ----------------
     const fetchProdutos = async () => {
         try {
             setLoading(true);
@@ -46,7 +45,12 @@ function Produtos() {
         }
     };
 
-    // ---------------- FETCH CATEGORIAS ----------------
+    const [idEditando, setIdEditando] = useState(null);
+    function abrirEditar(id) {
+        setIdEditando(id);
+    }
+
+
     useEffect(() => {
         const loadCategorias = async () => {
             try {
@@ -65,7 +69,6 @@ function Produtos() {
         fetchProdutos();
     }, []);
 
-    // ---------------- CONFIGURAÇÃO DE COLUNAS ----------------
     const atualizarColunas = () => {
         console.log("Atualizando colunas para filtroCategoria:", filtroCategoria);
         if (filtroCategoria.toLowerCase() === "calçados") {
@@ -84,7 +87,7 @@ function Produtos() {
                 { header: "Preço", accessor: "valorUnitario" },
                 { header: "Categoria", accessor: "categoriaPai" },
             ]);
-        } else { // Todas
+        } else {
             setColunas([
                 { header: "Nome/Marca", accessor: "nomeMarca" },
                 { header: "Modelo/Descrição", accessor: "modeloDescricao" },
@@ -100,15 +103,14 @@ function Produtos() {
         atualizarColunas();
     }, [filtroCategoria]);
 
-    // ---------------- FILTRO DOS DADOS ----------------
     const dadosFiltrados = produtos
         .filter(p => {
-            console.log("Filtro categoria atual:", filtroCategoria, "Produto tipo:", p.tipo);
             if (!filtroCategoria || filtroCategoria.toLowerCase() === "todas") return true;
             if (filtroCategoria.toLowerCase() === "calçados" && p.tipo !== "calcado") return false;
             if (filtroCategoria.toLowerCase() === "outros" && p.tipo !== "outros") return false;
             return true;
         })
+
         .map(p => {
             if (!filtroCategoria || filtroCategoria.toLowerCase() === "todas") {
                 return {
@@ -118,12 +120,20 @@ function Produtos() {
                 };
             }
             return p;
+        })
+        .filter(p => {
+            if (!termoBusca.trim()) return true;
+
+            const termo = termoBusca.toLowerCase();
+
+            return Object.values(p)
+                .filter(v => typeof v === "string" || typeof v === "number")
+                .some(v => String(v).toLowerCase().includes(termo));
         });
 
     console.log("Produtos brutos:", produtos);
     console.log("Dados filtrados para DataTable:", dadosFiltrados);
 
-    // ---------------- AÇÕES ----------------
     function handleEdit(produto) {
         console.log("Editar produto:", produto);
     }
@@ -155,10 +165,8 @@ function Produtos() {
         }
     }
 
-    // ---------------- RENDER ----------------
     return (
         <div className="page-container">
-            <h1 className="page-title">Produtos</h1>
             <TableContainer
                 header={
                     <div className="header-actions">
@@ -187,7 +195,7 @@ function Produtos() {
                             data={dadosFiltrados}
                             actions={(produto) => (
                                 <div style={{ display: "flex", gap: "12px" }}>
-                                    <IconButton icon={FiEdit} onClick={() => handleEdit(produto)} />
+                                    <IconButton icon={FiEdit} onClick={() => abrirEditar(produto.id)} />
                                     <IconButton icon={FiTrash} onClick={() => handleDelete(produto)} />
                                 </div>
                             )}
@@ -224,6 +232,16 @@ function Produtos() {
                 precoMax={precoMax}
                 setPrecoMax={setPrecoMax}
                 aplicarFiltros={aplicarFiltros}
+            />
+
+            <EditarProdutoModal
+                show={Boolean(idEditando)}
+                idProduto={idEditando}
+                onClose={() => setIdEditando(null)}
+                onSaved={() => {
+                    setIdEditando(null);
+                    fetchProdutos();
+                }}
             />
         </div>
     );

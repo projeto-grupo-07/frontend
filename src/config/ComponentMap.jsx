@@ -1,11 +1,5 @@
 import { lazy } from 'react';
 
-// =================================================================
-// LAZY LOADING
-// O navegador só fará o download do código destas páginas se
-// o utilizador realmente tiver permissão para as aceder.
-// =================================================================
-
 const Vendas = lazy(() => import('../pages/Vendas/index.jsx'));
 const Produtos = lazy(() => import('../pages/Produtos/index.jsx'));
 const Funcionarios = lazy(() => import('../pages/Funcionarios/index.jsx'));

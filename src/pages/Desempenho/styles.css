@@ -1,4 +1,250 @@
-* {
- margin: 0;
+/* ==========================================================
+   RESET GLOBAL
+   ========================================================== */
+
+html,
+body {
+    margin: 0;
     padding: 0;
-}   
+    height: 100%;
+    overflow: auto;
+    /* permite scroll quando necessário */
+    font-family: 'Arial', sans-serif;
+}
+
+#root,
+#app {
+    height: 100%;
+}
+
+main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-width: 100vw !important;
+}
+
+/* ==========================================================
+   WRAPPER GERAL DA PÁGINA DE DESEMPENHO
+   ========================================================== */
+
+.desempenho-page {
+    height: calc(100vh - 50px);
+    /* ajuste do header */
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    background: #ffe4f0;
+}
+
+/* ==========================================================
+   DASHBOARD PRINCIPAL
+   ========================================================== */
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    /* coluna esquerda fixa */
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+
+.metrics-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: #fff;
+    padding: 20px;
+    justify-content: space-around;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.metric-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.metric-filter button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 20px;
+    background: #e0d6ef;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    width: 5rem;
+    height: 6vh;
+}
+
+.metric-filter button.active {
+    background: #ff69b4;
+    color: #fff;
+}
+
+.metric-card {
+    border-bottom: 1px solid #ececec;
+    padding-bottom: 12px;
+}
+
+.metric-card:last-child {
+    border-bottom: none;
+}
+
+.metric-title {
+    font-weight: bold;
+    color: #333;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #555;
+}
+
+
+
+/* ==========================================================
+   COLUNA DIREITA - CONTEÚDOS (TABELAS + GRÁFICOS)
+   ========================================================== */
+
+.tables-charts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+/* Abas principais */
+.view-mode-tabs {
+    display: flex;
+    gap: 12px;
+}
+
+.view-mode-tabs button {
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.view-mode-tabs button.active {
+    background: #ff69b4;
+    color: white;
+    border-color: #ff69b4;
+}
+
+/* Grid de conteúdo: 2x2 responsivo */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: minmax(260px, auto);
+    /* altura fluida */
+    gap: 20px;
+    height: 100%;
+}
+
+/* ==========================================================
+   CARDS
+   ========================================================== */
+
+.card {
+    background: #fff;
+    padding: 18px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.revenue-chart {
+    justify-content: space-around;
+}
+
+.busiest-day {
+    justify-content: space-around;
+}
+
+.tabs {
+    display: flex;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-weight: bold;
+    color: #333;
+}
+
+.card-header span {
+    font-size: 1.2em;
+}
+
+/* Abas internas dos cards */
+.tabs button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 20px;
+    background: #e0d6ef;
+    cursor: pointer;
+    font-size: 0.85em;
+    margin-right: 6px;
+    transition: 0.2s;
+}
+
+.tabs button.active {
+    background: #ff69b4;
+    color: white;
+}
+
+.top-products .tabs button.active {
+    background: #5c005f;
+}
+
+/* ==========================================================
+   TABELAS
+   ========================================================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 8px 0px;
+    text-align: left;
+}
+
+tr {
+    border-bottom: 1px solid #eee;
+}
+
+tr:last-child {
+    border-bottom: none;
+}
+
+/* ==========================================================
+   GRÁFICOS
+   ========================================================== */
+
+.chart-container {
+    width: 100%;
+    height: 260px;
+    /* Altura ideal */
+    display: flex;
+}

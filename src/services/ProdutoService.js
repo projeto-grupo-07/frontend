@@ -12,6 +12,15 @@ export const ProductService = {
       throw error;
     }
   },
+  getById: async (id) => {
+    try {
+      const response = await api.get(`${ENDPOINT}/todos/${id}`);
+      return response
+    } catch (err) {
+      console.error("Erro ao buscar produto por ID:", err);
+      throw err;
+    }
+  },
 
   createProduct: async (product) => {
     const isCalcado = product.marca !== undefined && product.marca !== null;
@@ -33,19 +42,37 @@ export const ProductService = {
     return await api.delete(`${ENDPOINT}/${produto.id}`);
   },
 
-  // returns parents (each with subcategorias array)
   getParentCategories: async () => {
     const response = await api.get('/pais');
     return response.data;
   },
 
-  // fallback helper (calls parent endpoint and extracts subcats for a given parentId)
   getChildrenCategories: async (parentId) => {
     if (!parentId) return [];
     const parents = await api.get('/pais').then(r => r.data).catch(() => []);
     const parent = Array.isArray(parents) ? parents.find(p => p.id === Number(parentId)) : null;
     return parent?.subcategorias ?? [];
-  }
-};
+  },
+
+  updateCalcado: async (id, product) => {
+    try {
+      const res = await api.put(`${ENDPOINT}/calcado/${id}`, product);
+      return res.data;
+    } catch (err) {
+      console.error("Erro ao atualizar calçado:", err);
+      throw err;
+    }
+  },
+
+  updateOutros: async (id, product) => {
+    try {
+      const res = await api.put(`${ENDPOINT}/outros/${id}`, product);
+      return res.data;
+    } catch (err) {
+      console.error("Erro ao atualizar produto 'outros':", err);
+      throw err;
+    }
+  },
+}
 
 export default ProductService;
