@@ -6,6 +6,7 @@ import { DynamicRoutes } from "./components/common/DynamicRoutes/DynamicRoutes";
 
 import Login from './pages/Login';
 import AcessoNegado from './pages/AcessoNegado';
+import PainelDeVendas from './pages/PainelDeVendas';
 
 function AppManager() {
   const { signed, loading } = useContext(AuthContext);
@@ -29,6 +30,8 @@ function AppManager() {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
+         <Route path="/PainelDeVendas" element={<PainelDeVendas />} />
+
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );

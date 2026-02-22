@@ -14,7 +14,7 @@ export const Navbar = ({ logo, actions, children }) => {
 
   
 
-  if (!signed) return null;
+   if (!signed) return null;
 
   function handleLogout() {
     logout();

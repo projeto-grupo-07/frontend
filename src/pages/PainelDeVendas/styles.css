@@ -1,0 +1,141 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Layout Geral */
+.painel-container {
+    padding: 20px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+}
+
+.painel-title {
+    color: #4A4A4A;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.painel-content {
+    display: flex;
+    justify-content: center;
+    gap: 50px; /* Espaço entre os cards conforme o protótipo */
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Estilo dos Cards */
+.card-cadastro, .card-itens {
+    background: #FFFFFF;
+    border-radius: 25px; /* Bordas bem arredondadas */
+    width: 450px;
+    min-height: 580px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+/* Cores e Bordas Específicas */
+.card-cadastro { border: 2px solid #F2A7C3; }
+.card-itens { border: 2px solid #C5D3F7; }
+
+.card-header {
+    padding: 15px;
+    text-align: center;
+}
+
+.card-header.rosa { background-color: #F2A7C3; }
+.card-header.azul { background-color: #C5D3F7; }
+
+.card-header h3 {
+    color: #2D3E50;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Corpo e Inputs */
+.card-body {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.input-field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4A4A4A;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.custom-input {
+    background-color: #EDEDED;
+    border: none;
+    border-radius: 12px;
+    height: 45px;
+    padding: 0 15px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+}
+
+.helper-link {
+    color: #F2A7C3;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    margin-top: 5px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* Tabela de Itens */
+.vendas-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.vendas-table th {
+    background-color: #8CA9D3; /* Azul mais forte para o header da tabela */
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.vendas-table td {
+    padding: 12px;
+    color: #5D78A9;
+    font-weight: 500;
+    border-bottom: 1px solid #F0F0F0;
+    font-size: 0.9rem;
+}
+
+/* Botões Customizados */
+.btn-adicionar {
+    background-color: #5D78A9;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 40px auto 0; /* Centraliza no final do card */
+    width: fit-content;
+}
+
+.btn-concluir {
+    background-color: #F2A7C3;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: auto;
+}
