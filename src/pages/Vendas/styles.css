@@ -1,4 +1,53 @@
-* {
- margin: 0;
-    padding: 0;
-}   
+.vendas-page-container {
+    padding: 20px 40px;
+    background-color: #fff;
+}
+
+.btn-adicionar-venda {
+    background-color: #a7bceb;
+    color: #2D3E50;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.vendas-table-container {
+    background-color: #f9cadb50; /* Rosa bem clarinho de fundo */
+    border-radius: 15px;
+    overflow: hidden;
+    padding: 20px;
+}
+
+.vendas-lista-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.vendas-lista-table th {
+    color: #5D78A9;
+    padding: 15px;
+    text-align: left;
+    border-bottom: 2px solid #f9cadb;
+}
+
+.vendas-lista-table td {
+    padding: 15px;
+    color: #2D3E50;
+    font-weight: 500;
+}
+
+/* Efeito de linhas intercaladas do protótipo */
+.vendas-lista-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin: 0 5px;
+    font-size: 1.1rem;
+}

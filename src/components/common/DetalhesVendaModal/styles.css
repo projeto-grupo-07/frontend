@@ -1,0 +1,73 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.detalhe-venda-card {
+    background: white;
+    width: 90%;
+    max-width: 650px;
+    border-radius: 20px;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-header.azul {
+    background-color: #C5D3F7;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.info-venda-topo {
+    padding: 20px;
+    background: #fdfdfd;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid #eee;
+}
+
+.itens-venda-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.itens-venda-table th {
+    background: #5D78A9;
+    color: white;
+    padding: 12px;
+}
+
+.itens-venda-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+.total-destaque {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #e67e9f;
+}
+
+.btn-fechar {
+    padding: 10px 25px;
+    background: #5D78A9;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

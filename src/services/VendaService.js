@@ -6,7 +6,7 @@ export const VendaService = {
   getAll: async () => {
     try {
       const response = await api.get(ENDPOINT);
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Erro ao buscar vendas:", error);
       throw error;
@@ -61,7 +61,16 @@ export const VendaService = {
       console.error("Erro ao deletar venda:", error);
       throw error;
     }
-  }
+  },
+  update: async (id, vendaData) => {
+    try {
+        const response = await api.put(`${ENDPOINT}/${id}`, vendaData);
+        return response;
+    } catch (error) {
+        console.error(`Erro ao atualizar venda ID ${id}:`, error);
+        throw error;
+    }
+}
 }
 
 export default VendaService;
