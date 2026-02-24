@@ -1,14 +1,132 @@
-import './styles.css'
-import FuncionalidadeNaoDesenvolvida from "../FuncionalidadeNaoDesenvolvida"  
+import { useState, useEffect } from 'react';
+import { FiEdit, FiTrash } from "react-icons/fi";
+import { TableContainer } from '../../components/specific/TableContainer';
+import { SearchBar } from '../../components/common/SearchBar';
+import { DataTable } from '../../components/common/DataTable';
+import { IconButton } from '../../components/common/IconButton';
+import Button from '../../components/common/Button';
+import { FuncionarioService } from '../../services/FuncionarioService';
+import EditarFuncionarioModal from "../../components/common/EditarFuncionarioModal";
+import './styles.css';
 
 function Funcionarios() {
-return (
-        <h1>
-            <title>Funcionários</title>
-            <FuncionalidadeNaoDesenvolvida/>
-            
-        </h1>
+    const [funcionarios, setFuncionarios] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [termoBusca, setTermoBusca] = useState("");
+    const [modalEditarAberto, setModalEditarAberto] = useState(false);
+    const [funcionarioSelecionado, setFuncionarioSelecionado] = useState(null);
+
+    const colunas = [
+        { header: "Nome", accessor: "nome" },
+        { header: "Email", accessor: "email" },
+        { header: "Cargo", accessor: "cargo" },
+        { header: "Comissão", accessor: "comissaoFormatada" },
+    ];
+
+    // Função auxiliar para formatar strings de cargo
+    const formatarCargo = (perfil) => {
+        if (!perfil || !perfil.nome) return "Não Atribuído";
+        const nomeRaw = perfil.nome.toLowerCase();
+        return nomeRaw.charAt(0).toUpperCase() + nomeRaw.slice(1);
+    };
+
+    const loadFuncionarios = async () => {
+        try {
+            setLoading(true);
+            const res = await FuncionarioService.getAll();
+            const lista = Array.isArray(res) ? res : [];
+
+            // O backend agora filtra por 'ativo', mas garantimos aqui também
+            const formatados = lista
+                .filter(f => f.ativo !== false) 
+                .map(f => ({
+                    ...f,
+                    cargo: formatarCargo(f.perfil),
+                    comissaoFormatada: f.comissao
+                        ? `${(f.comissao * 100).toFixed(0)}%`
+                        : "0%"
+                }));
+
+            setFuncionarios(formatados);
+        } catch (err) {
+            console.error("Erro ao carregar funcionários:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadFuncionarios();
+    }, []);
+
+    const handleDelete = async (id) => {
+        const confirmacao = window.confirm("Deseja realmente remover este funcionário? (Ele será desativado do sistema)");
+        if (!confirmacao) return;
+
+        try {
+
+            await FuncionarioService.delete(id);
+            alert("Funcionário desativado com sucesso!");
+            loadFuncionarios(); // Recarrega a lista sem o inativo
+        } catch (err) {
+            alert("Erro ao desativar funcionário. Verifique a conexão.");
+        }
+    };
+
+    const dadosFiltrados = funcionarios.filter(f =>
+        (f.nome || "").toLowerCase().includes(termoBusca.toLowerCase()) ||
+        (f.email || "").toLowerCase().includes(termoBusca.toLowerCase())
+    );
+
+    return (
+        <div className="page-container">
+            <TableContainer
+                header={
+                    <div className="header-actions">
+                        <Button onClick={() => console.log("Abrir Modal Cadastro")}>
+                            Adicionar Funcionário
+                        </Button>
+                        <SearchBar
+                            placeholder="Pesquisar por nome ou email..."
+                            value={termoBusca}
+                            onChange={(e) => setTermoBusca(e.target.value)}
+                        />
+                    </div>
+                }
+            >
+                {loading ? (
+                    <div className="empty-table-placeholder">Buscando dados da equipe...</div>
+                ) : (
+                    <DataTable
+                        columns={colunas}
+                        data={dadosFiltrados}
+                        actions={(func) => (
+                            <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+                                <IconButton
+                                    icon={FiEdit}
+                                    onClick={() => {
+                                        setFuncionarioSelecionado(func);
+                                        setModalEditarAberto(true);
+                                    }}
+                                />
+                                <IconButton 
+                                    icon={FiTrash} 
+                                    onClick={() => handleDelete(func.id)} 
+                                />
+                            </div>
+                        )}
+                    />
+                )}
+            </TableContainer>
+
+            <EditarFuncionarioModal
+                show={modalEditarAberto}
+                onClose={() => setModalEditarAberto(false)}
+                funcionario={funcionarioSelecionado}
+                onUpdateSuccess={loadFuncionarios}
+            />
+        </div>
     );
 }
 
-export default Funcionarios
+export default Funcionarios;
