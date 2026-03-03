@@ -1,0 +1,200 @@
+/* Container Principal */
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 280px 1fr; /* Coluna esquerda fixa, direita flexível */
+  gap: 24px;
+  padding: 20px;
+  background-color: #ffffff;
+  font-family: 'Inter', sans-serif; /* Assumindo uma fonte padrão */
+}
+
+/* --- COLUNA ESQUERDA --- */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Toggle (Hoje/Semana/Mês) */
+.period-toggle {
+  background-color: #DCE4F2; /* Azul acinzentado claro */
+  border-radius: 20px;
+  padding: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.period-toggle button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  border-radius: 16px;
+  color: #5D78A9;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.period-toggle button.active {
+  background-color: #FFFFFF; /* Fundo branco para o ativo */
+  color: #2D3748;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.period-toggle button.active:first-child {
+    background-color: #EBF2FF; /* Azulzinho claro para o "Hoje" se quiser destacar */
+}
+
+/* Pilha de KPIs */
+.kpi-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Estilo forçado para o MetricCard (caso não possa alterar o componente interno) */
+/* Assumindo que o MetricCard gera uma div wrapper */
+.kpi-stack > div { 
+  background-color: #FFF5F7; /* Fundo rosa bem claro */
+  border-radius: 12px;
+  padding: 0 !important; /* Reset padding interno se necessário */
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Assumindo estrutura interna do MetricCard */
+.kpi-stack h3 { /* Título do Card */
+   background-color: #FBCFE8; /* Rosa mais forte do cabeçalho */
+   color: #C53030;
+   margin: 0;
+   padding: 10px;
+   font-size: 0.9rem;
+   font-weight: bold;
+}
+
+.kpi-stack p { /* Valor do Card */
+    color: #2D3748;
+    font-size: 2rem;
+    font-weight: 800;
+    padding: 20px 0;
+    margin: 0;
+}
+
+
+/* --- COLUNA DIREITA (GRID 2x2) --- */
+.main-content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr); /* Altura igual */
+  gap: 24px;
+}
+
+.card-panel {
+  background: white;
+  border-radius: 12px;
+  /* box-shadow: 0 2px 10px rgba(0,0,0,0.05); */
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+}
+
+.card-header {
+  background-color: #FFF5F7; /* Fundo rosa claro do header do card */
+  border-radius: 12px 12px 0 0;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header h3 {
+  color: #D53F8C; /* Rosa texto */
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Tabs pequenas dentro dos cards (Pill Tabs) */
+.pill-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #a0aec0; /* Fundo cinza escuro do toggle */
+  padding: 3px;
+  border-radius: 15px;
+}
+
+.pill-tabs button {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.pill-tabs button.active {
+  background-color: #DCE4F2; /* Azul claro ativo */
+  color: #2D3748;
+}
+
+.info-icon {
+    background: #DCE4F2;
+    color: #5D78A9;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 8px;
+    cursor: help;
+}
+
+.card-body {
+  padding: 15px;
+  flex: 1;
+}
+
+.chart-wrapper {
+    height: 250px; /* Força altura para os gráficos */
+}
+
+/* Badge de Ranking (Bolinhas azuis 1, 2, 3...) */
+.ranking-badge {
+    background-color: #2C3E50;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Responsividade simples */
+@media (max-width: 1100px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+  }
+  .left-column {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .kpi-stack {
+    flex-direction: row;
+    flex: 1;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content-grid {
+    grid-template-columns: 1fr;
+  }
+}

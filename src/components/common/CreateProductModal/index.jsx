@@ -26,7 +26,6 @@ export default function CreateProductModal({ show, onClose, onCreated }) {
           setSelectedParentId(first.id);
           setTipoForm(first.descricao.toLowerCase() === "calçados" ? "calcado" : "outros");
 
-          // pick first subcategory id if present
           const firstSub = Array.isArray(first.subcategorias) && first.subcategorias.length > 0
             ? first.subcategorias[0].id
             : "";
@@ -58,7 +57,6 @@ export default function CreateProductModal({ show, onClose, onCreated }) {
 
     setTipoForm(parent.descricao.toLowerCase() === "calçados" ? "calcado" : "outros");
 
-    // set first subcategory id (if exists), else empty string
     const firstSub = Array.isArray(parent.subcategorias) && parent.subcategorias.length > 0
       ? parent.subcategorias[0].id
       : "";
