@@ -7,6 +7,7 @@ import { IconButton } from '../../components/common/IconButton';
 import Button from '../../components/common/Button';
 import { FuncionarioService } from '../../services/FuncionarioService';
 import EditarFuncionarioModal from "../../components/common/EditarFuncionarioModal";
+import CadastrarFuncionarioModal from "../../components/common/CadastrarFuncionarioModal"
 import './styles.css';
 
 function Funcionarios() {
@@ -15,6 +16,7 @@ function Funcionarios() {
     const [termoBusca, setTermoBusca] = useState("");
     const [modalEditarAberto, setModalEditarAberto] = useState(false);
     const [funcionarioSelecionado, setFuncionarioSelecionado] = useState(null);
+    const [modalCadastroAberto, setModalCadastroAberto] = useState(false);
 
     const colunas = [
         { header: "Nome", accessor: "nome" },
@@ -36,7 +38,6 @@ function Funcionarios() {
             const res = await FuncionarioService.getAll();
             const lista = Array.isArray(res) ? res : [];
 
-            // O backend agora filtra por 'ativo', mas garantimos aqui também
             const formatados = lista
                 .filter(f => f.ativo !== false) 
                 .map(f => ({
@@ -67,7 +68,7 @@ function Funcionarios() {
 
             await FuncionarioService.delete(id);
             alert("Funcionário desativado com sucesso!");
-            loadFuncionarios(); // Recarrega a lista sem o inativo
+            loadFuncionarios(); 
         } catch (err) {
             alert("Erro ao desativar funcionário. Verifique a conexão.");
         }
@@ -83,7 +84,7 @@ function Funcionarios() {
             <TableContainer
                 header={
                     <div className="header-actions">
-                        <Button onClick={() => console.log("Abrir Modal Cadastro")}>
+                        <Button onClick={() => setModalCadastroAberto(true)}>
                             Adicionar Funcionário
                         </Button>
                         <SearchBar
@@ -124,6 +125,12 @@ function Funcionarios() {
                 onClose={() => setModalEditarAberto(false)}
                 funcionario={funcionarioSelecionado}
                 onUpdateSuccess={loadFuncionarios}
+            />
+
+            <CadastrarFuncionarioModal 
+                show={modalCadastroAberto}
+                onClose={() => setModalCadastroAberto(false)}
+                onSuccess={loadFuncionarios}
             />
         </div>
     );

@@ -4,14 +4,11 @@ import './styles.css'; // Corrigido (ponto antes da barra)
 const ModalBuscaProduto = ({ produtos, onSelect, onClose }) => {
     const [filtro, setFiltro] = useState('');
 
-    // Função para criar o nome de exibição baseado no tipo de produto
     const getNomeExibicao = (p) => {
         if (!p) return "";
-        // Se for calçado, montamos: "Marca Modelo - Cor (Nº 00)"
         if (p.marca && p.modelo) {
             return `${p.marca} ${p.modelo} - ${p.cor || ''} (Nº ${p.numero || ''})`;
         }
-        // Caso seja da classe "Outros" e tenha uma categoria ou descrição
         return p.categoria?.nome || "Produto sem nome";
     };
 

@@ -21,8 +21,7 @@ function EditarVendaModal({ show, onClose, venda, onUpdateSuccess }) {
     };
 
     const handleSalvar = async () => {
-        // FORMATADOR: Transforma o objeto complexo no formato simples que o seu endpoint exige
-        const payload = {
+      const payload = {
             idVendedor: Number(idVendedor),
             formaPagamento: formaPagamento,
             itensVenda: itensEditados.map(item => ({
@@ -35,7 +34,7 @@ function EditarVendaModal({ show, onClose, venda, onUpdateSuccess }) {
         try {
             await VendaService.update(venda.id, payload);
             alert("Venda atualizada com sucesso!");
-            onUpdateSuccess(); // Recarrega a tabela de vendas
+            onUpdateSuccess(); 
             onClose();
         } catch (err) {
             alert("Erro ao atualizar: Verifique se o ID do vendedor e produtos são válidos.");

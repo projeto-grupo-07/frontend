@@ -47,7 +47,6 @@ export default function FormOutros({
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* subcategory select is in parent modal */}
       <div className="form-group">
         <label>Nome</label>
         <input value={nome} onChange={(e) => setNome(e.target.value)} required />

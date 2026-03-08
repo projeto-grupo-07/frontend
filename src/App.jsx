@@ -50,8 +50,6 @@ function AppManager() {
   );
 }
 
-// --- APP RAIZ ---
-// Configura o Router e o Provider Global
 export default function App() {
   return (
     <BrowserRouter>
