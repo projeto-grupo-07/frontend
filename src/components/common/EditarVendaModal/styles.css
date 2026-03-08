@@ -1,11 +1,19 @@
-/* Overlay para escurecer o fundo */
+/* ============================================================
+   EditarVendaModal.css
+   Paleta: azul #B0C4DE / #5D78A9, rosa #E06C9F, branco
+   Tudo scoped sob .editar-venda-card para não vazar.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Overlay
+   ---------------------------------------------------------- */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,132 +21,241 @@
     backdrop-filter: blur(2px);
 }
 
-/* Card principal do modal */
+/* ----------------------------------------------------------
+   Card principal
+   ---------------------------------------------------------- */
 .editar-venda-card {
-    background: white;
+    background: #ffffff;
     width: 90%;
     max-width: 600px;
-    border-radius: 15px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    animation: slideUp 0.3s ease-out;
+    box-shadow: 0 12px 48px rgba(176, 196, 222, 0.35), 0 2px 8px rgba(0, 0, 0, 0.08);
+    animation: slideUpEditar 0.3s ease-out;
 }
 
-.modal-header.azul {
-    background-color: #C5D3F7;
-    padding: 1.2rem;
+@keyframes slideUpEditar {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ----------------------------------------------------------
+   Header
+   ---------------------------------------------------------- */
+.editar-venda-card .modal-header.azul {
+    background: linear-gradient(135deg, #B0C4DE 0%, #c5d6ea 100%);
+    padding: 20px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #1a2340;
+    border-bottom: none;
 }
 
-.modal-body {
-    padding: 20px;
+.editar-venda-card .modal-header.azul h3 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: #203462;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.editar-venda-card .modal-header.azul h3::before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: #E06C9F;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(224, 108, 159, 0.5);
+    flex-shrink: 0;
+}
+
+.editar-venda-card .close-btn {
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    color: #203462;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.18s;
+}
+
+.editar-venda-card .close-btn:hover {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+/* ----------------------------------------------------------
+   Body
+   ---------------------------------------------------------- */
+.editar-venda-card .modal-body {
+    padding: 24px;
     max-height: 70vh;
     overflow-y: auto;
+    background: #ffffff;
 }
 
-/* Grid para Vendedor e Pagamento */
-.edit-form-grid {
+/* ----------------------------------------------------------
+   Grid vendedor + pagamento
+   ---------------------------------------------------------- */
+.editar-venda-card .edit-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
-    margin-bottom: 25px;
+    margin-bottom: 26px;
 }
 
-.field {
+.editar-venda-card .field {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.field label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #555;
+.editar-venda-card .field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #203462;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
 }
 
-.field input, .field select {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+.editar-venda-card .field input,
+.editar-venda-card .field select {
+    padding: 12px 14px;
+    background: #EBEBEB;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #333;
     outline: none;
-    transition: border-color 0.2s;
+    transition: box-shadow 0.2s, background 0.2s;
+    box-sizing: border-box;
 }
 
-.field input:focus {
-    border-color: #5D78A9;
+.editar-venda-card .field input:hover,
+.editar-venda-card .field select:hover {
+    background: #e0e8f2;
 }
 
-/* Lista de Itens */
-.section-title {
-    margin-bottom: 15px;
-    color: #1a2340;
-    border-left: 4px solid #5D78A9;
+.editar-venda-card .field input:focus,
+.editar-venda-card .field select:focus {
+    background: #ffffff;
+    box-shadow: inset 0 0 0 2px #B0C4DE;
+}
+
+/* ----------------------------------------------------------
+   Título de seção
+   ---------------------------------------------------------- */
+.editar-venda-card .section-title {
+    margin: 0 0 14px 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #203462;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    border-left: 4px solid #E06C9F;
     padding-left: 10px;
 }
 
-.item-edicao-linha {
+/* ----------------------------------------------------------
+   Lista de itens
+   ---------------------------------------------------------- */
+.editar-venda-card .itens-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.editar-venda-card .item-edicao-linha {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 40px;
     align-items: center;
-    padding: 12px;
-    background: #f9f9f9;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #eee;
-    font-size: 0.85rem;
+    padding: 13px 16px;
+    background: #f7faff;
+    border-radius: 10px;
+    border: 1px solid #e8eef6;
+    font-size: 15px;
+    color: #3d5a80;
+    transition: background 0.15s;
 }
 
-.btn-delete-item {
+.editar-venda-card .item-edicao-linha:hover {
+    background: #eef4ff;
+}
+
+.editar-venda-card .btn-delete-item {
     background: transparent;
     border: none;
-    color: #ff4d4d;
+    color: #E06C9F;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s;
+    font-size: 17px;
+    transition: transform 0.2s, color 0.2s;
 }
 
-.btn-delete-item:hover {
-    transform: scale(1.2);
+.editar-venda-card .btn-delete-item:hover {
+    transform: scale(1.25);
+    color: #d15682;
 }
 
-/* Rodapé e Botões */
-.modal-footer {
-    padding: 15px 20px;
-    background: #f4f7fe;
+/* ----------------------------------------------------------
+   Footer
+   ---------------------------------------------------------- */
+.editar-venda-card .modal-footer {
+    padding: 18px 24px;
+    background: #f7faff;
+    border-top: 1px solid #e8eef6;
     display: flex;
     justify-content: flex-end;
-    gap: 15px;
+    gap: 12px;
 }
 
-.btn-cancelar {
-    background: #ccc;
-    color: #333;
+.editar-venda-card .btn-cancelar {
+    padding: 11px 22px;
+    background: #EBEBEB;
+    color: #5a7a9a;
     border: none;
-    padding: 10px 20px;
     border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
+    transition: background 0.2s, color 0.2s;
 }
 
-.btn-salvar {
-    background: #5D78A9;
+.editar-venda-card .btn-cancelar:hover {
+    background: #dce4ee;
+    color: #203462;
+}
+
+.editar-venda-card .btn-salvar {
+    padding: 11px 28px;
+    background-color: #E06C9F;
     color: white;
     border: none;
-    padding: 10px 25px;
     border-radius: 8px;
-    cursor: pointer;
+    font-size: 15px;
     font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(224, 108, 159, 0.3);
 }
 
-.btn-salvar:hover {
-    background: #4a628a;
+.editar-venda-card .btn-salvar:hover {
+    background-color: #d15682;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(224, 108, 159, 0.4);
 }
 
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+.editar-venda-card .btn-salvar:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(224, 108, 159, 0.25);
 }

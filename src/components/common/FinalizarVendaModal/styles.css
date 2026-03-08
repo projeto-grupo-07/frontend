@@ -1,0 +1,221 @@
+/* ============================================================
+   FinalizarVendaModal.css
+   Paleta do projeto: azul #B0C4DE, rosa #E06C9F, branco #fff
+   Tudo scoped sob .finalizar-venda-modal para não vazar.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Modal container
+   ---------------------------------------------------------- */
+.finalizar-venda-modal .modal-container {
+    background: #ffffff;
+    border-radius: 16px;
+    min-width: 440px;
+    max-width: 480px;
+    padding: 0;
+    box-shadow: 0 12px 48px rgba(176, 196, 222, 0.35), 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.finalizar-venda-modal .modal-header {
+    background: linear-gradient(135deg, #B0C4DE 0%, #c5d6ea 100%);
+    border-bottom: none;
+    padding: 22px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.finalizar-venda-modal .modal-header h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #203462;
+    letter-spacing: -0.3px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.finalizar-venda-modal .modal-header h2::before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: #E06C9F;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(224, 108, 159, 0.5);
+}
+
+.finalizar-venda-modal .modal-close {
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    color: #203462;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.18s;
+}
+
+.finalizar-venda-modal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.finalizar-venda-modal .modal-body {
+    padding: 26px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #ffffff;
+}
+
+/* ----------------------------------------------------------
+   Grupos de campo
+   ---------------------------------------------------------- */
+.finalizar-venda-modal .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.finalizar-venda-modal .form-group label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #203462;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* ----------------------------------------------------------
+   Select — funcionário
+   ---------------------------------------------------------- */
+.finalizar-venda-modal .form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    background: #EBEBEB;
+    border: none;
+    border-radius: 10px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    transition: box-shadow 0.2s, background 0.2s;
+    box-sizing: border-box;
+}
+
+.finalizar-venda-modal .form-group select:hover {
+    background: #e0e8f2;
+}
+
+.finalizar-venda-modal .form-group select:focus {
+    background: #ffffff;
+    box-shadow: inset 0 0 0 2px #B0C4DE;
+}
+
+/* ----------------------------------------------------------
+   Forma de pagamento — pills
+   ---------------------------------------------------------- */
+.finalizar-venda-modal .pagamento-pills {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.finalizar-venda-modal .pagamento-pill {
+    padding: 13px 8px;
+    background: #EBEBEB;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #7a8fa6;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.finalizar-venda-modal .pagamento-pill:hover {
+    background: #dce8f5;
+    color: #203462;
+}
+
+.finalizar-venda-modal .pagamento-pill.ativo {
+    background: #ffffff;
+    border-color: #E06C9F;
+    color: #E06C9F;
+    box-shadow: 0 4px 14px rgba(224, 108, 159, 0.18);
+}
+
+/* ----------------------------------------------------------
+   Resumo final
+   ---------------------------------------------------------- */
+.finalizar-venda-modal .resumo-final {
+    background: #f0f6ff;
+    border: 1.5px solid #B0C4DE;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.finalizar-venda-modal .resumo-final p {
+    margin: 0;
+    font-size: 13px;
+    color: #5a7a9a;
+    font-weight: 500;
+}
+
+.finalizar-venda-modal .resumo-final p span {
+    color: #203462;
+    font-weight: 700;
+}
+
+.finalizar-venda-modal .resumo-final h3 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: #203462;
+    letter-spacing: -0.8px;
+}
+
+/* ----------------------------------------------------------
+   Botão concluir venda
+   ---------------------------------------------------------- */
+.finalizar-venda-modal .btn-concluir-venda {
+    width: 100%;
+    padding: 13px;
+    background-color: #E06C9F;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(224, 108, 159, 0.3);
+}
+
+.finalizar-venda-modal .btn-concluir-venda:hover {
+    background-color: #d15682;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(224, 108, 159, 0.4);
+}
+
+.finalizar-venda-modal .btn-concluir-venda:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(224, 108, 159, 0.25);
+}

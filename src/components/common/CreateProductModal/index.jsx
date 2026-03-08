@@ -3,6 +3,7 @@ import { CategoriesService } from "../../../services/CategoriaService";
 import { Modal } from "../Modal";
 import FormCalcado from "../FormCalcado";
 import FormOutros from "../FormOutros";
+import "./styles.css";
 
 export default function CreateProductModal({ show, onClose, onCreated }) {
   const [parents, setParents] = useState([]);
@@ -26,7 +27,6 @@ export default function CreateProductModal({ show, onClose, onCreated }) {
           setSelectedParentId(first.id);
           setTipoForm(first.descricao.toLowerCase() === "calçados" ? "calcado" : "outros");
 
-          // pick first subcategory id if present
           const firstSub = Array.isArray(first.subcategorias) && first.subcategorias.length > 0
             ? first.subcategorias[0].id
             : "";
@@ -58,7 +58,6 @@ export default function CreateProductModal({ show, onClose, onCreated }) {
 
     setTipoForm(parent.descricao.toLowerCase() === "calçados" ? "calcado" : "outros");
 
-    // set first subcategory id (if exists), else empty string
     const firstSub = Array.isArray(parent.subcategorias) && parent.subcategorias.length > 0
       ? parent.subcategorias[0].id
       : "";
@@ -71,48 +70,50 @@ export default function CreateProductModal({ show, onClose, onCreated }) {
   const subcategories = currentParent?.subcategorias ?? [];
 
   return (
-    <Modal show={show} title="Registrar Produto" onClose={onClose}>
-      <div className="form-group">
-        <label>Categoria Principal</label>
-        <select value={selectedParentId} onChange={handleParentChange} required disabled={loadingParents}>
-          <option value="" disabled>{loadingParents ? "Carregando..." : "Selecione"}</option>
-          {parents.map(p => (
-            <option key={p.id} value={p.id}>{p.descricao}</option>
-          ))}
-        </select>
-      </div>
+    <div className="create-product-modal">
+      <Modal show={show} title="Registrar Produto" onClose={onClose}>
+        <div className="form-group">
+          <label>Categoria Principal</label>
+          <select value={selectedParentId} onChange={handleParentChange} required disabled={loadingParents}>
+            <option value="" disabled>{loadingParents ? "Carregando..." : "Selecione"}</option>
+            {parents.map(p => (
+              <option key={p.id} value={p.id}>{p.descricao}</option>
+            ))}
+          </select>
+        </div>
 
-      <div className="form-group">
-        <label>Subcategoria</label>
-        <select
-          value={selectedSubcategoryId}
-          onChange={(e) => setSelectedSubcategoryId(Number(e.target.value))}
-          required
-        >
-          <option value="" disabled>Selecione</option>
-          {subcategories.map(sc => (
-            <option key={sc.id} value={sc.id}>{sc.descricao}</option>
-          ))}
-        </select>
-      </div>
+        <div className="form-group">
+          <label>Subcategoria</label>
+          <select
+            value={selectedSubcategoryId}
+            onChange={(e) => setSelectedSubcategoryId(Number(e.target.value))}
+            required
+          >
+            <option value="" disabled>Selecione</option>
+            {subcategories.map(sc => (
+              <option key={sc.id} value={sc.id}>{sc.descricao}</option>
+            ))}
+          </select>
+        </div>
 
-      {tipoForm === "calcado" ? (
-        <FormCalcado
-          subcategories={subcategories}
-          subcategoryId={selectedSubcategoryId}
-          setSubcategoryId={setSelectedSubcategoryId}
-          onClose={onClose}
-          onCreated={onCreated}
-        />
-      ) : (
-        <FormOutros
-          subcategories={subcategories}
-          subcategoryId={selectedSubcategoryId}
-          setSubcategoryId={setSelectedSubcategoryId}
-          onClose={onClose}
-          onCreated={onCreated}
-        />
-      )}
-    </Modal>
+        {tipoForm === "calcado" ? (
+          <FormCalcado
+            subcategories={subcategories}
+            subcategoryId={selectedSubcategoryId}
+            setSubcategoryId={setSelectedSubcategoryId}
+            onClose={onClose}
+            onCreated={onCreated}
+          />
+        ) : (
+          <FormOutros
+            subcategories={subcategories}
+            subcategoryId={selectedSubcategoryId}
+            setSubcategoryId={setSelectedSubcategoryId}
+            onClose={onClose}
+            onCreated={onCreated}
+          />
+        )}
+      </Modal>
+    </div>
   );
 }

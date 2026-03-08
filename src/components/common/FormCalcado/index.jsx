@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ProductService } from "../../../services/ProdutoService";
+import "./styles.css";
 
 export default function FormCalcado({
   subcategories = [],
@@ -15,7 +16,6 @@ export default function FormCalcado({
   const [quantidade, setQuantidade] = useState(1);
   const [valorUnitario, setValorUnitario] = useState("");
 
-  // keep selected subcategory in sync when subcategories list changes
   useEffect(() => {
     if ((!subcategoryId || subcategoryId === "") && subcategories.length > 0) {
       setSubcategoryId(subcategories[0].id);
@@ -52,7 +52,6 @@ export default function FormCalcado({
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* We keep the subcategory selector in the modal parent; this form uses subcategoryId */}
       <div className="form-group">
         <label>Marca</label>
         <input value={marca} onChange={(e) => setMarca(e.target.value)} required />
