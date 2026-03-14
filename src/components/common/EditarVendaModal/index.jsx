@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { FiTrash } from "react-icons/fi";
 import { VendaService } from '../../../services/VendaService';
+import { FuncionarioService } from '../../../services/FuncionarioService';
+
 import './styles.css';
 
 function EditarVendaModal({ show, onClose, venda, onUpdateSuccess }) {
     const [itensEditados, setItensEditados] = useState([]);
     const [formaPagamento, setFormaPagamento] = useState("");
     const [idVendedor, setIdVendedor] = useState("");
+    const [vendedores, setVendedores] = useState([]);
+
+    useEffect(() => {
+        if (show) {
+            const fetchVendedores = async () => {
+                try {
+                    const res = await FuncionarioService.getAll();
+                    const lista = Array.isArray(res) ? res : (res?.data || []);
+                    setVendedores(lista);
+                } catch (err) {
+                    console.error("Erro ao carregar funcionários:", err);
+                }
+            };
+            fetchVendedores();
+        }
+    }, [show]);
 
     useEffect(() => {
         if (venda) {
@@ -21,7 +39,7 @@ function EditarVendaModal({ show, onClose, venda, onUpdateSuccess }) {
     };
 
     const handleSalvar = async () => {
-      const payload = {
+        const payload = {
             idVendedor: Number(idVendedor),
             formaPagamento: formaPagamento,
             itensVenda: itensEditados.map(item => ({
@@ -34,7 +52,7 @@ function EditarVendaModal({ show, onClose, venda, onUpdateSuccess }) {
         try {
             await VendaService.update(venda.id, payload);
             alert("Venda atualizada com sucesso!");
-            onUpdateSuccess(); 
+            onUpdateSuccess();
             onClose();
         } catch (err) {
             alert("Erro ao atualizar: Verifique se o ID do vendedor e produtos são válidos.");
@@ -54,12 +72,22 @@ function EditarVendaModal({ show, onClose, venda, onUpdateSuccess }) {
                 <div className="modal-body">
                     <div className="edit-form-grid">
                         <div className="field">
-                            <label>ID do Vendedor</label>
-                            <input 
-                                type="number" 
-                                value={idVendedor} 
-                                onChange={(e) => setIdVendedor(e.target.value)} 
-                            />
+                            <label>Vendedor</label>
+                            <select
+                                value={idVendedor}
+                                onChange={(e) => setIdVendedor(e.target.value)}
+                            >
+                                {vendedores.length === 0 ? (
+                                    <option>Carregando...</option>
+                                ) : (
+                                    vendedores.map((v) => (
+                                        <option key={v.id} value={v.id}>
+                                            {v.nome}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+
                         </div>
                         <div className="field">
                             <label>Método de Pagamento</label>

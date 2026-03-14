@@ -64,13 +64,23 @@ export const VendaService = {
   },
   update: async (id, vendaData) => {
     try {
-        const response = await api.put(`${ENDPOINT}/${id}`, vendaData);
-        return response;
+      const response = await api.put(`${ENDPOINT}/${id}`, vendaData);
+      return response;
     } catch (error) {
-        console.error(`Erro ao atualizar venda ID ${id}:`, error);
-        throw error;
+      console.error(`Erro ao atualizar venda ID ${id}:`, error);
+      throw error;
     }
-}
+  },
+  getFormasPagamento: async () => {
+    try {
+      const response = await api.get(`${ENDPOINT}/formas-pagamento`);
+
+      return response;
+    } catch (error) {
+      console.error("Erro ao buscar formas de pagamento:", error);
+      throw error;
+    }
+  }
 }
 
 export default VendaService;

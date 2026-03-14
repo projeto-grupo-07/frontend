@@ -1,18 +1,16 @@
-import './styles.css'
+import './styles.css';
 import { Navbar } from "../../components/specific/Navbar";
 import { useState, useEffect } from 'react';
 import { ProductService } from '../../services/ProdutoService';
-import ModalBuscaProduto from '../../components/common/ModalBuscaProduto'
-import CreateProductModal from '../../components/common/CreateProductModal'
+import ModalBuscaProduto from '../../components/common/ModalBuscaProduto';
+import CreateProductModal from '../../components/common/CreateProductModal';
 import { VendaService } from '../../services/VendaService';
 import FinalizarVendaModal from '../../components/common/FinalizarVendaModal';
 
 function PainelDeVendas() {
     const [produtos, setProdutos] = useState([]);
     const [itensVenda, setItensVenda] = useState(() => {
-        // Busca os dados salvos no navegador
         const dadosSalvos = localStorage.getItem('@BrinksCalcados:carrinho');
-        // Se houver dados, converte de String para Objeto; se não, inicia vazio
         return dadosSalvos ? JSON.parse(dadosSalvos) : [];
     });
     const [loading, setLoading] = useState(true);
@@ -21,22 +19,18 @@ function PainelDeVendas() {
     const [quantidade, setQuantidade] = useState(1);
     const [modalCadastroAberto, setModalCadastroAberto] = useState(false);
     const [modalFinalizarAberto, setModalFinalizarAberto] = useState(false);
+
     const handleConfirmarVenda = async (dadosVenda) => {
         try {
             await VendaService.create(dadosVenda);
-
-            // SUCESSO:
             alert("Venda realizada com sucesso!");
-            setItensVenda([]); // Limpa a tabela
-            localStorage.removeItem('@BrinksCalcados:carrinho'); // Limpa o cache
-            setModalFinalizarAberto(false); // Fecha o modal
+            setItensVenda([]); 
+            localStorage.removeItem('@BrinksCalcados:carrinho'); 
+            setModalFinalizarAberto(false); 
         } catch (err) {
             alert("Erro ao processar venda no servidor.");
         }
     };
-
-
-
 
     const handleSelecionarProduto = (produto) => {
         setProdutoSelecionado(produto);
@@ -44,8 +38,8 @@ function PainelDeVendas() {
     };
 
     const handleProdutoCriado = () => {
-        fetchProdutos(); // Isso recarrega a lista do seu backend
-        setModalCadastroAberto(false); // Fecha o modal de cadastro
+        fetchProdutos(); 
+        setModalCadastroAberto(false); 
         alert("Produto cadastrado com sucesso e pronto para venda!");
     };
 
@@ -63,25 +57,45 @@ function PainelDeVendas() {
     };
 
     const handleAdicionarItem = () => {
-    if (!produtoSelecionado) return alert("Selecione um produto primeiro!");
+        if (!produtoSelecionado) return alert("Selecione um produto primeiro!");
 
-    const descricao = `${produtoSelecionado.marca} ${produtoSelecionado.modelo} - Nº ${produtoSelecionado.numero}`;
+        const descricao = `${produtoSelecionado.marca} ${produtoSelecionado.modelo} - Nº ${produtoSelecionado.numero}`;
 
-    const novoItem = {
-        // Mudamos os nomes das chaves para bater com o DTO do seu Backend
-        idProduto: produtoSelecionado.id, 
-        nome: descricao, 
-        quantidadeVendaProduto: Number(quantidade),
-        valorTotalVendaProduto: (produtoSelecionado.valorUnitario || 0) * quantidade,
-        // Mantemos 'total' e 'preco' apenas se você os usar para exibir na tabela do painel
-        preco: produtoSelecionado.valorUnitario || 0,
-        total: (produtoSelecionado.valorUnitario || 0) * quantidade
+        const novoItem = {
+            idProduto: produtoSelecionado.id,
+            nome: descricao,
+            quantidadeVendaProduto: Number(quantidade),
+            desconto: 0.00, 
+            preco: produtoSelecionado.valorUnitario || 0,
+            total: (produtoSelecionado.valorUnitario || 0) * quantidade
+        };
+
+        setItensVenda([...itensVenda, novoItem]);
+        setProdutoSelecionado(null);
+        setQuantidade(1);
     };
 
-    setItensVenda([...itensVenda, novoItem]);
-    setProdutoSelecionado(null);
-    setQuantidade(1);
-};
+    // FUNÇÃO QUE ESTAVA FALTANDO
+    const handleAtualizarDesconto = (index, novoDesconto) => {
+        const valorDesconto = Number(novoDesconto);
+        
+        if (valorDesconto < 0) return;
+
+        const novaLista = [...itensVenda];
+        const item = novaLista[index];
+        
+        const subtotalBruto = item.preco * item.quantidadeVendaProduto;
+        
+        if (valorDesconto > subtotalBruto) {
+             alert(`O desconto não pode ser maior que o subtotal bruto do item (R$ ${subtotalBruto.toFixed(2)}).`);
+             return;
+        }
+
+        item.desconto = valorDesconto;
+        item.total = subtotalBruto - valorDesconto; 
+        
+        setItensVenda(novaLista);
+    };
 
     const removerItem = (index) => {
         const novaLista = itensVenda.filter((_, i) => i !== index);
@@ -89,15 +103,15 @@ function PainelDeVendas() {
     };
 
     useEffect(() => {
-        fetchProdutos()
-    }, [])
+        fetchProdutos();
+    }, []);
 
     useEffect(() => {
         localStorage.setItem('@BrinksCalcados:carrinho', JSON.stringify(itensVenda));
-    }, [itensVenda]); // Executa sempre que a lista de itens mudar
+    }, [itensVenda]);
 
     return (
-        <> {/* CORRIGIDO: Usando Fragment ao invés de <h1> */}
+        <>
             {modalAberto && (
                 <ModalBuscaProduto
                     produtos={produtos}
@@ -113,7 +127,6 @@ function PainelDeVendas() {
             />
 
             <main className="painel-container">
-
                 <div className="painel-content">
                     <section className="card-cadastro">
                         <div className="card-header rosa">
@@ -129,7 +142,6 @@ function PainelDeVendas() {
                                             type="text"
                                             readOnly
                                             placeholder="Clique para buscar um produto..."
-                                            // GARANTIA: Se não houver nome ou produto, fica string vazia
                                             value={produtoSelecionado ? `${produtoSelecionado.marca} ${produtoSelecionado.modelo}` : ''}
                                             className="custom-input cursor-pointer"
                                         />
@@ -147,7 +159,6 @@ function PainelDeVendas() {
                                     <input
                                         type="number"
                                         className="custom-input"
-                                        // GARANTIA: Nunca deixa o value ser undefined
                                         value={quantidade || ''}
                                         onChange={(e) => setQuantidade(e.target.value)}
                                     />
@@ -172,6 +183,7 @@ function PainelDeVendas() {
                                         <th>Produto</th>
                                         <th>Qtd</th>
                                         <th>Preço</th>
+                                        <th>Desconto (R$)</th> 
                                         <th>Total</th>
                                         <th></th>
                                     </tr>
@@ -180,8 +192,20 @@ function PainelDeVendas() {
                                     {itensVenda.map((item, index) => (
                                         <tr key={index}>
                                             <td>{item.nome}</td>
-                                            <td>{item.quantidade}</td>
+                                            <td>{item.quantidadeVendaProduto}</td>
                                             <td>R$ {item.preco.toFixed(2)}</td>
+                                            <td>
+                                                <input 
+                                                    type="number" 
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={item.desconto === 0 ? '' : item.desconto} 
+                                                    placeholder="0.00"
+                                                    onChange={(e) => handleAtualizarDesconto(index, e.target.value)}
+                                                    className="input-desconto" 
+                                                    style={{ width: '80px', padding: '4px' }}
+                                                />
+                                            </td>
                                             <td>R$ {item.total.toFixed(2)}</td>
                                             <td>
                                                 <button className="btn-delete" onClick={() => removerItem(index)}>🗑️</button>
@@ -190,7 +214,7 @@ function PainelDeVendas() {
                                     ))}
                                     {itensVenda.length === 0 && (
                                         <tr>
-                                            <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>Nenhum item adicionado</td>
+                                            <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>Nenhum item adicionado</td>
                                         </tr>
                                     )}
                                 </tbody>

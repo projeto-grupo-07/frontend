@@ -1,6 +1,5 @@
 import { Modal } from "../Modal";
 import Button from "../Button";
-import "./styles.css";
 
 export default function FilterModal({
     show, onClose,

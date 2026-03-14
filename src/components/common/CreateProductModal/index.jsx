@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CategoriesService } from "../../../services/CategoriaService";
+import CreateCategoryModal from "../CreateCategoryModal";
 import { Modal } from "../Modal";
 import FormCalcado from "../FormCalcado";
 import FormOutros from "../FormOutros";
@@ -11,6 +12,13 @@ export default function CreateProductModal({ show, onClose, onCreated }) {
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState("");
   const [tipoForm, setTipoForm] = useState("outros");
   const [loadingParents, setLoadingParents] = useState(false);
+  const [modalCategoriaAberto, setModalCategoriaAberto] = useState(false);
+
+  const handleCategoriaCriada = async () => {
+    const list = await CategoriesService.getParentCategories();
+    const safeList = Array.isArray(list) ? list : [];
+    setParents(safeList);
+  };
 
   useEffect(() => {
     if (!show) return;
@@ -64,56 +72,75 @@ export default function CreateProductModal({ show, onClose, onCreated }) {
     setSelectedSubcategoryId(firstSub);
   };
 
-  if (!show) return null;
+  // Alteração importante: Se nenhum dos modais deve aparecer, retorna null.
+  if (!show && !modalCategoriaAberto) return null;
 
   const currentParent = parents.find(p => p.id === Number(selectedParentId)) ?? null;
   const subcategories = currentParent?.subcategorias ?? [];
 
   return (
-    <div className="create-product-modal">
-      <Modal show={show} title="Registrar Produto" onClose={onClose}>
-        <div className="form-group">
-          <label>Categoria Principal</label>
-          <select value={selectedParentId} onChange={handleParentChange} required disabled={loadingParents}>
-            <option value="" disabled>{loadingParents ? "Carregando..." : "Selecione"}</option>
-            {parents.map(p => (
-              <option key={p.id} value={p.id}>{p.descricao}</option>
-            ))}
-          </select>
-        </div>
+    <>
+      {/* 1. O Modal Principal vem PRIMEIRO na ordem de renderização */}
+      {show && (
+        <Modal show={show} title="Registrar Produto" onClose={onClose}>
+          <div className="form-group">
+            <label>Categoria Principal</label>
+            <select value={selectedParentId} onChange={handleParentChange} required disabled={loadingParents}>
+              <option value="" disabled>{loadingParents ? "Carregando..." : "Selecione"}</option>
+              {parents.map(p => (
+                <option key={p.id} value={p.id}>{p.descricao}</option>
+              ))}
+            </select>
+          </div>
 
-        <div className="form-group">
-          <label>Subcategoria</label>
-          <select
-            value={selectedSubcategoryId}
-            onChange={(e) => setSelectedSubcategoryId(Number(e.target.value))}
-            required
-          >
-            <option value="" disabled>Selecione</option>
-            {subcategories.map(sc => (
-              <option key={sc.id} value={sc.id}>{sc.descricao}</option>
-            ))}
-          </select>
-        </div>
+          <div className="form-group">
+            <label>Subcategoria</label>
+            <select
+              value={selectedSubcategoryId}
+              onChange={(e) => setSelectedSubcategoryId(Number(e.target.value))}
+              required
+            >
+              <option value="" disabled>Selecione</option>
+              {subcategories.map(sc => (
+                <option key={sc.id} value={sc.id}>{sc.descricao}</option>
+              ))}
+            </select>
+            
+            <span
+              className="helper-link"
+              onClick={() => setModalCategoriaAberto(true)}
+              style={{ cursor: "pointer", display: "inline-block", marginTop: "8px" }}
+            >
+              + Cadastrar nova categoria
+            </span>
+          </div>
 
-        {tipoForm === "calcado" ? (
-          <FormCalcado
-            subcategories={subcategories}
-            subcategoryId={selectedSubcategoryId}
-            setSubcategoryId={setSelectedSubcategoryId}
-            onClose={onClose}
-            onCreated={onCreated}
-          />
-        ) : (
-          <FormOutros
-            subcategories={subcategories}
-            subcategoryId={selectedSubcategoryId}
-            setSubcategoryId={setSelectedSubcategoryId}
-            onClose={onClose}
-            onCreated={onCreated}
-          />
-        )}
-      </Modal>
-    </div>
+          {tipoForm === "calcado" ? (
+            <FormCalcado
+              subcategories={subcategories}
+              subcategoryId={selectedSubcategoryId}
+              setSubcategoryId={setSelectedSubcategoryId}
+              onClose={onClose}
+              onCreated={onCreated}
+            />
+          ) : (
+            <FormOutros
+              subcategories={subcategories}
+              subcategoryId={selectedSubcategoryId}
+              setSubcategoryId={setSelectedSubcategoryId}
+              onClose={onClose}
+              onCreated={onCreated}
+            />
+          )}
+        </Modal>
+      )}
+
+      {/* 2. O Modal de Categoria vem POR ÚLTIMO, garantindo que ele fique na camada superior */}
+      <CreateCategoryModal
+        show={modalCategoriaAberto}
+        onClose={() => setModalCategoriaAberto(false)}
+        onCreated={handleCategoriaCriada}
+      />
+    </>
   );
 }

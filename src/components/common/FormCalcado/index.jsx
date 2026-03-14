@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { ProductService } from "../../../services/ProdutoService";
-import "./styles.css";
 
 export default function FormCalcado({
   subcategories = [],

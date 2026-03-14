@@ -21,5 +21,15 @@ export const CategoriesService = {
       console.error("Erro ao buscar categorias:", error);
       throw error;
     }
-  }
+  },
+
+  createParent: async (dados) => {  // dados: { descricao }
+        const response = await api.post('/categorias/pai', dados);
+        return response;
+    },
+
+    createChild: async (dados) => {   // dados: { descricao, idCategoriaPai }
+        const response = await api.post('/categorias/filho', dados);
+        return response;
+    }
 };
