@@ -46,31 +46,34 @@ export default function FormOutros({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '8px' }}>
+      
       <div className="form-group">
-        <label>Nome</label>
-        <input value={nome} onChange={(e) => setNome(e.target.value)} required />
+        <label>Nome do Produto</label>
+        <input value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Ex: Mochila" />
       </div>
 
       <div className="form-group">
         <label>Descrição</label>
-        <input value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+        <input value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Detalhes (Opcional)" />
       </div>
 
-      <div className="form-group">
-        <label>Quantidade</label>
-        <input type="number" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} required />
+      <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
+        <div className="form-group" style={{ flex: 1 }}>
+          <label>Quantidade</label>
+          <input type="number" min="1" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} required />
+        </div>
+        <div className="form-group" style={{ flex: 1 }}>
+          <label>Valor Unitário (R$)</label>
+          <input type="number" step="0.01" min="0" value={valorUnitario} onChange={(e) => setValorUnitario(e.target.value)} required placeholder="0.00" />
+        </div>
       </div>
 
-      <div className="form-group">
-        <label>Valor Unitário</label>
-        <input type="number" step="0.01" value={valorUnitario} onChange={(e) => setValorUnitario(e.target.value)} required />
+      <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '16px' }}>
+        <button type="button" onClick={onClose} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#e2e8f0', color: '#4a5568', fontWeight: 'bold', cursor: 'pointer' }}>Cancelar</button>
+        <button type="submit" style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: '#ed64a6', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>Criar Produto</button>
       </div>
-
-      <div className="modal-actions">
-        <button className="btn-primary" type="submit">Criar</button>
-        <button className="btn-secondary" type="button" onClick={onClose}>Cancelar</button>
-      </div>
+      
     </form>
   );
 }

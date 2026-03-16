@@ -1,180 +1,123 @@
 /* ============================================================
-   styles.css — FormCalcado / FormOutros / CreateProductModal
-   Paleta: azul #B0C4DE / #5D78A9, rosa #E06C9F, branco
-   Tudo scoped sob .create-product-modal para não vazar.
+   styles.css — Blindagem do Modal de Produtos
    ============================================================ */
 
-/* ----------------------------------------------------------
-   Modal container
-   ---------------------------------------------------------- */
-.create-product-modal .modal-container {
-    background: #ffffff;
-    border-radius: 16px;
-    min-width: 440px;
-    max-width: 500px;
-    padding: 0;
-    box-shadow: 0 12px 48px rgba(176, 196, 222, 0.35), 0 2px 8px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-}
-
-.create-product-modal .modal-header {
-    background: linear-gradient(135deg, #B0C4DE 0%, #c5d6ea 100%);
-    border-bottom: none;
-    padding: 22px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.create-product-modal .modal-header h2 {
-    font-size: 17px;
-    font-weight: 700;
-    color: #203462;
-    letter-spacing: -0.3px;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.create-product-modal .modal-header h2::before {
-    content: '';
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background: #E06C9F;
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(224, 108, 159, 0.5);
-}
-
-.create-product-modal .modal-close {
-    width: 30px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    border-radius: 8px;
-    color: #203462;
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.18s;
-}
-
-.create-product-modal .modal-close:hover {
-    background: rgba(255, 255, 255, 0.85);
-}
-
-.create-product-modal .modal-body {
-    padding: 26px 28px 28px;
+.create-product-content {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    background: #ffffff;
-    max-height: 75vh;
-    overflow-y: auto;
+    padding: 10px 0;
 }
 
-/* ----------------------------------------------------------
-   Grupos de campo
-   ---------------------------------------------------------- */
-.create-product-modal .form-group {
+/* Coloca dois campos lado a lado */
+.create-product-content .form-row-duplo {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.create-product-modal .form-group label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #203462;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-}
-
-.create-product-modal .form-group input,
-.create-product-modal .form-group select {
+    gap: 16px;
     width: 100%;
-    padding: 12px 16px;
-    background: #EBEBEB;
-    border: none;
-    border-radius: 10px;
-    color: #333;
-    font-size: 14px;
-    font-weight: 500;
-    outline: none;
-    appearance: none;
-    transition: box-shadow 0.2s, background 0.2s;
-    box-sizing: border-box;
 }
 
-.create-product-modal .form-group input:hover,
-.create-product-modal .form-group select:hover {
-    background: #e0e8f2;
-}
-
-.create-product-modal .form-group input:focus,
-.create-product-modal .form-group select:focus {
-    background: #ffffff;
-    box-shadow: inset 0 0 0 2px #B0C4DE;
-}
-
-.create-product-modal .form-group input:disabled,
-.create-product-modal .form-group select:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* ----------------------------------------------------------
-   Ações (botões)
-   ---------------------------------------------------------- */
-.create-product-modal .modal-actions {
-    display: flex;
-    gap: 12px;
-    padding-top: 6px;
-}
-
-.create-product-modal .btn-primary {
-    flex: 2;
-    padding: 13px;
-    background-color: #E06C9F;
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 16px rgba(224, 108, 159, 0.3);
-}
-
-.create-product-modal .btn-primary:hover {
-    background-color: #d15682;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(224, 108, 159, 0.4);
-}
-
-.create-product-modal .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 12px rgba(224, 108, 159, 0.25);
-}
-
-.create-product-modal .btn-secondary {
+/* Força os estilos em TODOS os form-groups dentro do modal */
+.create-product-content .form-group {
+    display: flex !important;
+    flex-direction: column !important;
     flex: 1;
-    padding: 13px;
-    background: #EBEBEB;
-    border: none;
-    border-radius: 8px;
-    color: #5a7a9a;
-    font-size: 15px;
+    gap: 6px !important;
+    text-align: left !important;
+}
+
+.create-product-content .form-group label {
+    font-weight: 600 !important;
+    color: #4a5568 !important;
+    font-size: 0.9rem !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    margin: 0 !important;
+}
+
+/* Estiliza os campos de digitação com design moderno */
+.create-product-content .form-group input,
+.create-product-content .form-group select {
+    width: 100% !important;
+    padding: 10px 14px !important;
+    background-color: #f7fafc !important;
+    border: 1px solid #cbd5e0 !important;
+    border-radius: 8px !important;
+    color: #2d3748 !important;
+    font-size: 0.95rem !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+}
+
+.create-product-content .form-group input:focus,
+.create-product-content .form-group select:focus {
+    border-color: #ed64a6 !important; /* Rosa da Brinks */
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(237, 100, 166, 0.15) !important;
+}
+
+/* Link de Cadastrar Categoria */
+.create-product-content .helper-link {
+    color: #ed64a6;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+    transition: color 0.2s;
 }
 
-.create-product-modal .btn-secondary:hover {
-    background: #dce4ee;
-    color: #203462;
+.create-product-content .helper-link:hover {
+    color: #d53f8c;
+    text-decoration: underline;
+}
+
+/* ----------------------------------------------------------
+   Ações (Botões que vêm do FormCalcado/FormOutros)
+   ---------------------------------------------------------- */
+.create-product-content .modal-actions,
+.create-product-content form > div:last-child {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    margin-top: 20px !important;
+    padding-top: 16px !important;
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+.create-product-content button[type="submit"],
+.create-product-content button.btn-primary {
+    background-color: #ed64a6 !important;
+    color: white !important;
+    padding: 10px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 0.95rem !important;
+    transition: background-color 0.2s !important;
+    width: auto !important; /* Mata o botão gigante */
+}
+
+.create-product-content button[type="submit"]:hover,
+.create-product-content button.btn-primary:hover {
+    background-color: #d53f8c !important;
+}
+
+.create-product-content button[type="button"],
+.create-product-content button.btn-cancelar {
+    background-color: #e2e8f0 !important;
+    color: #4a5568 !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 0.95rem !important;
+    transition: background-color 0.2s !important;
+    width: auto !important;
+}
+
+.create-product-content button[type="button"]:hover,
+.create-product-content button.btn-cancelar:hover {
+    background-color: #cbd5e0 !important;
 }

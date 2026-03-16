@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FiEdit, FiTrash } from "react-icons/fi";
+import { FiEdit, FiTrash, FiSearch } from "react-icons/fi";
 import { TableContainer } from '../../components/specific/TableContainer';
-import { SearchBar } from '../../components/common/SearchBar';
 import { DataTable } from '../../components/common/DataTable';
 import { IconButton } from '../../components/common/IconButton';
 import { FuncionarioService } from '../../services/FuncionarioService';
@@ -16,10 +15,10 @@ function Comissao() {
     const [modalAberto, setModalAberto] = useState(false);
     const [funcionarioParaEditar, setFuncionarioParaEditar] = useState(null);
 
-
-
+    // 1. COLUNAS
     const colunas = [
         { header: "Nome Funcionário", accessor: "nome" },
+        { header: "Taxa (%)", accessor: "taxaComissaoFormatada" }, 
         { header: "Qtd Vendas", accessor: "qtdVendas" },
         { header: "Faturamento", accessor: "faturamentoFormatado" },
         { header: "Comissão", accessor: "comissaoFormatada" },
@@ -28,13 +27,10 @@ function Comissao() {
     const carregarDadosComissao = async () => {
         try {
             setLoading(true);
-            // 1. Busca a lista de funcionários ativos
             const funcionarios = await FuncionarioService.getAll();
             const ativos = (funcionarios || []).filter(f => f.ativo !== false);
 
-            // 2. Mapeia os funcionários buscando os KPIs de cada um em paralelo
             const listaComMetricas = await Promise.all(ativos.map(async (func) => {
-                // Chamada tripla para obter todos os dados do vendedor
                 const [faturamento, comissao, qtdVendas] = await Promise.all([
                     KpiService.getFaturamentoPorVendedor(func.id),
                     KpiService.getComissaoPorVendedor(func.id),
@@ -45,10 +41,11 @@ function Comissao() {
 
                 return {
                     ...func,
-                    // Agora o valor vem do backend em vez de ser zero
+                    taxaComissaoFormatada: func.comissao != null ? `${(func.comissao * 100).toFixed(0)}%` : "0%",
+                    
                     qtdVendas: qtdVendas || 0,
-                    faturamentoFormatado: faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
-                    comissaoFormatada: comissao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                    faturamentoFormatado: faturamento ? `R$ ${faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : "R$ 0,00",
+                    comissaoFormatada: comissao ? `R$ ${comissao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : "R$ 0,00"
                 };
             }));
 
@@ -72,12 +69,37 @@ function Comissao() {
         <div className="comissao-page">
             <TableContainer
                 header={
-                    <div className="comissao-header-content">
-                        <SearchBar
-                            placeholder="Pesquisar..."
-                            value={termoBusca}
-                            onChange={(e) => setTermoBusca(e.target.value)}
-                        />
+                    <div className="comissao-header-content" style={{ width: '100%', boxSizing: 'border-box' }}>
+                        
+                        {/* BARRA DE PESQUISA BLINDADA (100% de largura garantido) */}
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            backgroundColor: '#fff', 
+                            borderRadius: '8px', 
+                            padding: '10px 16px', 
+                            width: '100%', 
+                            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)',
+                            border: '1px solid #cbd5e0',
+                            boxSizing: 'border-box'
+                        }}>
+                            <FiSearch color="#a0aec0" size={18} style={{ marginRight: '10px', flexShrink: 0 }} />
+                            <input 
+                                type="text" 
+                                placeholder="Pesquisar por nome do funcionário..." 
+                                value={termoBusca} 
+                                onChange={(e) => setTermoBusca(e.target.value)}
+                                style={{ 
+                                    border: 'none', 
+                                    outline: 'none', 
+                                    width: '100%', 
+                                    fontSize: '15px', 
+                                    color: '#2d3748', 
+                                    backgroundColor: 'transparent' 
+                                }}
+                            />
+                        </div>
+
                     </div>
                 }
             >
@@ -102,6 +124,7 @@ function Comissao() {
                     />
                 )}
             </TableContainer>
+            
             <EditarComissaoModal
                 show={modalAberto}
                 onClose={() => setModalAberto(false)}

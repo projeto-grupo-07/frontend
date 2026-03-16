@@ -11,17 +11,40 @@ import { VendaService } from '../../services/VendaService';
 import { FuncionarioService } from '../../services/FuncionarioService';
 import DetalhesVendaModal from '../../components/common/DetalhesVendaModal';
 import EditarVendaModal from '../../components/common/EditarVendaModal';
+import FilterVendaModal from '../../components/common/FilterVendaModal';
 
 function Vendas() {
     const navigate = useNavigate();
     const [vendas, setVendas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [termoBusca, setTermoBusca] = useState("");
-    
+
+    // Estados para os Filtros
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [vendedores, setVendedores] = useState([]);
+    const [formasPagamento, setFormasPagamento] = useState([]);
+    const [filtroDataInicio, setFiltroDataInicio] = useState("");
+    const [filtroDataFim, setFiltroDataFim] = useState("");
+    const [filtrosVendedores, setFiltrosVendedores] = useState([]);
+    const [filtrosFormasPagamento, setFiltrosFormasPagamento] = useState([]);
+    const [valorMin, setValorMin] = useState("");
+    const [valorMax, setValorMax] = useState("");
+
     // Estados para Controle dos Modais
     const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false);
     const [modalEditarAberto, setModalEditarAberto] = useState(false);
     const [vendaSelecionada, setVendaSelecionada] = useState(null);
+
+    const limparFiltros = () => {
+        setFiltroDataInicio("");
+        setFiltroDataFim("");
+        setFiltrosVendedores([]);
+        setFiltrosFormasPagamento([]);
+        setValorMin("");
+        setValorMax("");
+        setTermoBusca(""); // Opcional: limpa a barra de pesquisa também
+        setIsFilterOpen(false); // Fecha o modal
+    };
 
     const colunas = [
         { header: "Vendedor", accessor: "nomeVendedor" },
@@ -29,6 +52,18 @@ function Vendas() {
         { header: "Data/Hora", accessor: "dataExibicao" },
         { header: "Pagamento", accessor: "formaPagamento" },
     ];
+
+    const carregarDadosApoio = async () => {
+        try {
+            const funcRes = await FuncionarioService.getAll();
+            setVendedores(Array.isArray(funcRes) ? funcRes : (funcRes?.data || []));
+
+            const pagRes = await VendaService.getFormasPagamento();
+            setFormasPagamento(Array.isArray(pagRes) ? pagRes : (pagRes?.data || []));
+        } catch (err) {
+            console.error("Erro ao carregar dados de apoio para os filtros:", err);
+        }
+    };
 
     const fetchVendas = async () => {
         try {
@@ -69,15 +104,41 @@ function Vendas() {
     };
 
     useEffect(() => {
+        carregarDadosApoio();
         fetchVendas();
     }, []);
 
+    // Lógica principal de filtragem
     const dadosFiltrados = vendas.filter(v => {
+        // 1. Filtro de Vendedor
+        if (filtrosVendedores.length > 0 && !filtrosVendedores.includes(v.idVendedor)) {
+            return false;
+        }
+
+        // 2. Filtro de Forma de Pagamento (Multi-select: mesma lógica de inclusão)
+        if (filtrosFormasPagamento.length > 0 && !filtrosFormasPagamento.includes(v.formaPagamento)) {
+            return false;
+        }
+
+        // 3. Filtro de Valor Mínimo/Máximo
+        const total = Number(v.valorTotalDaVenda) || 0;
+        if (valorMin && total < Number(valorMin)) return false;
+        if (valorMax && total > Number(valorMax)) return false;
+
+        // 4. Filtro de Data
+        // A data vem do back como "2026-03-14T10:30:00", o slice(0,10) pega só o "2026-03-14"
+        if (v.dataHora) {
+            const dataVenda = String(v.dataHora).slice(0, 10);
+            if (filtroDataInicio && dataVenda < filtroDataInicio) return false;
+            if (filtroDataFim && dataVenda > filtroDataFim) return false;
+        }
+
+        // 5. Filtro de Texto (Barra de busca)
         if (!termoBusca.trim()) return true;
         const termo = termoBusca.toLowerCase();
         return (v.nomeVendedor || "").toLowerCase().includes(termo) ||
-               (v.formaPagamento || "").toLowerCase().includes(termo) ||
-               (v.dataExibicao || "").toLowerCase().includes(termo);
+            (v.formaPagamento || "").toLowerCase().includes(termo) ||
+            (v.dataExibicao || "").toLowerCase().includes(termo);
     });
 
     const handleDeleteVenda = async (venda) => {
@@ -105,6 +166,10 @@ function Vendas() {
                                 onChange={(e) => setTermoBusca(e.target.value)}
                             />
                         </div>
+                        {/* Botão de Filtrar Adicionado Aqui */}
+                        <div className="filters-wrapper">
+                            <Button onClick={() => setIsFilterOpen(true)}>Filtrar</Button>
+                        </div>
                     </div>
                 }
             >
@@ -116,7 +181,6 @@ function Vendas() {
                         data={dadosFiltrados}
                         actions={(venda) => (
                             <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-                                {/* Visualizar - Olho */}
                                 <IconButton
                                     icon={FiEye}
                                     onClick={() => {
@@ -124,20 +188,18 @@ function Vendas() {
                                         setModalDetalhesAberto(true);
                                     }}
                                 />
-                                
-                                {/* Editar - Lápis [CORRIGIDO AQUI] */}
-                                <IconButton 
-                                    icon={FiEdit} 
+
+                                <IconButton
+                                    icon={FiEdit}
                                     onClick={() => {
                                         setVendaSelecionada(venda);
                                         setModalEditarAberto(true);
-                                    }} 
+                                    }}
                                 />
 
-                                {/* Excluir - Lixeira */}
-                                <IconButton 
-                                    icon={FiTrash} 
-                                    onClick={() => handleDeleteVenda(venda)} 
+                                <IconButton
+                                    icon={FiTrash}
+                                    onClick={() => handleDeleteVenda(venda)}
                                 />
                             </div>
                         )}
@@ -157,6 +219,26 @@ function Vendas() {
                 onClose={() => setModalEditarAberto(false)}
                 venda={vendaSelecionada}
                 onUpdateSuccess={fetchVendas}
+            />
+
+            {/* Novo Modal de Filtro */}
+            <FilterVendaModal
+                show={isFilterOpen}
+                onClose={() => setIsFilterOpen(false)}
+                onClear={limparFiltros}
+                vendedores={vendedores}
+                formasPagamento={formasPagamento}
+                filtroDataInicio={filtroDataInicio} setFiltroDataInicio={setFiltroDataInicio}
+                filtroDataFim={filtroDataFim} setFiltroDataFim={setFiltroDataFim}
+
+                // --- AQUI ESTÃO AS NOVAS VARIÁVEIS NO PLURAL ---
+                filtrosVendedores={filtrosVendedores} setFiltrosVendedores={setFiltrosVendedores}
+                filtrosFormasPagamento={filtrosFormasPagamento} setFiltrosFormasPagamento={setFiltrosFormasPagamento}
+                // ------------------------------------------------
+
+                valorMin={valorMin} setValorMin={setValorMin}
+                valorMax={valorMax} setValorMax={setValorMax}
+                aplicarFiltros={(e) => { e.preventDefault(); setIsFilterOpen(false); }}
             />
         </div>
     );

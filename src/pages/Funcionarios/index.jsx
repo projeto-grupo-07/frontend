@@ -4,7 +4,6 @@ import { TableContainer } from '../../components/specific/TableContainer';
 import { SearchBar } from '../../components/common/SearchBar';
 import { DataTable } from '../../components/common/DataTable';
 import { IconButton } from '../../components/common/IconButton';
-import Button from '../../components/common/Button';
 import { FuncionarioService } from '../../services/FuncionarioService';
 import EditarFuncionarioModal from "../../components/common/EditarFuncionarioModal";
 import CadastrarFuncionarioModal from "../../components/common/CadastrarFuncionarioModal"
@@ -65,7 +64,6 @@ function Funcionarios() {
         if (!confirmacao) return;
 
         try {
-
             await FuncionarioService.delete(id);
             alert("Funcionário desativado com sucesso!");
             loadFuncionarios(); 
@@ -83,15 +81,36 @@ function Funcionarios() {
         <div className="page-container">
             <TableContainer
                 header={
-                    <div className="header-actions">
-                        <Button onClick={() => setModalCadastroAberto(true)}>
-                            Adicionar Funcionário
-                        </Button>
-                        <SearchBar
-                            placeholder="Pesquisar por nome ou email..."
-                            value={termoBusca}
-                            onChange={(e) => setTermoBusca(e.target.value)}
-                        />
+                    // Novo cabeçalho blindado com Flexbox
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', width: '100%', paddingBottom: '8px' }}>
+                        
+                        <button 
+                            onClick={() => setModalCadastroAberto(true)}
+                            style={{ 
+                                padding: '10px 24px', 
+                                backgroundColor: '#ed64a6', 
+                                color: '#fff', 
+                                border: 'none', 
+                                borderRadius: '8px', 
+                                fontWeight: 'bold', 
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap',
+                                width: 'fit-content', // Mantém o botão compacto
+                                fontSize: '15px'
+                            }}
+                        >
+                            + Adicionar Funcionário
+                        </button>
+
+                        {/* O flex: 1 sem maxWidth faz a barra ocupar todo o espaço restante */}
+                        <div style={{ flex: 1 }}>
+                            <SearchBar
+                                placeholder="Pesquisar por nome ou email..."
+                                value={termoBusca}
+                                onChange={(e) => setTermoBusca(e.target.value)}
+                            />
+                        </div>
+
                     </div>
                 }
             >
