@@ -1,200 +1,221 @@
-/* Container Principal */
-.dashboard-container {
-  display: grid;
-  grid-template-columns: 280px 1fr; /* Coluna esquerda fixa, direita flexível */
-  gap: 24px;
-  padding: 20px;
+/* ==========================================================================
+   RESET E CONTAINER PRINCIPAL
+   ========================================================================== */
+.dashboard-wrapper {
   background-color: #ffffff;
-  font-family: 'Inter', sans-serif; /* Assumindo uma fonte padrão */
+  /* Trava a altura máxima na tela inteira MENOS o tamanho do seu menu rosa no topo */
+  height: calc(100vh - 70px); 
+  overflow: hidden; /* Proíbe o scroll da página inteira */
+  padding: 16px;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
 }
 
-/* --- COLUNA ESQUERDA --- */
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px; /* Diminui o gap para sobrar mais espaço pros gráficos */
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%; /* Força o container a preencher exatamente os 100% disponíveis */
+}
+
+/* ==========================================================================
+   COLUNA ESQUERDA (KPIS)
+   ========================================================================== */
 .left-column {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
+  height: 100%;
 }
 
-/* Toggle (Hoje/Semana/Mês) */
-.period-toggle {
-  background-color: #DCE4F2; /* Azul acinzentado claro */
+.period-toggle-large {
+  display: flex;
+  background-color: #DCE4F2;
   border-radius: 20px;
   padding: 4px;
-  display: flex;
-  justify-content: space-between;
+  flex-shrink: 0; /* Impede os botões de amassarem */
 }
 
-.period-toggle button {
+.period-toggle-large button {
   flex: 1;
-  background: transparent;
+  padding: 6px 0;
   border: none;
-  padding: 8px 0;
   border-radius: 16px;
+  background: transparent;
   color: #5D78A9;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 13px;
 }
 
-.period-toggle button.active {
-  background-color: #FFFFFF; /* Fundo branco para o ativo */
-  color: #2D3748;
+.period-toggle-large button.active {
+  background-color: #5B6F8A; 
+  color: #ffffff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.period-toggle button.active:first-child {
-    background-color: #EBF2FF; /* Azulzinho claro para o "Hoje" se quiser destacar */
-}
-
-/* Pilha de KPIs */
 .kpi-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  flex: 1; /* Preenche a altura que sobrar da coluna */
 }
 
-/* Estilo forçado para o MetricCard (caso não possa alterar o componente interno) */
-/* Assumindo que o MetricCard gera uma div wrapper */
-.kpi-stack > div { 
-  background-color: #FFF5F7; /* Fundo rosa bem claro */
+.kpi-card {
+  background-color: #ffffff;
   border-radius: 12px;
-  padding: 0 !important; /* Reset padding interno se necessário */
-  overflow: hidden;
-  text-align: center;
-}
-
-/* Assumindo estrutura interna do MetricCard */
-.kpi-stack h3 { /* Título do Card */
-   background-color: #FBCFE8; /* Rosa mais forte do cabeçalho */
-   color: #C53030;
-   margin: 0;
-   padding: 10px;
-   font-size: 0.9rem;
-   font-weight: bold;
-}
-
-.kpi-stack p { /* Valor do Card */
-    color: #2D3748;
-    font-size: 2rem;
-    font-weight: 800;
-    padding: 20px 0;
-    margin: 0;
-}
-
-
-/* --- COLUNA DIREITA (GRID 2x2) --- */
-.main-content-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr); /* Altura igual */
-  gap: 24px;
-}
-
-.card-panel {
-  background: white;
-  border-radius: 12px;
-  /* box-shadow: 0 2px 10px rgba(0,0,0,0.05); */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #f0f4f8;
   display: flex;
   flex-direction: column;
-  min-height: 300px;
+  flex: 1; /* Faz todos os 4 cartões terem exatamente a mesma altura */
+  overflow: hidden;
 }
 
-.card-header {
-  background-color: #FFF5F7; /* Fundo rosa claro do header do card */
-  border-radius: 12px 12px 0 0;
-  padding: 12px 20px;
+.kpi-header {
+  background-color: #FFE5F0; 
+  color: #FF70A6; 
+  padding: 10px 16px;
+  font-weight: bold;
+  font-size: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.card-header h3 {
-  color: #D53F8C; /* Rosa texto */
-  font-size: 1rem;
-  margin: 0;
-}
-
-/* Tabs pequenas dentro dos cards (Pill Tabs) */
-.pill-tabs {
+.info-icon {
+  background: #5B6F8A;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background-color: #a0aec0; /* Fundo cinza escuro do toggle */
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.kpi-body {
+  padding: 10px 16px;
+  font-size: 28px; /* Fonte levemente menor para garantir que caiba */
+  font-weight: 900;
+  color: #2D3748;
+  text-align: center;
+  flex: 1; /* Centraliza verticalmente o número */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   COLUNA DIREITA (GRID 2x2)
+   ========================================================================== */
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr; /* Divide a altura restante meio a meio */
+  gap: 16px;
+  height: 100%; /* Trava na altura do pai */
+}
+
+.content-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f0f4f8;
+  overflow: hidden; /* Se a tabela for muito grande, o scroll acontece DENTRO dela, não na página */
+}
+
+.card-header {
+  background-color: #FFE5F0;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px 12px 0 0;
+  flex-shrink: 0;
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: #FF70A6;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.pill-tabs {
+  display: flex;
+  gap: 4px;
+  background-color: #5B6F8A; 
   padding: 3px;
-  border-radius: 15px;
+  border-radius: 20px;
 }
 
 .pill-tabs button {
-  background: transparent;
+  padding: 3px 12px;
+  border-radius: 16px;
   border: none;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  background: transparent;
+  color: #A0AEC0;
+  font-weight: 700;
+  font-size: 11px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .pill-tabs button.active {
-  background-color: #DCE4F2; /* Azul claro ativo */
-  color: #2D3748;
-}
-
-.info-icon {
-    background: #DCE4F2;
-    color: #5D78A9;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-left: 8px;
-    cursor: help;
+  background: #DCE4F2; 
+  color: #5B6F8A; 
 }
 
 .card-body {
-  padding: 15px;
-  flex: 1;
+  padding: 10px 16px;
+  flex: 1; /* O gráfico vai preencher toda a área restante do cartão */
+  min-height: 0; /* Macete do Flexbox: permite que o filho encolha além do seu conteúdo se necessário */
 }
 
-.chart-wrapper {
-    height: 250px; /* Força altura para os gráficos */
+/* ==========================================================================
+   TABELAS
+   ========================================================================== */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
 }
 
-/* Badge de Ranking (Bolinhas azuis 1, 2, 3...) */
+.custom-table th {
+  padding: 8px;
+  color: #FF70A6;
+  font-size: 11px;
+  font-weight: 800;
+  border-bottom: 2px solid #EDF2F7;
+}
+
+.custom-table td {
+  padding: 8px;
+  color: #2D3748;
+  font-size: 12px;
+  border-bottom: 1px solid #EDF2F7;
+  font-weight: 600;
+}
+
 .ranking-badge {
-    background-color: #2C3E50;
-    color: white;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-/* Responsividade simples */
-@media (max-width: 1100px) {
-  .dashboard-container {
-    grid-template-columns: 1fr;
-  }
-  .left-column {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-  .kpi-stack {
-    flex-direction: row;
-    flex: 1;
-    justify-content: space-between;
-  }
-}
-
-@media (max-width: 768px) {
-  .main-content-grid {
-    grid-template-columns: 1fr;
-  }
+  background-color: #5B6F8A;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 900;
 }
