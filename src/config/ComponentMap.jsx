@@ -4,7 +4,7 @@ const Vendas = lazy(() => import('../pages/Vendas/index.jsx'));
 const Produtos = lazy(() => import('../pages/Produtos/index.jsx'));
 const Funcionarios = lazy(() => import('../pages/Funcionarios/index.jsx'));
 const Comissao = lazy(() => import('../pages/Comissao/index.jsx'));
-const Desempenho = lazy(() => import('../pages/Desempenho/index.jsx'));
+const Desempenho = lazy(() => import('../components/common/Desempenho/index.jsx'));
 const PainelDeVendas = lazy(() => import('../pages/PainelDeVendas/index.jsx'))
 
 const NotFound = () => (
