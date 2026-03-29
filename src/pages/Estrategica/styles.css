@@ -1,0 +1,185 @@
+/* ==========================================================================
+   LAYOUT PRINCIPAL DA TELA ESTRATÉGICA
+   ========================================================================== */
+.estrategica-wrapper {
+  background-color: #ffffff;
+  
+  /* Hack para escapar do max-width e padding da tag <main> no App.jsx */
+  position: fixed;
+  top: 70px; /* Altura exata abaixo da sua Navbar */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  
+  overflow: hidden; /* Remove o scroll da página inteira */
+  padding: 24px;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ==========================================================================
+   TOPO (Filtros)
+   ========================================================================== */
+.estr-top-bar {
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-icon-filtro {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.btn-icon-filtro:hover {
+  border-color: #d53f8c;
+  background-color: #fff5f7;
+  box-shadow: 0 4px 6px rgba(213, 63, 140, 0.1);
+}
+
+/* ==========================================================================
+   MODAL DE FILTRO (MOCKADO)
+   ========================================================================== */
+.estr-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.estr-modal-content {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  width: 350px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ==========================================================================
+   LINHAS DO GRID
+   ========================================================================== */
+.estr-row-1 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex: 1; /* Divide o espaço da tela... */
+  min-height: 0; /* ...e permite encolher sem forçar scroll */
+}
+
+.estr-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex: 1; /* ...igualmente com a linha de cima */
+  min-height: 0; 
+}
+
+/* ==========================================================================
+   CARDS DOS GRÁFICOS
+   ========================================================================== */
+.estr-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #f0f4f8;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.estr-card-header {
+  background-color: #FFE5F0;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px 12px 0 0;
+  flex-shrink: 0;
+}
+
+.estr-card-header h3 {
+  margin: 0;
+  color: #FF70A6;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.estr-card-body {
+  padding: 10px 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ==========================================================================
+   TABS (Aba de Mais Rentáveis)
+   ========================================================================== */
+.estr-pill-tabs {
+  display: flex;
+  gap: 4px;
+  background-color: #5B6F8A; 
+  padding: 3px;
+  border-radius: 20px;
+}
+
+.estr-pill-tabs button {
+  padding: 3px 12px;
+  border-radius: 16px;
+  border: none;
+  background: transparent;
+  color: #A0AEC0;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.estr-pill-tabs button.active {
+  background: #DCE4F2; 
+  color: #5B6F8A; 
+}
+
+/* ==========================================================================
+   TABELA DE PRODUTOS
+   ========================================================================== */
+.estr-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.estr-table th {
+  padding: 8px;
+  color: #FF70A6;
+  font-size: 11px;
+  font-weight: 800;
+  border-bottom: 2px solid #EDF2F7;
+}
+
+.estr-table td {
+  padding: 8px;
+  color: #2D3748;
+  font-size: 12px;
+  border-bottom: 1px solid #EDF2F7;
+  font-weight: 600;
+}

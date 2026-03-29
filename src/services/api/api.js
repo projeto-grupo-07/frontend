@@ -8,8 +8,53 @@ const instance = axios.create({
   withCredentials: true
 });
 
-// You can add common headers or auth tokens here
-// instance.defaults.headers.common['Authorization'] = AUTH_TOKEN;
+// =========================================================
+// 1. INTERCEPTADOR DE REQUISIÇÃO (Envia o token)
+// =========================================================
+instance.interceptors.request.use((config) => {
+    // Pegue o token de onde você o salva (sessionStorage ou localStorage)
+    const token = sessionStorage.getItem('token'); 
+    if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+});
+
+// =========================================================
+// 2. INTERCEPTADOR DE RESPOSTA (Trata o Token Expirado)
+// =========================================================
+instance.interceptors.response.use(
+    (response) => {
+        return response; // Deu tudo certo, segue o jogo
+    },
+    (error) => {
+        if (error.response) {
+            const status = error.response.status;
+
+            // Se o backend gritar que o usuário não tem permissão (401/403)
+            if (status === 401 || status === 403) {
+                const currentPath = window.location.pathname;
+                
+                // Só avisa e redireciona se o usuário já não estiver na tela de login
+                if (currentPath !== '/login' && currentPath !== '/') {
+                    alert("⏳ Sua sessão expirou por inatividade. Por favor, faça login novamente.");
+                    
+                    // Limpa as credenciais mortas
+                    sessionStorage.removeItem('token'); 
+                    sessionStorage.removeItem('usuario'); 
+                    
+                    // Chuta para a tela de login
+                    window.location.href = '/login'; 
+                }
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
+// =========================================================
+// MÉTODOS ORIGINAIS (Intactos)
+// =========================================================
 
 export const get = async (endpoint) => {
   try {

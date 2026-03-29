@@ -155,21 +155,34 @@ function Vendas() {
         <div className="page-container">
             <TableContainer
                 header={
-                    <div className="header-actions">
-                        <div className="button-wrapper">
-                            <Button onClick={() => navigate('/painel-vendas')}>Adicionar Venda</Button>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row', // Força direção horizontal
+                        flexWrap: 'nowrap',   // PROÍBE quebra de linha
+                        alignItems: 'center',
+                        justifyContent: 'space-between', // Espalha os botões nas pontas e a busca no meio
+                        gap: '15px',
+                        width: '100%',
+                        minWidth: '600px', // O HACK SALVADOR: Garante espaço mínimo para os 3 elementos não se esmagarem
+                        boxSizing: 'border-box'
+                    }}>
+
+                        <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
+                            <Button onClick={() => navigate('/painel-vendas')}>Nova Venda</Button>
                         </div>
-                        <div className="search-wrapper">
+
+                        <div style={{ flexGrow: 1, minWidth: '200px' }}>
                             <SearchBar
-                                placeholder="Pesquisar por vendedor ou pagamento..."
+                                placeholder="Pesquisar em qualquer coluna..."
                                 value={termoBusca}
                                 onChange={(e) => setTermoBusca(e.target.value)}
                             />
                         </div>
-                        {/* Botão de Filtrar Adicionado Aqui */}
-                        <div className="filters-wrapper">
+
+                        <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
                             <Button onClick={() => setIsFilterOpen(true)}>Filtrar</Button>
                         </div>
+
                     </div>
                 }
             >

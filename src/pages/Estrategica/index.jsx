@@ -1,0 +1,304 @@
+import React, { useState, useEffect } from 'react';
+import './styles.css';
+import { FiFilter } from 'react-icons/fi';
+import { 
+  Tooltip as RechartsTooltip, ResponsiveContainer, Legend, 
+  BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid 
+} from 'recharts';
+import { KpiService } from '../../services/KpiService';
+
+const CORES_PAGAMENTO = {
+  'PIX': '#10B981',       // Verde (Sem taxa)
+  'DINHEIRO': '#059669',  // Verde escuro (Sem taxa)
+  'DEBITO': '#3B82F6',    // Azul (Taxa média)
+  'CREDITO': '#F43F5E',   // Vermelho (Alta taxa)
+};
+
+// Utilitário para formatar a string do ENUM que vem do Java
+const formatarNomePagamento = (nomeCru) => {
+  if (!nomeCru) return "-";
+  const map = { 'CREDITO': 'Crédito', 'DEBITO': 'Débito', 'DINHEIRO': 'Dinheiro', 'PIX': 'PIX' };
+  return map[nomeCru.toUpperCase()] || nomeCru;
+};
+
+export default function Estrategica() {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [periodoAtual, setPeriodoAtual] = useState('Mês Atual');
+
+  // Estados Reais
+  const [pagamentos, setPagamentos] = useState([]);
+  const [produtosRentaveis, setProdutosRentaveis] = useState([]);
+  const [margemCategoria, setMargemCategoria] = useState([]);
+  const [sazonalidade, setSazonalidade] = useState([]); // Usaremos o faturamento histórico como volume
+  const [loading, setLoading] = useState(false);
+
+  // ========================================================================
+  // LÓGICA DE DATAS E INTEGRAÇÃO
+  // ========================================================================
+  useEffect(() => {
+    const carregarDados = async () => {
+      setLoading(true);
+      try {
+        // 1. Converte o período selecionado para Datas Reais
+        const hoje = new Date();
+        let inicio = new Date(hoje);
+        
+        if (periodoAtual === 'Esta Semana') {
+          inicio.setDate(hoje.getDate() - hoje.getDay());
+        } else if (periodoAtual === 'Mês Atual') {
+          inicio.setDate(1);
+        } else if (periodoAtual === 'Últimos 3 Meses') {
+          inicio.setMonth(hoje.getMonth() - 3);
+        }
+        
+        inicio.setHours(0, 0, 0, 0);
+        hoje.setHours(23, 59, 59, 999);
+
+        // Formata para o LocalDateTime do Spring
+        const formatIso = (date) => {
+          const pad = (n) => String(n).padStart(2, '0');
+          return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        };
+
+        const filtroObj = { inicio: formatIso(inicio), fim: formatIso(hoje) };
+
+        // 2. Dispara requisições simultâneas para otimizar tempo
+        const [resPag, resProd, resMargem, resSaz] = await Promise.all([
+          KpiService.getDesempenhoPagamentos(filtroObj),
+          KpiService.getProdutosRentaveis(filtroObj),
+          KpiService.getMargemCategoria(filtroObj),
+          KpiService.getGraficoFaturamentoDinamico({ ...filtroObj, tipo: "Mês" }) // Reaproveita endpoint
+        ]);
+
+        setPagamentos(resPag || []);
+        setProdutosRentaveis(resProd || []);
+        setMargemCategoria(resMargem || []);
+        setSazonalidade(resSaz || []);
+
+      } catch (error) {
+        console.error("Erro ao buscar dados estratégicos", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    carregarDados();
+  }, [periodoAtual]);
+
+  // ========================================================================
+  // CÁLCULOS DINÂMICOS
+  // ========================================================================
+  const totalVendasQtd = pagamentos.reduce((acc, item) => acc + (item.qtdVendas || 0), 0);
+  
+  // Como a regra de taxas ainda não está no backend, calculamos aqui no frontend!
+  const calcularTaxa = (metodo, valor) => {
+      const m = (metodo || "").toUpperCase();
+      if (m === 'CREDITO') return valor * 0.05; // 5%
+      if (m === 'DEBITO') return valor * 0.02;  // 2%
+      return 0; // Pix e Dinheiro
+  };
+  const totalTaxas = pagamentos.reduce((acc, item) => acc + calcularTaxa(item.metodo, item.valorTotal || 0), 0);
+
+  return (
+    <div className="estrategica-wrapper">
+      
+      {/* ==========================================
+          TOPO: FILTRO GLOBAL (LARGURA TOTAL)
+          ========================================== */}
+      <div className="estr-top-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button className="btn-icon-filtro" onClick={() => setIsFilterOpen(true)} title="Filtrar Período">
+            <FiFilter size={22} color="#FF70A6" />
+          </button>
+          <div>
+            <h2 style={{ margin: 0, color: '#2D3748', fontSize: '22px', fontWeight: '900' }}>Visão Estratégica & Lucratividade</h2>
+            <p style={{ margin: '4px 0 0 0', color: '#718096', fontSize: '13px' }}>
+              Foco em eficiência operacional, custos ocultos e margem real. Período: <strong style={{ color: '#FF70A6' }}>{periodoAtual}</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ==========================================
+          LINHA 1: EFICIÊNCIA E PAGAMENTOS (Esquerda/Direita)
+          ========================================== */}
+      <div className="estr-row-1">
+        
+        {/* CARD ESQUERDA ACIMA: Sazonalidade do Produto (Volume) */}
+        <div className="estr-card">
+          <div className="estr-card-header">
+            <h3>Sazonalidade de Vendas (Volume)</h3>
+          </div>
+          <div className="estr-card-body">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sazonalidade} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
+                <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} tickFormatter={(val) => `R$${val/1000}k`} />
+                <RechartsTooltip 
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  formatter={(value) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Volume de Vendas']}
+                />
+                <Bar dataKey="faturamento" name="Volume de Vendas" fill="#DCE4F2" radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* CARD DIREITA ACIMA: Métodos de Pagamento */}
+        <div className="estr-card">
+          <div className="estr-card-header">
+            <h3>Desempenho por Método de Pagamento</h3>
+          </div>
+          <div className="estr-card-body" style={{ display: 'flex', flexDirection: 'column' }}>
+            {loading ? <div style={{color: '#a0aec0', padding: '10px'}}>Carregando métricas...</div> : (
+              <div style={{ flex: 1, overflowY: 'auto' }}>
+                <table className="estr-table">
+                  <thead>
+                    <tr>
+                      <th>Método</th>
+                      <th>Uso (%)</th>
+                      <th>Valor Total</th>
+                      <th>Ticket Médio</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pagamentos.map((pag) => {
+                      const frequencia = totalVendasQtd > 0 ? ((pag.qtdVendas / totalVendasQtd) * 100).toFixed(1) : 0;
+                      const valorMedio = pag.qtdVendas > 0 ? pag.valorTotal / pag.qtdVendas : 0;
+                      const metodoEnum = (pag.metodo || "").toUpperCase();
+                      return (
+                        <tr key={pag.metodo}>
+                          <td style={{ fontWeight: '600', display: 'flex', alignItems: 'center' }}>
+                            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CORES_PAGAMENTO[metodoEnum] || '#CBD5E0', marginRight: '8px' }}></span>
+                            {formatarNomePagamento(pag.metodo)}
+                          </td>
+                          <td>{frequencia}%</td>
+                          <td style={{ fontWeight: 'bold', color: '#2D3748' }}>R$ {Number(pag.valorTotal || 0).toLocaleString('pt-BR')}</td>
+                          <td>R$ {valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div style={{ background: '#FFF1F2', border: '1px solid #FED7D7', borderRadius: '8px', padding: '12px', marginTop: '16px', flexShrink: 0 }}>
+              <p style={{ margin: 0, fontSize: '12px', color: '#C53030', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Total de Taxas Pagas:</span>
+                <span style={{ fontSize: '16px' }}>R$ {totalTaxas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ==========================================
+          LINHA 2: MARGEM DE LUCRO E PRODUTOS RENTÁVEIS (Esquerda/Direita)
+          ========================================== */}
+      <div className="estr-row-2">
+        
+        {/* CARD ESQUERDA ABAIXO: Gráfico de Margem de Lucro */}
+        <div className="estr-card">
+          <div className="estr-card-header">
+            <h3>Margem de Lucro por Categoria</h3>
+          </div>
+          <div className="estr-card-body">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={margemCategoria} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
+                <XAxis dataKey="categoria" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#FF70A6' }} tickFormatter={(val) => `${val}%`} />
+                <RechartsTooltip 
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  formatter={(value) => [`${value}%`, 'Margem Média']}
+                />
+                <Bar dataKey="margem" name="Margem Média" fill="#FF70A6" radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* CARD DIREITA ABAIXO: Tabela de Produtos Mais Rentáveis */}
+        <div className="estr-card">
+          <div className="estr-card-header">
+            <h3>Produtos Mais Rentáveis</h3>
+          </div>
+          <div className="estr-card-body" style={{ overflowY: 'auto' }}>
+            {loading ? <div style={{color: '#a0aec0', padding: '10px'}}>Mapeando produtos...</div> : (
+              <table className="estr-table">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Qtd. Vendas</th>
+                    <th>Lucro Líquido</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {produtosRentaveis.map((prod, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: '600' }}>{prod.nome}</td>
+                      <td>{prod.vendas} un.</td>
+                      <td style={{ color: '#38A169', fontWeight: 'bold' }}>
+                        R$ {Number(prod.lucro || 0).toLocaleString('pt-BR')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ==========================================
+          MODAL DE FILTRO MOCKADO
+          ========================================== */}
+      {isFilterOpen && (
+        <div className="estr-modal-overlay">
+          <div className="estr-modal-content">
+            <h3 style={{ margin: '0 0 20px 0', color: '#2D3748', fontSize: '18px', fontWeight: '800' }}>Filtrar Período</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {['Hoje', 'Esta Semana', 'Mês Atual', 'Últimos 3 Meses'].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => { setPeriodoAtual(p); setIsFilterOpen(false); }}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: p === periodoAtual ? '2px solid #FF70A6' : '1px solid #E2E8F0',
+                    backgroundColor: p === periodoAtual ? '#FFE5F0' : '#FFF',
+                    color: p === periodoAtual ? '#D53F8C' : '#4A5568',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    textAlign: 'center'
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setIsFilterOpen(false)}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#EDF2F7',
+                  color: '#4A5568',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
