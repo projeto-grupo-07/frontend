@@ -24,6 +24,11 @@ const formatarNomePagamento = (nomeCru) => {
 export default function Estrategica() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [periodoAtual, setPeriodoAtual] = useState('Mês Atual');
+  
+  // ESTADOS DO FILTRO PERSONALIZADO
+  const [dataInicioCustom, setDataInicioCustom] = useState('');
+  const [dataFimCustom, setDataFimCustom] = useState('');
+  const [triggerFetch, setTriggerFetch] = useState(0); // Gatilho para recarregar os dados
 
   // Estados Reais
   const [pagamentos, setPagamentos] = useState([]);
@@ -39,9 +44,9 @@ export default function Estrategica() {
     const carregarDados = async () => {
       setLoading(true);
       try {
-        // 1. Converte o período selecionado para Datas Reais
         const hoje = new Date();
         let inicio = new Date(hoje);
+        let fim = new Date(hoje); // Criamos a variável fim
         
         if (periodoAtual === 'Esta Semana') {
           inicio.setDate(hoje.getDate() - hoje.getDay());
@@ -49,10 +54,17 @@ export default function Estrategica() {
           inicio.setDate(1);
         } else if (periodoAtual === 'Últimos 3 Meses') {
           inicio.setMonth(hoje.getMonth() - 3);
+        } else if (periodoAtual === 'Personalizado') {
+          // LÓGICA NOVA: Pega as datas do input
+          if (dataInicioCustom) inicio = new Date(`${dataInicioCustom}T00:00:00`);
+          if (dataFimCustom) fim = new Date(`${dataFimCustom}T23:59:59`);
         }
         
-        inicio.setHours(0, 0, 0, 0);
-        hoje.setHours(23, 59, 59, 999);
+        // Zera as horas se não for personalizado (o personalizado já vem com a hora setada acima)
+        if (periodoAtual !== 'Personalizado') {
+           inicio.setHours(0, 0, 0, 0);
+           fim.setHours(23, 59, 59, 999);
+        }
 
         // Formata para o LocalDateTime do Spring
         const formatIso = (date) => {
@@ -60,14 +72,14 @@ export default function Estrategica() {
           return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
         };
 
-        const filtroObj = { inicio: formatIso(inicio), fim: formatIso(hoje) };
+        const filtroObj = { inicio: formatIso(inicio), fim: formatIso(fim) };
 
         // 2. Dispara requisições simultâneas para otimizar tempo
         const [resPag, resProd, resMargem, resSaz] = await Promise.all([
           KpiService.getDesempenhoPagamentos(filtroObj),
           KpiService.getProdutosRentaveis(filtroObj),
           KpiService.getMargemCategoria(filtroObj),
-          KpiService.getGraficoFaturamentoDinamico({ ...filtroObj, tipo: "Mês" }) // Reaproveita endpoint
+          KpiService.getGraficoFaturamentoDinamico({ ...filtroObj, tipo: "Mês" }) 
         ]);
 
         setPagamentos(resPag || []);
@@ -82,21 +94,12 @@ export default function Estrategica() {
       }
     };
     carregarDados();
-  }, [periodoAtual]);
+  }, [periodoAtual, triggerFetch]); // <-- ADICIONADO O triggerFetch AQUI
 
   // ========================================================================
   // CÁLCULOS DINÂMICOS
   // ========================================================================
   const totalVendasQtd = pagamentos.reduce((acc, item) => acc + (item.qtdVendas || 0), 0);
-  
-  // Como a regra de taxas ainda não está no backend, calculamos aqui no frontend!
-  const calcularTaxa = (metodo, valor) => {
-      const m = (metodo || "").toUpperCase();
-      if (m === 'CREDITO') return valor * 0.05; // 5%
-      if (m === 'DEBITO') return valor * 0.02;  // 2%
-      return 0; // Pix e Dinheiro
-  };
-  const totalTaxas = pagamentos.reduce((acc, item) => acc + calcularTaxa(item.metodo, item.valorTotal || 0), 0);
 
   return (
     <div className="estrategica-wrapper">
@@ -112,7 +115,7 @@ export default function Estrategica() {
           <div>
             <h2 style={{ margin: 0, color: '#2D3748', fontSize: '22px', fontWeight: '900' }}>Visão Estratégica & Lucratividade</h2>
             <p style={{ margin: '4px 0 0 0', color: '#718096', fontSize: '13px' }}>
-              Foco em eficiência operacional, custos ocultos e margem real. Período: <strong style={{ color: '#FF70A6' }}>{periodoAtual}</strong>
+              Foco em eficiência operacional e margem real. Período: <strong style={{ color: '#FF70A6' }}>{periodoAtual}</strong>
             </p>
           </div>
         </div>
@@ -157,6 +160,7 @@ export default function Estrategica() {
                     <tr>
                       <th>Método</th>
                       <th>Uso (%)</th>
+                      <th>Qtd. Vendas</th>
                       <th>Valor Total</th>
                       <th>Ticket Médio</th>
                     </tr>
@@ -173,6 +177,7 @@ export default function Estrategica() {
                             {formatarNomePagamento(pag.metodo)}
                           </td>
                           <td>{frequencia}%</td>
+                          <td>{pag.qtdVendas}</td>
                           <td style={{ fontWeight: 'bold', color: '#2D3748' }}>R$ {Number(pag.valorTotal || 0).toLocaleString('pt-BR')}</td>
                           <td>R$ {valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         </tr>
@@ -182,12 +187,6 @@ export default function Estrategica() {
                 </table>
               </div>
             )}
-            <div style={{ background: '#FFF1F2', border: '1px solid #FED7D7', borderRadius: '8px', padding: '12px', marginTop: '16px', flexShrink: 0 }}>
-              <p style={{ margin: 0, fontSize: '12px', color: '#C53030', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>Total de Taxas Pagas:</span>
-                <span style={{ fontSize: '16px' }}>R$ {totalTaxas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </p>
-            </div>
           </div>
         </div>
 
@@ -252,17 +251,23 @@ export default function Estrategica() {
       </div>
 
       {/* ==========================================
-          MODAL DE FILTRO MOCKADO
+          MODAL DE FILTRO 
           ========================================== */}
       {isFilterOpen && (
         <div className="estr-modal-overlay">
           <div className="estr-modal-content">
             <h3 style={{ margin: '0 0 20px 0', color: '#2D3748', fontSize: '18px', fontWeight: '800' }}>Filtrar Período</h3>
+            
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {['Hoje', 'Esta Semana', 'Mês Atual', 'Últimos 3 Meses'].map((p) => (
+              {['Hoje', 'Esta Semana', 'Mês Atual', 'Últimos 3 Meses', 'Personalizado'].map((p) => (
                 <button
                   key={p}
-                  onClick={() => { setPeriodoAtual(p); setIsFilterOpen(false); }}
+                  onClick={() => { 
+                    setPeriodoAtual(p); 
+                    if (p !== 'Personalizado') {
+                      setIsFilterOpen(false); 
+                    }
+                  }}
                   style={{
                     padding: '12px',
                     borderRadius: '8px',
@@ -279,7 +284,32 @@ export default function Estrategica() {
                 </button>
               ))}
             </div>
-            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+
+            {/* Renderiza os inputs de data apenas se "Personalizado" estiver selecionado */}
+            {periodoAtual === 'Personalizado' && (
+              <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px', padding: '12px', backgroundColor: '#F7FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label style={{ fontSize: '12px', color: '#4A5568', fontWeight: 'bold', marginBottom: '4px' }}>Data Inicial</label>
+                  <input
+                    type="date"
+                    value={dataInicioCustom}
+                    onChange={(e) => setDataInicioCustom(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #CBD5E0', color: '#2D3748', outline: 'none' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <label style={{ fontSize: '12px', color: '#4A5568', fontWeight: 'bold', marginBottom: '4px' }}>Data Final</label>
+                  <input
+                    type="date"
+                    value={dataFimCustom}
+                    onChange={(e) => setDataFimCustom(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #CBD5E0', color: '#2D3748', outline: 'none' }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button 
                 onClick={() => setIsFilterOpen(false)}
                 style={{
@@ -294,6 +324,27 @@ export default function Estrategica() {
               >
                 Cancelar
               </button>
+
+              {/* LÓGICA NOVA: Botão Aplicar agora dispara o triggerFetch */}
+              {periodoAtual === 'Personalizado' && (
+                <button 
+                  onClick={() => {
+                    setIsFilterOpen(false);
+                    setTriggerFetch(prev => prev + 1); // <-- A MÁGICA ACONTECE AQUI
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#FF70A6',
+                    color: '#FFF',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Aplicar
+                </button>
+              )}
             </div>
           </div>
         </div>
