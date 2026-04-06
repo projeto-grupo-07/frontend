@@ -46,7 +46,7 @@ function DetalhesVendaModal({ show, onClose, venda }) {
                                     <td>{formatarNomeProduto(item.produto)}</td>
                                     
                                     <td>{item.quantidadeVendaProduto}</td>
-                                    <td>R$ {item.produto.valorUnitario?.toFixed(2).replace('.', ',')}</td>
+                                    <td>R$ {(item.precoUnitarioNaVenda ?? item.produto?.valorUnitario)?.toFixed(2).replace('.', ',')}</td>
                                     <td style={{ color: item.desconto > 0 ? '#e53e3e' : 'inherit' }}>
                                         R$ {(item.desconto || 0).toFixed(2).replace('.', ',')}
                                     </td>
