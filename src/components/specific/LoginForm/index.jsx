@@ -2,7 +2,7 @@ import './styles.css'
 import { useEffect, useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"; 
 import api from "../../../services/api/api"
-import Input from "../../common/Input/Index"
+import Input from "../../common/Input/index"
 import Button from "../../common/Button/index"
 import { AuthContext } from "../../../contexts/AuthContext";
 
