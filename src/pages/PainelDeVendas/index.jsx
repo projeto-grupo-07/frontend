@@ -24,11 +24,14 @@ function PainelDeVendas() {
         try {
             await VendaService.create(dadosVenda);
             alert("Venda realizada com sucesso!");
-            setItensVenda([]); 
-            localStorage.removeItem('@BrinksCalcados:carrinho'); 
-            setModalFinalizarAberto(false); 
+            setItensVenda([]);
+            localStorage.removeItem('@BrinksCalcados:carrinho');
+            setModalFinalizarAberto(false);
         } catch (err) {
-            alert("Erro ao processar venda no servidor.");
+            const msg = err.response?.data?.message
+                || err.response?.data?.error
+                || "Erro ao processar venda no servidor.";
+            alert(msg);
         }
     };
 
@@ -38,8 +41,8 @@ function PainelDeVendas() {
     };
 
     const handleProdutoCriado = () => {
-        fetchProdutos(); 
-        setModalCadastroAberto(false); 
+        fetchProdutos();
+        setModalCadastroAberto(false);
         alert("Produto cadastrado com sucesso e pronto para venda!");
     };
 
@@ -57,43 +60,47 @@ function PainelDeVendas() {
     };
 
     const handleAdicionarItem = () => {
-        if (!produtoSelecionado) return alert("Selecione um produto primeiro!");
+    if (!produtoSelecionado || !quantidade) return;
 
-        const descricao = `${produtoSelecionado.marca} ${produtoSelecionado.modelo} - Nº ${produtoSelecionado.numero}`;
-
-        const novoItem = {
-            idProduto: produtoSelecionado.id,
-            nome: descricao,
-            quantidadeVendaProduto: Number(quantidade),
-            desconto: 0.00, 
-            preco: produtoSelecionado.valorUnitario || 0,
-            total: (produtoSelecionado.valorUnitario || 0) * quantidade
-        };
-
-        setItensVenda([...itensVenda, novoItem]);
-        setProdutoSelecionado(null);
-        setQuantidade(1);
+    const novoItem = {
+        idProduto: produtoSelecionado.id,
+        // Normaliza o nome aqui! Se não tiver nome (Outros), monta com marca/modelo
+        nome: produtoSelecionado.nome || `${produtoSelecionado.marca} ${produtoSelecionado.modelo}`,
+        quantidadeVendaProduto: parseInt(quantidade),
+        preco: produtoSelecionado.valorUnitario,
+        desconto: 0,
+        total: produtoSelecionado.valorUnitario * parseInt(quantidade),
+        // Mantenha marca e modelo se precisar deles para outra coisa
+        marca: produtoSelecionado.marca,
+        modelo: produtoSelecionado.modelo
     };
+
+    setItensVenda([...itensVenda, novoItem]);
+    
+    // Limpar seleção após adicionar
+    setProdutoSelecionado(null);
+    setQuantidade("");
+};
 
     // FUNÇÃO QUE ESTAVA FALTANDO
     const handleAtualizarDesconto = (index, novoDesconto) => {
         const valorDesconto = Number(novoDesconto);
-        
+
         if (valorDesconto < 0) return;
 
         const novaLista = [...itensVenda];
         const item = novaLista[index];
-        
+
         const subtotalBruto = item.preco * item.quantidadeVendaProduto;
-        
+
         if (valorDesconto > subtotalBruto) {
-             alert(`O desconto não pode ser maior que o subtotal bruto do item (R$ ${subtotalBruto.toFixed(2)}).`);
-             return;
+            alert(`O desconto não pode ser maior que o subtotal bruto do item (R$ ${subtotalBruto.toFixed(2)}).`);
+            return;
         }
 
         item.desconto = valorDesconto;
-        item.total = subtotalBruto - valorDesconto; 
-        
+        item.total = subtotalBruto - valorDesconto;
+
         setItensVenda(novaLista);
     };
 
@@ -142,7 +149,11 @@ function PainelDeVendas() {
                                             type="text"
                                             readOnly
                                             placeholder="Clique para buscar um produto..."
-                                            value={produtoSelecionado ? `${produtoSelecionado.marca} ${produtoSelecionado.modelo}` : ''}
+                                            value={
+                                                produtoSelecionado
+                                                    ? (produtoSelecionado.nome || `${produtoSelecionado.marca} ${produtoSelecionado.modelo}`)
+                                                    : ''
+                                            }
                                             className="custom-input cursor-pointer"
                                         />
                                     </div>
@@ -155,10 +166,12 @@ function PainelDeVendas() {
                                 </div>
 
                                 <div className="input-field quantity">
-                                    <label>Qtd.</label>
+                                    <label>Qtd. (Disponível: {produtoSelecionado?.quantidade || 0})</label>
                                     <input
                                         type="number"
                                         className="custom-input"
+                                        min="1"
+                                        max={produtoSelecionado?.quantidade || 999}
                                         value={quantidade || ''}
                                         onChange={(e) => setQuantidade(e.target.value)}
                                     />
@@ -183,7 +196,7 @@ function PainelDeVendas() {
                                         <th>Produto</th>
                                         <th>Qtd</th>
                                         <th>Preço</th>
-                                        <th>Desconto (R$)</th> 
+                                        <th>Desconto (R$)</th>
                                         <th>Total</th>
                                         <th></th>
                                     </tr>
@@ -191,18 +204,18 @@ function PainelDeVendas() {
                                 <tbody>
                                     {itensVenda.map((item, index) => (
                                         <tr key={index}>
-                                            <td>{item.nome}</td>
+                                            <td>{item.nome || `${item.marca} ${item.modelo}`}</td>
                                             <td>{item.quantidadeVendaProduto}</td>
                                             <td>R$ {item.preco.toFixed(2)}</td>
                                             <td>
-                                                <input 
-                                                    type="number" 
+                                                <input
+                                                    type="number"
                                                     min="0"
                                                     step="0.01"
-                                                    value={item.desconto === 0 ? '' : item.desconto} 
+                                                    value={item.desconto === 0 ? '' : item.desconto}
                                                     placeholder="0.00"
                                                     onChange={(e) => handleAtualizarDesconto(index, e.target.value)}
-                                                    className="input-desconto" 
+                                                    className="input-desconto"
                                                     style={{ width: '80px', padding: '4px' }}
                                                 />
                                             </td>

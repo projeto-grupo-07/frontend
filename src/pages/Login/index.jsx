@@ -12,9 +12,7 @@ function Login() {
              <title>Login</title>
             <header className="login-header">
                 <img src={logoBrink} alt="Logo Brink Calçados" className="logo" />
-                <button className="back-button">
-                    <img src={arrowIcon} alt="Voltar" className="icon-arrow" />
-                </button>
+    
             </header>
             <main className="login-content">
                 <LoginForm />

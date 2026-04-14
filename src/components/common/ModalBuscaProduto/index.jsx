@@ -6,10 +6,19 @@ const ModalBuscaProduto = ({ produtos, onSelect, onClose }) => {
 
     const getNomeExibicao = (p) => {
         if (!p) return "";
-        if (p.marca && p.modelo) {
-            return `${p.marca} ${p.modelo} - ${p.cor || ''} (Nº ${p.numero || ''})`;
+
+        // Lógica para Calçados (que possuem marca e modelo)
+        if (p.tipo === "calcado" || (p.marca && p.modelo)) {
+            return `${p.marca} ${p.modelo} ${p.cor ? `- ${p.cor}` : ''} ${p.numero ? `(Nº ${p.numero})` : ''}`;
         }
-        return p.categoria?.nome || "Produto sem nome";
+
+        // Lógica para Outros (que possuem a propriedade 'nome')
+        if (p.nome) {
+            return p.nome;
+        }
+
+        // Fallback caso não encontre nenhuma das opções acima
+        return p.categoriaPai || "Produto sem nome";
     };
 
     const listaSegura = Array.isArray(produtos) ? produtos : [];
@@ -34,9 +43,12 @@ const ModalBuscaProduto = ({ produtos, onSelect, onClose }) => {
                     {filtrados.map(p => (
                         <div key={p.id} onClick={() => onSelect(p)} className="produto-item">
                             <span>{getNomeExibicao(p)}</span>
-                            <span className="produto-preco-badge">
-                                R$ {p.valorUnitario?.toFixed(2)}
-                            </span>
+                            <div className="produto-badges">
+                                <span className="produto-preco-badge">
+                                    R$ {p.valorUnitario?.toFixed(2)}
+                                </span>
+
+                            </div>
                         </div>
                     ))}
                 </div>

@@ -54,9 +54,11 @@ function FormularioLogin() {
     }
 
     return (
-        <form className='login-form-card' onSubmit={autenticar}>
-            <h1 className='titleForm'>Login</h1>
-            
+    <form className='login-form-card' onSubmit={autenticar}>
+        <h1 className='titleForm'>Login</h1>
+        
+        {/* Agrupe os inputs para que o gap não os separe tanto do resto */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Input 
                 type="text" 
                 placeholder="Login" 
@@ -70,19 +72,28 @@ function FormularioLogin() {
                 onChange={(e) => {setSenha(e.target.value)}} 
                 label="Senha"
             />
+        </div>
 
-            {/* Renderiza a mensagem de erro condicionalmente */}
-            {erro && (
-                <div style={{ color: '#e53e3e', backgroundColor: '#fff5f5', padding: '10px', borderRadius: '8px', fontSize: '14px', marginBottom: '16px', textAlign: 'center', border: '1px solid #feb2b2' }}>
-                    {erro}
-                </div>
-            )}
-            
-            <Button type="submit" disabled={loading}>
-                {loading ? "Entrando..." : "Entrar"}
-            </Button>
-        </form>
-    )
+        {erro && (
+            <div style={{ 
+                color: '#e53e3e', 
+                backgroundColor: '#fff5f5', 
+                padding: '10px', 
+                borderRadius: '8px', 
+                fontSize: '14px', 
+                textAlign: 'center', 
+                border: '1px solid #feb2b2',
+                width: '100%' // Garante que ocupe a largura total
+            }}>
+                {erro}
+            </div>
+        )}
+        
+        <Button type="submit" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
+        </Button>
+    </form>
+)
 }
 
 export default FormularioLogin
