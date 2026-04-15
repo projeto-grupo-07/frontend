@@ -12,6 +12,16 @@ export const ProductService = {
       throw error;
     }
   },
+  getPaginated: async (pagina = 0, tamanho = 15) => {
+    try {
+      const response = await api.get(`${ENDPOINT}/paginas?pagina=${pagina}&tamanho=${tamanho}`);
+      return response;
+    } catch (error) {
+      console.error("Erro ao buscar produtos paginados:", error);
+      throw error;
+    }
+  },
+
   getById: async (id) => {
     try {
       const response = await api.get(`${ENDPOINT}/todos/${id}`);
@@ -38,9 +48,16 @@ export const ProductService = {
     }
   },
 
-  delete: async (produto) => {
-    return await api.delete(`${ENDPOINT}/${produto.id}`);
-  },
+  delete: async (id) => {
+  try {
+    const res = await api.delete(`${ENDPOINT}/${id}`);
+
+    return res;
+  } catch (err) {
+
+    throw err;
+  }
+},
 
   getParentCategories: async () => {
     const response = await api.get('/pais');
