@@ -56,9 +56,20 @@ export const VendaService = {
   getPaginated: async (pagina = 0, tamanho = 15) => {
   try {
     const response = await api.get(`${ENDPOINT}/paginas?pagina=${pagina}&tamanho=${tamanho}`);
-    return response;
+    return response.data;
   } catch (error) {
     console.error("Erro ao buscar vendas paginadas:", error);
+    throw error;
+  }
+},
+
+getCursor: async (cursor = null, tamanho = 15) => {
+  try {
+    const params = cursor ? `?cursor=${cursor}&tamanho=${tamanho}` : `?tamanho=${tamanho}`;
+    const response = await api.get(`${ENDPOINT}/cursor${params}`);
+    return response;
+  } catch (error) {
+    console.error("Erro ao buscar vendas por cursor:", error);
     throw error;
   }
 },

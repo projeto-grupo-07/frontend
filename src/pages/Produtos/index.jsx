@@ -254,7 +254,7 @@ function Produtos() {
                             <div className="empty-table-placeholder">Nenhum produto encontrado.</div>
                         )}
 
-                        {totalPaginas > 1 && (
+                        {totalPaginas > 0 && (
                             <div className="pagination-wrapper">
                                 <button
                                     className="btn-paginacao"

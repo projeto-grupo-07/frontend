@@ -14,6 +14,7 @@ export default function FormCalcado({
   const [cor, setCor] = useState("");
   const [quantidade, setQuantidade] = useState(1);
   const [valorUnitario, setValorUnitario] = useState("");
+  const [precoCusto, setPrecoCusto] = useState("");
 
   useEffect(() => {
     if ((!subcategoryId || subcategoryId === "") && subcategories.length > 0) {
@@ -33,6 +34,7 @@ export default function FormCalcado({
       idCategoria: Number(subcategoryId),
       quantidade: Number(quantidade),
       valorUnitario: Number(valorUnitario),
+      precoCustoProduto: Number(precoCusto),
       marca,
       modelo,
       numero: Number(numero),
@@ -84,8 +86,21 @@ export default function FormCalcado({
         </div>
         <div className="form-group" style={{ flex: 1 }}>
           <label>Valor Unitário (R$)</label>
-          <input type="number" step="0.01" min="0" value={valorUnitario} onChange={(e) => setValorUnitario(e.target.value)} required placeholder="0.00" />
+          <input type="number" step="0.01" min="0.01" value={valorUnitario} onChange={(e) => setValorUnitario(e.target.value)} required placeholder="0.00" />
         </div>
+      </div>
+
+      <div className="form-group">
+        <label>Preço de Custo (R$)</label>
+        <input
+          type="number"
+          step="0.01"
+          min="0.01"
+          value={precoCusto}
+          onChange={(e) => setPrecoCusto(e.target.value)}
+          required
+          placeholder="0.00"
+        />
       </div>
 
       <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '16px' }}>

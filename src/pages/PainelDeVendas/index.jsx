@@ -58,6 +58,8 @@ function PainelDeVendas() {
 
     const handleAdicionarItem = () => {
         if (!produtoSelecionado) return alert("Selecione um produto primeiro!");
+        if (Number(quantidade) < 1) return alert("A quantidade deve ser pelo menos 1.");
+
 
         const descricao = `${produtoSelecionado.marca} ${produtoSelecionado.modelo} - Nº ${produtoSelecionado.numero}`;
 
@@ -158,6 +160,7 @@ function PainelDeVendas() {
                                     <label>Qtd.</label>
                                     <input
                                         type="number"
+                                        min="1"
                                         className="custom-input"
                                         value={quantidade || ''}
                                         onChange={(e) => setQuantidade(e.target.value)}
@@ -202,6 +205,7 @@ function PainelDeVendas() {
                                                     value={item.desconto === 0 ? '' : item.desconto} 
                                                     placeholder="0.00"
                                                     onChange={(e) => handleAtualizarDesconto(index, e.target.value)}
+                                                    onKeyDown={(e) => e.key === '-' && e.preventDefault()}
                                                     className="input-desconto" 
                                                     style={{ width: '80px', padding: '4px' }}
                                                 />

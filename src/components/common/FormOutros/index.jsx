@@ -12,6 +12,7 @@ export default function FormOutros({
   const [descricao, setDescricao] = useState("");
   const [quantidade, setQuantidade] = useState(1);
   const [valorUnitario, setValorUnitario] = useState("");
+  const [precoCusto, setPrecoCusto] = useState("");
 
   useEffect(() => {
     if ((!subcategoryId || subcategoryId === "") && subcategories.length > 0) {
@@ -32,7 +33,8 @@ export default function FormOutros({
       nome,
       descricao,
       quantidade: Number(quantidade),
-      valorUnitario: Number(valorUnitario)
+      valorUnitario: Number(valorUnitario),
+      precoCustoProduto: precoCusto ? Number(precoCusto) : null
     };
 
     try {
@@ -67,6 +69,18 @@ export default function FormOutros({
           <label>Valor Unitário (R$)</label>
           <input type="number" step="0.01" min="0" value={valorUnitario} onChange={(e) => setValorUnitario(e.target.value)} required placeholder="0.00" />
         </div>
+      </div>
+
+      <div className="form-group">
+        <label>Preço de Custo (R$) — opcional</label>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          value={precoCusto}
+          onChange={(e) => setPrecoCusto(e.target.value)}
+          placeholder="0.00"
+        />
       </div>
 
       <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '16px' }}>

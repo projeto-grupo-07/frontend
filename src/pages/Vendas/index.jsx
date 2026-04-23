@@ -8,7 +8,6 @@ import { IconButton } from '../../components/common/IconButton';
 import { SearchBar } from '../../components/common/SearchBar';
 import { DataTable } from '../../components/common/DataTable';
 import { VendaService } from '../../services/VendaService';
-import { FuncionarioService } from '../../services/FuncionarioService';
 import DetalhesVendaModal from '../../components/common/DetalhesVendaModal';
 import EditarVendaModal from '../../components/common/EditarVendaModal';
 import FilterVendaModal from '../../components/common/FilterVendaModal';
@@ -37,10 +36,10 @@ function Vendas() {
 
     const TAMANHO_PAGINA = 15;
 
-    // ESTADOS DE PAGINAÇÃO
-    const [paginaAtual, setPaginaAtual] = useState(0);
-    const [totalPaginas, setTotalPaginas] = useState(1);
-    const [totalElementos, setTotalElementos] = useState(0);
+    // PAGINAÇÃO CURSOR
+    const [pilhaAnterior, setPilhaAnterior] = useState([]);
+    const [proximoCursor, setProximoCursor] = useState(null);
+    const [cursorAtual, setCursorAtual] = useState(null);
 
     const limparFiltros = () => {
         setFiltroDataInicio("");
@@ -49,8 +48,8 @@ function Vendas() {
         setFiltrosFormasPagamento([]);
         setValorMin("");
         setValorMax("");
-        setTermoBusca(""); // Opcional: limpa a barra de pesquisa também
-        setIsFilterOpen(false); // Fecha o modal
+        setTermoBusca("");
+        setIsFilterOpen(false);
     };
 
     const colunas = [
@@ -62,102 +61,82 @@ function Vendas() {
 
     const carregarDadosApoio = async () => {
         try {
-            const funcRes = await FuncionarioService.getAll();
-            setVendedores(Array.isArray(funcRes) ? funcRes : (funcRes?.data || []));
-
             const pagRes = await VendaService.getFormasPagamento();
             setFormasPagamento(Array.isArray(pagRes) ? pagRes : (pagRes?.data || []));
         } catch (err) {
-            console.error("Erro ao carregar dados de apoio para os filtros:", err);
+            console.error("Erro ao carregar dados de apoio:", err);
         }
     };
 
-    const fetchVendas = async (pagina = 0) => {
-    try {
-        setLoading(true);
-        const dados = await VendaService.getPaginated(pagina, TAMANHO_PAGINA);
-        const listaVendas = dados.conteudo || [];
+    const fetchVendas = async (cursor = null) => {
+        try {
+            setLoading(true);
+            const dados = await VendaService.getCursor(cursor, TAMANHO_PAGINA);
+            const listaVendas = dados.conteudo || [];
 
-        if (listaVendas.length > 0) {
-            const vendasComNomes = await Promise.all(
-                listaVendas.map(async (venda) => {
-                    let nomeVend = "Carregando...";
-                    try {
-                        const func = await FuncionarioService.getById(venda.idVendedor);
-                        nomeVend = func?.nome || "Desconhecido";
-                    } catch (e) {
-                        nomeVend = "Erro ao buscar";
-                    }
-                    return {
-                        ...venda,
-                        nomeVendedor: nomeVend,
-                        valorTotalExibicao: venda.valorTotalDaVenda
-                            ? `R$ ${venda.valorTotalDaVenda.toFixed(2).replace('.', ',')}`
-                            : "R$ 0,00",
-                        dataExibicao: new Date(venda.dataHora).toLocaleString('pt-BR')
-                    };
-                })
-            );
-            setVendas(vendasComNomes);
-        } else {
-            setVendas([]);
+            if (listaVendas.length > 0) {
+                const vendasComNomes = listaVendas.map((venda) => ({
+                    ...venda,
+                    nomeVendedor: venda.funcionarioNome || "Desconhecido",
+                    valorTotalExibicao: venda.valorTotalDaVenda
+                        ? `R$ ${venda.valorTotalDaVenda.toFixed(2).replace('.', ',')}`
+                        : "R$ 0,00",
+                    dataExibicao: new Date(venda.dataHora).toLocaleString('pt-BR')
+                }));
+                setVendas(vendasComNomes);
+            } else {
+                setVendas([]);
+            }
+
+            setProximoCursor(dados.proximoCursor ?? null);
+        } catch (err) {
+            console.error("Erro no processamento das vendas:", err);
+        } finally {
+            setLoading(false);
         }
-
-        setPaginaAtual(dados.pagina ?? pagina);
-        setTotalPaginas(dados.totalPaginas ?? 1);
-        setTotalElementos(dados.total ?? 0);
-    } catch (err) {
-        console.error("Erro no processamento das vendas:", err);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     useEffect(() => {
         carregarDadosApoio();
-        fetchVendas(0);
+        fetchVendas(null);
     }, []);
 
-    const irParaPagina = (pagina) => {
-    if (pagina >= 0 && pagina < totalPaginas && pagina !== paginaAtual) {
-        fetchVendas(pagina);
-    }
-};
+    const irParaProxima = () => {
+        if (!proximoCursor) return;
+        setPilhaAnterior(prev => [...prev, cursorAtual]);
+        setCursorAtual(proximoCursor);
+        fetchVendas(proximoCursor);
+    };
 
-const paginasVisiveis = () => {
-    const paginas = [];
-    const inicio = Math.max(0, paginaAtual - 2);
-    const fim = Math.min(totalPaginas - 1, paginaAtual + 2);
-    for (let i = inicio; i <= fim; i++) paginas.push(i);
-    return paginas;
-};
+    const irParaAnterior = () => {
+        if (pilhaAnterior.length === 0) return;
+        const pilha = [...pilhaAnterior];
+        const cursorVoltar = pilha.pop();
+        setPilhaAnterior(pilha);
+        setCursorAtual(cursorVoltar);
+        fetchVendas(cursorVoltar);
+    };
 
-    // Lógica principal de filtragem
+    const voltarParaPrimeira = () => {
+        setPilhaAnterior([]);
+        setCursorAtual(null);
+        fetchVendas(null);
+    };
+
     const dadosFiltrados = vendas.filter(v => {
-        // 1. Filtro de Vendedor
-        if (filtrosVendedores.length > 0 && !filtrosVendedores.includes(v.idVendedor)) {
-            return false;
-        }
+        if (filtrosVendedores.length > 0 && !filtrosVendedores.includes(v.idVendedor)) return false;
+        if (filtrosFormasPagamento.length > 0 && !filtrosFormasPagamento.includes(v.formaPagamento)) return false;
 
-        // 2. Filtro de Forma de Pagamento (Multi-select: mesma lógica de inclusão)
-        if (filtrosFormasPagamento.length > 0 && !filtrosFormasPagamento.includes(v.formaPagamento)) {
-            return false;
-        }
-
-        // 3. Filtro de Valor Mínimo/Máximo
         const total = Number(v.valorTotalDaVenda) || 0;
         if (valorMin && total < Number(valorMin)) return false;
         if (valorMax && total > Number(valorMax)) return false;
 
-        // 4. Filtro de Data
-        // A data vem do back como "2026-03-14T10:30:00", o slice(0,10) pega só o "2026-03-14"
         if (v.dataHora) {
             const dataVenda = String(v.dataHora).slice(0, 10);
             if (filtroDataInicio && dataVenda < filtroDataInicio) return false;
             if (filtroDataFim && dataVenda > filtroDataFim) return false;
         }
 
-        // 5. Filtro de Texto (Barra de busca)
         if (!termoBusca.trim()) return true;
         const termo = termoBusca.toLowerCase();
         return (v.nomeVendedor || "").toLowerCase().includes(termo) ||
@@ -169,11 +148,14 @@ const paginasVisiveis = () => {
         if (!window.confirm(`Deseja realmente excluir a venda #${venda.id}?`)) return;
         try {
             await VendaService.delete(venda.id);
-            fetchVendas();
+            voltarParaPrimeira();
         } catch (err) {
             alert("Erro ao excluir venda.");
         }
     };
+
+    const primeiraPagina = pilhaAnterior.length === 0;
+    const ultimaPagina = proximoCursor === null;
 
     return (
         <div className="page-container">
@@ -181,20 +163,18 @@ const paginasVisiveis = () => {
                 header={
                     <div style={{
                         display: 'flex',
-                        flexDirection: 'row', // Força direção horizontal
-                        flexWrap: 'nowrap',   // PROÍBE quebra de linha
+                        flexDirection: 'row',
+                        flexWrap: 'nowrap',
                         alignItems: 'center',
-                        justifyContent: 'space-between', // Espalha os botões nas pontas e a busca no meio
+                        justifyContent: 'space-between',
                         gap: '15px',
                         width: '100%',
-                        minWidth: '600px', // O HACK SALVADOR: Garante espaço mínimo para os 3 elementos não se esmagarem
+                        minWidth: '600px',
                         boxSizing: 'border-box'
                     }}>
-
                         <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
                             <Button onClick={() => navigate('/painel-vendas')}>Nova Venda</Button>
                         </div>
-
                         <div style={{ flexGrow: 1, minWidth: '200px' }}>
                             <SearchBar
                                 placeholder="Pesquisar em qualquer coluna..."
@@ -202,11 +182,9 @@ const paginasVisiveis = () => {
                                 onChange={(e) => setTermoBusca(e.target.value)}
                             />
                         </div>
-
                         <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
                             <Button onClick={() => setIsFilterOpen(true)}>Filtrar</Button>
                         </div>
-
                     </div>
                 }
             >
@@ -226,61 +204,44 @@ const paginasVisiveis = () => {
                             )}
                         />
 
-                         {totalPaginas > 1 && (
-                            <div className="pagination-wrapper">
-                                <button className="btn-paginacao" disabled={paginaAtual === 0} onClick={() => irParaPagina(paginaAtual - 1)}>Anterior</button>
-
-                                {paginaAtual > 2 && (
-                                    <>
-                                        <button className="btn-paginacao" onClick={() => irParaPagina(0)}>1</button>
-                                        {paginaAtual > 3 && <span className="btn-paginacao-separator">...</span>}
-                                    </>
-                                )}
-
-                                {paginasVisiveis().map(p => (
-                                    <button key={p} className={`btn-paginacao ${p === paginaAtual ? 'btn-paginacao-ativo' : ''}`} onClick={() => irParaPagina(p)}>
-                                        {p + 1}
-                                    </button>
-                                ))}
-
-                                {paginaAtual < totalPaginas - 3 && (
-                                    <>
-                                        {paginaAtual < totalPaginas - 4 && <span className="btn-paginacao-separator">...</span>}
-                                        <button className="btn-paginacao" onClick={() => irParaPagina(totalPaginas - 1)}>{totalPaginas}</button>
-                                    </>
-                                )}
-
-                                {paginaAtual < totalPaginas - 3 && (
-                                     <>
-                                         {paginaAtual < totalPaginas - 4 && <span className="btn-paginacao-separator">...</span>}
-                                         <button className="btn-paginacao" onClick={() => irParaPagina(totalPaginas - 1)}>{totalPaginas}</button>
-                                     </>
-                                )}
-
-                                <button className="btn-paginacao" disabled={paginaAtual === totalPaginas - 1} onClick={() => irParaPagina(paginaAtual + 1)}>Próxima</button>
-
-                                <span className="btn-paginacao-info">{totalElementos} venda{totalElementos !== 1 ? 's' : ''}</span>
-                            </div>
-                          )}
+                        <div className="pagination-wrapper">
+                            <button
+                                className="btn-paginacao"
+                                disabled={primeiraPagina}
+                                onClick={voltarParaPrimeira}
+                            >
+                                « Primeira
+                            </button>
+                            <button
+                                className="btn-paginacao"
+                                disabled={primeiraPagina}
+                                onClick={irParaAnterior}
+                            >
+                                Anterior
+                            </button>
+                            <button
+                                className="btn-paginacao"
+                                disabled={ultimaPagina}
+                                onClick={irParaProxima}
+                            >
+                                Próxima
+                            </button>
+                        </div>
                     </>
-                )}     
+                )}
             </TableContainer>
 
-            {/* Modais de Suporte */}
             <DetalhesVendaModal
                 show={modalDetalhesAberto}
                 onClose={() => setModalDetalhesAberto(false)}
                 venda={vendaSelecionada}
             />
-
             <EditarVendaModal
                 show={modalEditarAberto}
                 onClose={() => setModalEditarAberto(false)}
                 venda={vendaSelecionada}
-                onUpdateSuccess={fetchVendas}
+                onUpdateSuccess={voltarParaPrimeira}
             />
-
-            {/* Novo Modal de Filtro */}
             <FilterVendaModal
                 show={isFilterOpen}
                 onClose={() => setIsFilterOpen(false)}
@@ -289,12 +250,8 @@ const paginasVisiveis = () => {
                 formasPagamento={formasPagamento}
                 filtroDataInicio={filtroDataInicio} setFiltroDataInicio={setFiltroDataInicio}
                 filtroDataFim={filtroDataFim} setFiltroDataFim={setFiltroDataFim}
-
-                // --- AQUI ESTÃO AS NOVAS VARIÁVEIS NO PLURAL ---
                 filtrosVendedores={filtrosVendedores} setFiltrosVendedores={setFiltrosVendedores}
                 filtrosFormasPagamento={filtrosFormasPagamento} setFiltrosFormasPagamento={setFiltrosFormasPagamento}
-                // ------------------------------------------------
-
                 valorMin={valorMin} setValorMin={setValorMin}
                 valorMax={valorMax} setValorMax={setValorMax}
                 aplicarFiltros={(e) => { e.preventDefault(); setIsFilterOpen(false); }}
