@@ -128,8 +128,15 @@ function Produtos() {
                 return false;
             }
 
-            if (filtroNome && p.nome && !p.nome.toLowerCase().includes(filtroNome.toLowerCase()) &&
-                p.modelo && !p.modelo.toLowerCase().includes(filtroNome.toLowerCase())) return false;
+            if (filtroNome) {
+                const termo = filtroNome.toLowerCase();
+                const bate =
+                    (p.nome && p.nome.toLowerCase().includes(termo)) ||
+                    (p.modelo && p.modelo.toLowerCase().includes(termo)) ||
+                    (p.marca && p.marca.toLowerCase().includes(termo)) ||
+                    (p.descricao && p.descricao.toLowerCase().includes(termo));
+                if (!bate) return false;
+            }
 
             const preco = Number(p.valorUnitario) || 0;
             if (precoMin && preco < Number(precoMin)) return false;
