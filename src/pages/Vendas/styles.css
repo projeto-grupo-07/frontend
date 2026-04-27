@@ -51,3 +51,134 @@
     margin: 0 5px;
     font-size: 1.1rem;
 }
+
+
+.page-container {
+    padding: 20px;
+    font-family: sans-serif; 
+}
+
+.page-title {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+
+.header-actions {
+    display: flex;
+    align-items: center; 
+    gap: 20px;           
+    width: 100%;       
+}
+
+.button-wrapper {
+    flex-shrink: 0; 
+}
+
+
+.search-wrapper {
+    flex: 1; 
+}
+
+.filters-wrapper {
+    flex-shrink: 0;
+}
+
+.empty-table-placeholder {
+    padding: 20px;
+    text-align: center;
+    color: #aaa;
+    font-style: italic;
+}
+
+/* PAGINAÇÃO */
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.btn-paginacao {
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+    transition: all 0.15s;
+}
+
+.btn-paginacao:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.btn-paginacao:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-paginacao-ativo {
+    background: #ed64a6;
+    color: #fff;
+    border-color: #ed64a6;
+}
+
+.btn-paginacao-ativo:hover {
+    background: #d53f8f;
+    border-color: #d53f8f;
+}
+
+.btn-paginacao-separator {
+    color: #9ca3af;
+    padding: 0 4px;
+    font-weight: 600;
+}
+
+.btn-paginacao-info {
+    margin-left: 12px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.empty-table-placeholder {
+    padding: 20px;
+    text-align: center;
+    color: #aaa;
+    font-style: italic;
+}
+
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.btn-paginacao {
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+    transition: all 0.15s;
+}
+
+.btn-paginacao:hover:not(:disabled) { background: #f3f4f6; border-color: #9ca3af; }
+.btn-paginacao:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-paginacao-ativo { background: #ed64a6; color: #fff; border-color: #ed64a6; }
+.btn-paginacao-ativo:hover { background: #d53f8f; border-color: #d53f8f; }
+.btn-paginacao-separator { color: #9ca3af; padding: 0 4px; font-weight: 600; }
+.btn-paginacao-info { margin-left: 12px; font-size: 13px; color: #6b7280; }

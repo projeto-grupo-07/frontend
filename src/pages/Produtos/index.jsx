@@ -12,42 +12,54 @@ import FilterModal from "../../components/common/FilterModal";
 import { CategoriesService } from "../../services/CategoriaService";
 import EditarProdutoModal from "../../components/common/EditarProdutoModal";
 
+const TAMANHO_PAGINA = 15;
+
 function Produtos() {
     const [produtos, setProdutos] = useState([]);
     const [colunas, setColunas] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [termoBusca, setTermoBusca] = useState("");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    // ESTADOS DE FILTRO (Agora usando Arrays para múltipla escolha)
-    const [filtrosCategorias, setFiltrosCategorias] = useState([]); 
+    // ESTADOS DE FILTRO (Arrays para múltipla escolha)
+    const [filtrosCategorias, setFiltrosCategorias] = useState([]);
     const [filtrosSubcategorias, setFiltrosSubcategorias] = useState([]);
     const [filtrosMarcas, setFiltrosMarcas] = useState([]);
-    const [filtroModelo, setFiltroModelo] = useState("");
     const [filtroNome, setFiltroNome] = useState("");
     const [precoMin, setPrecoMin] = useState("");
     const [precoMax, setPrecoMax] = useState("");
 
+    // ESTADOS DE PAGINAÇÃO
+    const [paginaAtual, setPaginaAtual] = useState(0);
+    const [totalPaginas, setTotalPaginas] = useState(1);
+    const [totalElementos, setTotalElementos] = useState(0);
+
     const [categorias, setCategorias] = useState([]);
 
-    const fetchProdutos = async () => {
+    const [idEditando, setIdEditando] = useState(null);
+    function abrirEditar(id) {
+        setIdEditando(id);
+    }
+
+    const fetchProdutos = async (pagina = 0) => {
         try {
             setLoading(true);
-            const produtosRaw = await ProductService.getAll();
-            const safeProdutos = Array.isArray(produtosRaw) ? produtosRaw : [];
-            setProdutos(safeProdutos);
+            const dados = await ProductService.getPaginated(pagina, TAMANHO_PAGINA);
+            const produtosPreparados = (dados.conteudo || []).map(p => ({
+                ...p,
+                nomeMarca: p.marca || p.nome || "-",
+                modeloDescricao: p.modelo || p.descricao || "-",
+            }));
+            setProdutos(produtosPreparados);
+            setPaginaAtual(dados.pagina ?? pagina);
+            setTotalPaginas(dados.totalPaginas ?? 1);
+            setTotalElementos(dados.total ?? 0);
         } catch (err) {
             console.error("Erro ao buscar produtos:", err);
         } finally {
             setLoading(false);
         }
     };
-
-    const [idEditando, setIdEditando] = useState(null);
-    function abrirEditar(id) {
-        setIdEditando(id);
-    }
 
     useEffect(() => {
         const loadCategorias = async () => {
@@ -60,12 +72,11 @@ function Produtos() {
             }
         };
         loadCategorias();
-        fetchProdutos();
+        fetchProdutos(0);
     }, []);
 
-    // 1. ATUALIZADA: Lógica das colunas agora verifica o Array
+    // Lógica das colunas baseada no filtro ativo
     const atualizarColunas = () => {
-        // Só muda para colunas específicas se houver EXATAMENTE UMA categoria marcada
         if (filtrosCategorias.length === 1 && filtrosCategorias[0].toLowerCase() === "calçados") {
             setColunas([
                 { header: "Marca", accessor: "marca" },
@@ -83,7 +94,6 @@ function Produtos() {
                 { header: "Categoria", accessor: "categoriaPai" },
             ]);
         } else {
-            // Se não tem filtro ou tem vários, usa a visão genérica
             setColunas([
                 { header: "Nome/Marca", accessor: "nomeMarca" },
                 { header: "Modelo/Descrição", accessor: "modeloDescricao" },
@@ -99,12 +109,12 @@ function Produtos() {
         atualizarColunas();
     }, [filtrosCategorias]);
 
-    // 2. MATEMÁTICA DOS FILTROS (Múltipla Escolha)
+    // Filtros client-side aplicados na página atual
     const dadosFiltrados = produtos
         .filter(p => {
             if (filtrosCategorias.length > 0) {
                 const catProduto = String(p.categoriaPai || p.tipo || "").toLowerCase();
-                const passou = filtrosCategorias.some(catFiltro => 
+                const passou = filtrosCategorias.some(catFiltro =>
                     catProduto === catFiltro.toLowerCase() || catProduto.includes(catFiltro.toLowerCase())
                 );
                 if (!passou) return false;
@@ -118,9 +128,9 @@ function Produtos() {
                 return false;
             }
 
-            if (filtroNome && p.nome && !p.nome.toLowerCase().includes(filtroNome.toLowerCase()) && 
+            if (filtroNome && p.nome && !p.nome.toLowerCase().includes(filtroNome.toLowerCase()) &&
                 p.modelo && !p.modelo.toLowerCase().includes(filtroNome.toLowerCase())) return false;
-        
+
             const preco = Number(p.valorUnitario) || 0;
             if (precoMin && preco < Number(precoMin)) return false;
             if (precoMax && preco > Number(precoMax)) return false;
@@ -128,45 +138,44 @@ function Produtos() {
             return true;
         })
         .map(p => {
-            // Sempre prepara os campos combinados para caso a tabela esteja no modo genérico
             return {
                 ...p,
                 nomeMarca: p.marca || p.nome || "-",
                 modeloDescricao: p.modelo || p.descricao || "-",
             };
-        })
-        .filter(p => {
-            if (!termoBusca.trim()) return true;
-            const termo = termoBusca.toLowerCase();
-            return Object.values(p)
-                .filter(v => typeof v === "string" || typeof v === "number")
-                .some(v => String(v).toLowerCase().includes(termo));
         });
 
     const aplicarFiltros = (e) => {
         e.preventDefault();
         setIsFilterOpen(false);
+        fetchProdutos(0);
     };
 
-    // 3. NOVO: Função para zerar o modal
     const limparFiltros = () => {
         setFiltrosCategorias([]);
         setFiltrosSubcategorias([]);
         setFiltrosMarcas([]);
-        setFiltroModelo("");
         setFiltroNome("");
         setPrecoMin("");
         setPrecoMax("");
-        setTermoBusca(""); 
         setIsFilterOpen(false);
+        fetchProdutos(0);
     };
 
     async function handleDelete(produto) {
+        console.log("DELETE PRODUTO:", produto);
+        if (!produto?.id) {
+            console.error("Produto sem ID:", produto);
+            alert("Erro: produto inválido");
+            return;
+        }
+
         if (!window.confirm("Você tem certeza que quer deletar esse produto?")) return;
+
         try {
             setLoading(true);
-            await ProductService.delete(produto.id || produto);
-            fetchProdutos();
+            await ProductService.delete(produto.id);
+            fetchProdutos(paginaAtual);
         } catch (err) {
             alert(err.response?.data?.message || "Não foi possível deletar o produto.");
         } finally {
@@ -174,35 +183,51 @@ function Produtos() {
         }
     }
 
+    const irParaPagina = (pagina) => {
+        if (pagina >= 0 && pagina < totalPaginas && pagina !== paginaAtual) {
+            fetchProdutos(pagina);
+        }
+    };
+
+    const paginasVisiveis = () => {
+        const paginas = [];
+        const inicio = Math.max(0, paginaAtual - 2);
+        const fim = Math.min(totalPaginas - 1, paginaAtual + 2);
+        for (let i = inicio; i <= fim; i++) {
+            paginas.push(i);
+        }
+        return paginas;
+    };
+
     return (
         <div className="page-container">
             <title>Produtos</title>
             <TableContainer
                 header={
-                    <div style={{ 
-                        display: 'flex', 
-                        flexDirection: 'row', // Força direção horizontal
-                        flexWrap: 'nowrap',   // PROÍBE quebra de linha
-                        alignItems: 'center', 
-                        justifyContent: 'space-between', // Espalha os botões nas pontas e a busca no meio
-                        gap: '15px', 
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'nowrap',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '15px',
                         width: '100%',
-                        minWidth: '600px', // O HACK SALVADOR: Garante espaço mínimo para os 3 elementos não se esmagarem
+                        minWidth: '600px',
                         boxSizing: 'border-box'
                     }}>
-                        
+
                         <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
                             <Button onClick={() => setIsCreateModalOpen(true)}>Adicionar produto</Button>
                         </div>
-                        
+
                         <div style={{ flexGrow: 1, minWidth: '200px' }}>
                             <SearchBar
-                                placeholder="Pesquisar em qualquer coluna..."
-                                value={termoBusca}
-                                onChange={(e) => setTermoBusca(e.target.value)}
+                                placeholder="Pesquisar..."
+                                value={filtroNome}
+                                onChange={(e) => setFiltroNome(e.target.value)}
                             />
                         </div>
-                        
+
                         <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
                             <Button onClick={() => setIsFilterOpen(true)}>Filtrar</Button>
                         </div>
@@ -213,60 +238,99 @@ function Produtos() {
                 {loading ? (
                     <div className="empty-table-placeholder">Carregando produtos...</div>
                 ) : (
-                    dadosFiltrados.length > 0 ? (
-                        <DataTable
-                            columns={colunas}
-                            data={dadosFiltrados}
-                            actions={(produto) => (
-                                <div style={{ display: "flex", gap: "12px" }}>
-                                    <IconButton icon={FiEdit} onClick={() => abrirEditar(produto.id)} />
-                                    <IconButton icon={FiTrash} onClick={() => handleDelete(produto)} />
-                                </div>
-                            )}
-                        />
-                    ) : (
-                        <div className="empty-table-placeholder">Nenhum produto encontrado.</div>
-                    )
+                    <>
+                        {dadosFiltrados.length > 0 ? (
+                            <DataTable
+                                columns={colunas}
+                                data={dadosFiltrados}
+                                actions={(produto) => (
+                                    <div style={{ display: "flex", gap: "12px" }}>
+                                        <IconButton icon={FiEdit} onClick={() => abrirEditar(produto.id)} />
+                                        <IconButton icon={FiTrash} onClick={() => handleDelete(produto)} />
+                                    </div>
+                                )}
+                            />
+                        ) : (
+                            <div className="empty-table-placeholder">Nenhum produto encontrado.</div>
+                        )}
+
+                        {totalPaginas > 0 && (
+                            <div className="pagination-wrapper">
+                                <button
+                                    className="btn-paginacao"
+                                    disabled={paginaAtual === 0}
+                                    onClick={() => irParaPagina(paginaAtual - 1)}
+                                >
+                                    Anterior
+                                </button>
+
+                                {paginaAtual > 2 && (
+                                    <>
+                                        <button className="btn-paginacao" onClick={() => irParaPagina(0)}>1</button>
+                                        {paginaAtual > 3 && <span className="btn-paginacao-separator">...</span>}
+                                    </>
+                                )}
+
+                                {paginasVisiveis().map(p => (
+                                    <button
+                                        key={p}
+                                        className={`btn-paginacao ${p === paginaAtual ? 'btn-paginacao-ativo' : ''}`}
+                                        onClick={() => irParaPagina(p)}
+                                    >
+                                        {p + 1}
+                                    </button>
+                                ))}
+
+                                {paginaAtual < totalPaginas - 3 && (
+                                    <>
+                                        {paginaAtual < totalPaginas - 4 && <span className="btn-paginacao-separator">...</span>}
+                                        <button className="btn-paginacao" onClick={() => irParaPagina(totalPaginas - 1)}>{totalPaginas}</button>
+                                    </>
+                                )}
+
+                                <button
+                                    className="btn-paginacao"
+                                    disabled={paginaAtual === totalPaginas - 1}
+                                    onClick={() => irParaPagina(paginaAtual + 1)}
+                                >
+                                    Próxima
+                                </button>
+
+                                <span className="btn-paginacao-info">
+                                    {totalElementos} produto{totalElementos !== 1 ? 's' : ''}
+                                </span>
+                            </div>
+                        )}
+                    </>
                 )}
             </TableContainer>
 
             <CreateProductModal
                 show={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onCreated={fetchProdutos}
+                onCreated={() => fetchProdutos(paginaAtual)}
             />
 
-            {/* 4. MODAL DE FILTRO ATUALIZADO */}
             <FilterModal
                 show={isFilterOpen}
                 onClose={() => setIsFilterOpen(false)}
                 onClear={limparFiltros}
                 categorias={categorias}
-                
-                // Mágica: Extrai dinamicamente as marcas dos produtos
                 marcas={[...new Set(produtos.map(p => p.marca).filter(Boolean))]}
-                
                 filtrosCategorias={filtrosCategorias}
                 setFiltrosCategorias={setFiltrosCategorias}
-                
                 filtrosSubcategorias={filtrosSubcategorias}
                 setFiltrosSubcategorias={setFiltrosSubcategorias}
-                
                 filtrosMarcas={filtrosMarcas}
                 setFiltrosMarcas={setFiltrosMarcas}
-                
-                filtroModelo={filtroModelo}
-                setFiltroModelo={setFiltroModelo}
-                
+                filtroModelo={filtroNome}
+                setFiltroModelo={setFiltroNome}
                 filtroNome={filtroNome}
                 setFiltroNome={setFiltroNome}
-                
                 precoMin={precoMin}
                 setPrecoMin={setPrecoMin}
-                
                 precoMax={precoMax}
                 setPrecoMax={setPrecoMax}
-                
                 aplicarFiltros={aplicarFiltros}
             />
 
@@ -276,7 +340,7 @@ function Produtos() {
                 onClose={() => setIdEditando(null)}
                 onSaved={() => {
                     setIdEditando(null);
-                    fetchProdutos();
+                    fetchProdutos(paginaAtual);
                 }}
             />
         </div>

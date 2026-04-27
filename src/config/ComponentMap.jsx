@@ -9,7 +9,7 @@ const PainelDeVendas = lazy(() => import('../pages/PainelDeVendas/index.jsx'));
 const Estrategica = lazy(() => import('../pages/Estrategica/index.jsx'));
 
 const NotFound = () => (
-  <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+  <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}> 
     <h2>Funcionalidade não encontrada</h2>
     <p>O componente solicitado não está mapeado no sistema.</p>
   </div>
