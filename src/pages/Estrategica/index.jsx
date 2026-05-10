@@ -6,6 +6,8 @@ import {
   BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid 
 } from 'recharts';
 import { KpiService } from '../../services/KpiService';
+import EmitirRelatorioModal from './EmitirRelatorioModal';
+import RelatorioService from '../../services/RelatorioService';
 
 const CORES_PAGAMENTO = {
   'PIX': '#10B981',       // Verde (Sem taxa)
@@ -23,7 +25,10 @@ const formatarNomePagamento = (nomeCru) => {
 
 export default function Estrategica() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isRelatorioOpen, setIsRelatorioOpen] = useState(false);
   const [periodoAtual, setPeriodoAtual] = useState('Mês Atual');
+  const [mesRelatorio, setMesRelatorio] = useState('');
+  const [anoRelatorio, setAnoRelatorio] = useState('');
   
   // ESTADOS DO FILTRO PERSONALIZADO
   const [dataInicioCustom, setDataInicioCustom] = useState('');
@@ -36,6 +41,26 @@ export default function Estrategica() {
   const [margemCategoria, setMargemCategoria] = useState([]);
   const [sazonalidade, setSazonalidade] = useState([]); // Usaremos o faturamento histórico como volume
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isRelatorioOpen) return;
+
+    const hoje = new Date();
+    setMesRelatorio(String(hoje.getMonth() + 1).padStart(2, '0'));
+    setAnoRelatorio(String(hoje.getFullYear()));
+  }, [isRelatorioOpen]);
+
+  useEffect(() => {
+    const handleOpenImportReport = () => {
+      setIsRelatorioOpen(true);
+    };
+
+    window.addEventListener('open-relatorio-importacao', handleOpenImportReport);
+
+    return () => {
+      window.removeEventListener('open-relatorio-importacao', handleOpenImportReport);
+    };
+  }, []);
 
   // ========================================================================
   // LÓGICA DE DATAS E INTEGRAÇÃO
@@ -100,6 +125,26 @@ export default function Estrategica() {
   // CÁLCULOS DINÂMICOS
   // ========================================================================
   const totalVendasQtd = pagamentos.reduce((acc, item) => acc + (item.qtdVendas || 0), 0);
+
+  const handleGerarRelatorio = (event) => {
+    event.preventDefault();
+    (async () => {
+      setIsSubmittingRelatorio(true);
+      try {
+        console.log('Relatório solicitado', { mes: mesRelatorio, ano: anoRelatorio });
+        await RelatorioService.emitirImportacao({ mes: mesRelatorio, ano: anoRelatorio });
+        alert('Solicitação de relatório enviada com sucesso.');
+        setIsRelatorioOpen(false);
+      } catch (error) {
+        console.error('Erro ao solicitar relatório:', error);
+        alert('Erro ao emitir relatório. Tente novamente.');
+      } finally {
+        setIsSubmittingRelatorio(false);
+      }
+    })();
+  };
+
+  const [isSubmittingRelatorio, setIsSubmittingRelatorio] = useState(false);
 
   return (
     <div className="estrategica-wrapper">
@@ -349,6 +394,17 @@ export default function Estrategica() {
           </div>
         </div>
       )}
+
+      <EmitirRelatorioModal
+        isOpen={isRelatorioOpen}
+        mes={mesRelatorio}
+        ano={anoRelatorio}
+        onChangeMes={setMesRelatorio}
+        onChangeAno={setAnoRelatorio}
+        onClose={() => setIsRelatorioOpen(false)}
+        onSubmit={handleGerarRelatorio}
+        isSubmitting={isSubmittingRelatorio}
+      />
 
     </div>
   );

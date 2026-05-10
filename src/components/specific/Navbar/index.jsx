@@ -11,6 +11,7 @@ export const Navbar = ({ logo, actions, children }) => {
   const { user, logout, signed } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const shouldShowReportButton = location.pathname.toLowerCase().includes('estrategica');
 
   
 
@@ -19,6 +20,10 @@ export const Navbar = ({ logo, actions, children }) => {
   function handleLogout() {
     logout();
     navigate('/login');
+  }
+
+  function handleOpenImportReport() {
+    window.dispatchEvent(new CustomEvent('open-relatorio-importacao'));
   }
 
  const menuItems = user?.menu || [];
@@ -53,6 +58,16 @@ export const Navbar = ({ logo, actions, children }) => {
 
         {/* LADO DIREITO: PERFIL E SAIR */}
         <div className="navbar-actions">
+          {shouldShowReportButton && (
+            <button
+              type="button"
+              className="navbar-report-button"
+              onClick={handleOpenImportReport}
+            >
+              Emitir relatório de importação
+            </button>
+          )}
+
           {/* <div className="user-info">
             <p className="user-name">{user?.nome || 'Usuário'}</p>
             <p className="user-role">{user?.perfil || 'Perfil'}</p>
