@@ -1,13 +1,13 @@
 import api from './api/api';
 
 const RelatorioService = {
-  emitirImportacao: async (payload) => {
+  solicitarRelatorioLambda: async (payload) => {
     try {
-      // endpoint provável no backend para iniciar emissão de relatório de importação
-      const response = await api.post('/relatorios/importacao', payload);
-      return response;
+      // Note o caminho '/lambda/' que definimos no nginx.conf
+      const response = await api.post('/lambda/solicitar-relatorio', payload);
+      return response.data;
     } catch (error) {
-      console.error('RelatorioService: erro ao emitir relatório', error);
+      console.error('RelatorioService: erro ao solicitar via Lambda', error);
       throw error;
     }
   }

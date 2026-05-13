@@ -42,7 +42,7 @@ export default function EmitirRelatorioModal({
         </div>
 
         <p className="estr-report-modal-description">
-          Selecione o mês e o ano para preparar o relatório que será emitido depois pela integração do sistema.
+          Selecione o mês e o ano para preparar o relatório de dados de importação que será emitido após um breve carregamento.
         </p>
 
         <form onSubmit={onSubmit} className="estr-report-modal-form">

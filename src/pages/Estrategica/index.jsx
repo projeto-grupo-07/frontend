@@ -132,7 +132,7 @@ export default function Estrategica() {
       setIsSubmittingRelatorio(true);
       try {
         console.log('Relatório solicitado', { mes: mesRelatorio, ano: anoRelatorio });
-        await RelatorioService.emitirImportacao({ mes: mesRelatorio, ano: anoRelatorio });
+        await RelatorioService.solicitarRelatorioLambda({ mes: mesRelatorio, ano: anoRelatorio });
         alert('Solicitação de relatório enviada com sucesso.');
         setIsRelatorioOpen(false);
       } catch (error) {
