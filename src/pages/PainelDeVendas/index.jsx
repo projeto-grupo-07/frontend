@@ -192,7 +192,6 @@ function PainelDeVendas() {
                                         type="number"
                                         min="1"
                                         className="custom-input"
-                                        min="1"
                                         max={produtoSelecionado?.quantidade || 999}
                                         value={quantidade || ''}
                                         onChange={(e) => setQuantidade(e.target.value)}

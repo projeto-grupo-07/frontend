@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './styles.css';
 import { FiFilter } from 'react-icons/fi';
-import { 
-  Tooltip as RechartsTooltip, ResponsiveContainer, Legend, 
-  BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid 
+import {
+  Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
+  BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import { KpiService } from '../../services/KpiService';
 import EmitirRelatorioModal from './EmitirRelatorioModal';
@@ -29,7 +29,7 @@ export default function Estrategica() {
   const [periodoAtual, setPeriodoAtual] = useState('Mês Atual');
   const [mesRelatorio, setMesRelatorio] = useState('');
   const [anoRelatorio, setAnoRelatorio] = useState('');
-  
+
   // ESTADOS DO FILTRO PERSONALIZADO
   const [dataInicioCustom, setDataInicioCustom] = useState('');
   const [dataFimCustom, setDataFimCustom] = useState('');
@@ -46,7 +46,7 @@ export default function Estrategica() {
     if (!isRelatorioOpen) return;
 
     const hoje = new Date();
-    setMesRelatorio(String(hoje.getMonth() + 1).padStart(2, '0'));
+    setMesRelatorio(String(hoje.getMonth() + 1));
     setAnoRelatorio(String(hoje.getFullYear()));
   }, [isRelatorioOpen]);
 
@@ -72,7 +72,7 @@ export default function Estrategica() {
         const hoje = new Date();
         let inicio = new Date(hoje);
         let fim = new Date(hoje); // Criamos a variável fim
-        
+
         if (periodoAtual === 'Esta Semana') {
           inicio.setDate(hoje.getDate() - hoje.getDay());
         } else if (periodoAtual === 'Mês Atual') {
@@ -84,11 +84,11 @@ export default function Estrategica() {
           if (dataInicioCustom) inicio = new Date(`${dataInicioCustom}T00:00:00`);
           if (dataFimCustom) fim = new Date(`${dataFimCustom}T23:59:59`);
         }
-        
+
         // Zera as horas se não for personalizado (o personalizado já vem com a hora setada acima)
         if (periodoAtual !== 'Personalizado') {
-           inicio.setHours(0, 0, 0, 0);
-           fim.setHours(23, 59, 59, 999);
+          inicio.setHours(0, 0, 0, 0);
+          fim.setHours(23, 59, 59, 999);
         }
 
         // Formata para o LocalDateTime do Spring
@@ -104,7 +104,7 @@ export default function Estrategica() {
           KpiService.getDesempenhoPagamentos(filtroObj),
           KpiService.getProdutosRentaveis(filtroObj),
           KpiService.getMargemCategoria(filtroObj),
-          KpiService.getGraficoFaturamentoDinamico({ ...filtroObj, tipo: "Mês" }) 
+          KpiService.getGraficoFaturamentoDinamico({ ...filtroObj, tipo: "Mês" })
         ]);
 
         setPagamentos(resPag || []);
@@ -131,8 +131,9 @@ export default function Estrategica() {
     (async () => {
       setIsSubmittingRelatorio(true);
       try {
-        console.log('Relatório solicitado', { mes: mesRelatorio, ano: anoRelatorio });
-        await RelatorioService.solicitarRelatorioLambda({ mes: mesRelatorio, ano: anoRelatorio });
+        const mesParaEnviar = mesRelatorio ? String(Number(mesRelatorio)) : mesRelatorio;
+        console.log('Relatório solicitado', { mes: mesParaEnviar, ano: anoRelatorio });
+        await RelatorioService.solicitarRelatorioLambda({ mes: mesParaEnviar, ano: anoRelatorio });
         alert('Solicitação de relatório enviada com sucesso.');
         setIsRelatorioOpen(false);
       } catch (error) {
@@ -148,7 +149,7 @@ export default function Estrategica() {
 
   return (
     <div className="estrategica-wrapper">
-      
+
       {/* ==========================================
           TOPO: FILTRO GLOBAL (LARGURA TOTAL)
           ========================================== */}
@@ -170,7 +171,7 @@ export default function Estrategica() {
           LINHA 1: EFICIÊNCIA E PAGAMENTOS (Esquerda/Direita)
           ========================================== */}
       <div className="estr-row-1">
-        
+
         {/* CARD ESQUERDA ACIMA: Sazonalidade do Produto (Volume) */}
         <div className="estr-card">
           <div className="estr-card-header">
@@ -181,8 +182,8 @@ export default function Estrategica() {
               <BarChart data={sazonalidade} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
                 <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} tickFormatter={(val) => `R$${val/1000}k`} />
-                <RechartsTooltip 
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} tickFormatter={(val) => `R$${val / 1000}k`} />
+                <RechartsTooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   formatter={(value) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Volume de Vendas']}
                 />
@@ -198,7 +199,7 @@ export default function Estrategica() {
             <h3>Desempenho por Método de Pagamento</h3>
           </div>
           <div className="estr-card-body" style={{ display: 'flex', flexDirection: 'column' }}>
-            {loading ? <div style={{color: '#a0aec0', padding: '10px'}}>Carregando métricas...</div> : (
+            {loading ? <div style={{ color: '#a0aec0', padding: '10px' }}>Carregando métricas...</div> : (
               <div style={{ flex: 1, overflowY: 'auto' }}>
                 <table className="estr-table">
                   <thead>
@@ -241,7 +242,7 @@ export default function Estrategica() {
           LINHA 2: MARGEM DE LUCRO E PRODUTOS RENTÁVEIS (Esquerda/Direita)
           ========================================== */}
       <div className="estr-row-2">
-        
+
         {/* CARD ESQUERDA ABAIXO: Gráfico de Margem de Lucro */}
         <div className="estr-card">
           <div className="estr-card-header">
@@ -253,7 +254,7 @@ export default function Estrategica() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
                 <XAxis dataKey="categoria" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#FF70A6' }} tickFormatter={(val) => `${val}%`} />
-                <RechartsTooltip 
+                <RechartsTooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   formatter={(value) => [`${value}%`, 'Margem Média']}
                 />
@@ -269,7 +270,7 @@ export default function Estrategica() {
             <h3>Produtos Mais Rentáveis</h3>
           </div>
           <div className="estr-card-body" style={{ overflowY: 'auto' }}>
-            {loading ? <div style={{color: '#a0aec0', padding: '10px'}}>Mapeando produtos...</div> : (
+            {loading ? <div style={{ color: '#a0aec0', padding: '10px' }}>Mapeando produtos...</div> : (
               <table className="estr-table">
                 <thead>
                   <tr>
@@ -302,15 +303,15 @@ export default function Estrategica() {
         <div className="estr-modal-overlay">
           <div className="estr-modal-content">
             <h3 style={{ margin: '0 0 20px 0', color: '#2D3748', fontSize: '18px', fontWeight: '800' }}>Filtrar Período</h3>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {['Hoje', 'Esta Semana', 'Mês Atual', 'Últimos 3 Meses', 'Personalizado'].map((p) => (
                 <button
                   key={p}
-                  onClick={() => { 
-                    setPeriodoAtual(p); 
+                  onClick={() => {
+                    setPeriodoAtual(p);
                     if (p !== 'Personalizado') {
-                      setIsFilterOpen(false); 
+                      setIsFilterOpen(false);
                     }
                   }}
                   style={{
@@ -355,7 +356,7 @@ export default function Estrategica() {
             )}
 
             <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button 
+              <button
                 onClick={() => setIsFilterOpen(false)}
                 style={{
                   padding: '10px 20px',
@@ -372,7 +373,7 @@ export default function Estrategica() {
 
               {/* LÓGICA NOVA: Botão Aplicar agora dispara o triggerFetch */}
               {periodoAtual === 'Personalizado' && (
-                <button 
+                <button
                   onClick={() => {
                     setIsFilterOpen(false);
                     setTriggerFetch(prev => prev + 1); // <-- A MÁGICA ACONTECE AQUI
