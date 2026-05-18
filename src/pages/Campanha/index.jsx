@@ -1,50 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { CampanhaCard } from '../../components/common/CampanhaCard';
-import { CadastrarClienteModal } from '../../components/common/CadastrarClienteModal';
+import CadastrarClienteModal from '../../components/common/CadastrarClienteModal';
+import CadastrarCampanhaModal from '../../components/common/CadastrarCampanhaModal';
+import EditarCampanhaModal from '../../components/common/EditarCampanhaModal';
+import { CampanhaService } from '../../services/CampanhaService';
 import './styles.css';
 
 export default function Campanha() {
   const [isCriarModalOpen, setIsCriarModalOpen] = useState(false);
   const [isCadastroModalOpen, setIsCadastroModalOpen] = useState(false);
+  const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
+  const [campanhaEditandoId, setCampanhaEditandoId] = useState(null);
+  const [campanhas, setCampanhas] = useState([]);
+
+  const carregarCampanhas = () => {
+    CampanhaService.listarCampanhas()
+      .then(response => {
+        setCampanhas(response.data || response || []);
+      })
+      .catch(error => {
+        console.error(error);
+        setCampanhas([]);
+      });
+  };
+
+  useEffect(() => {
+    carregarCampanhas();
+  }, []);
 
   const handleSalvarCliente = (dadosCliente) => {
     console.log("Enviando cliente para o Spring Boot:", dadosCliente);
     setIsCadastroModalOpen(false); 
   };
 
+  const handleSalvarCampanha = async (dadosCampanha) => {
+    const payload = {
+      nome: dadosCampanha.nome,
+      assunto: dadosCampanha.assunto,
+      corpoTexto: dadosCampanha.corpoTexto,
+      genero: dadosCampanha.genero !== "" ? dadosCampanha.genero : null,
+      mesAniversario: dadosCampanha.mesAniversario !== "" ? parseInt(dadosCampanha.mesAniversario) : null,
+      estado: dadosCampanha.estado !== "" ? dadosCampanha.estado : null,
+      cidade: dadosCampanha.cidade !== "" ? dadosCampanha.cidade : null,
+      bairro: dadosCampanha.bairro !== "" ? dadosCampanha.bairro : null
+    };
 
-  const [campanhas, setCampanhas] = useState([
-    { id: 1, titulo: 'Dia das mães' },
-    { id: 2, titulo: 'Páscoa' },
-    { id: 3, titulo: 'Halloween' },
-    { id: 4, titulo: 'Carnaval' },
-    { id: 5, titulo: 'Mês das mulheres' },
-    { id: 6, titulo: 'Natal' },
-    { id: 7, titulo: 'Ofertas especiais' },
-    { id: 8, titulo: 'Nova Campanha' }, 
-  ]);
-
-  const handleIniciar = (id) => {
-    console.log(`Iniciando campanha ${id}`);
+    try {
+      const response = await CampanhaService.criarCampanha(payload);
+      const novaCampanha = response.data || response;
+      setCampanhas(prev => [...(prev || []), novaCampanha]);
+      setIsCriarModalOpen(false);
+      alert("Campanha criada com sucesso!");
+    } catch (error) {
+      alert("Erro: " + error.message);
+    }
   };
 
-  const handleDeletar = (id) => {
-    console.log(`Deletando campanha ${id}`);
+  const handleAbrirEdicao = (id) => {
+    setCampanhaEditandoId(id);
+    setIsEditarModalOpen(true);
+  };
+
+  const handleIniciar = async (id) => {
+    try {
+      await CampanhaService.iniciarCampanha(id);
+      alert("Campanha iniciada com sucesso!");
+      carregarCampanhas();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeletar = async (id) => {
+    try {
+      await CampanhaService.deletarCampanha(id);
+      setCampanhas(campanhas.filter(c => c.id !== id));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <div className="campanha-page">
-      
-      {/* Top Bar: Botões de Ação e Busca */}
       <div className="top-bar">
-        
-        {/* Grupo de Botões */}
         <div className="btn-group">
           <button className="btn-action" onClick={() => setIsCadastroModalOpen(true)}>
             Cadastrar cliente
           </button>
-          <button className="btn-action">
+          <button className="btn-action" onClick={() => setIsCriarModalOpen(true)}>
             Criar campanha
           </button>
           <button className="btn-action">
@@ -52,11 +96,10 @@ export default function Campanha() {
           </button>
         </div>
 
-        {/* Input de Pesquisa */}
         <div className="search-container">
           <input
             type="text"
-            placeholder=""
+            placeholder="Pesquisar..."
             className="search-input"
           />
           <button className="search-icon-btn">
@@ -65,23 +108,36 @@ export default function Campanha() {
         </div>
       </div>
 
-      {/* Grid de Campanhas */}
       <div className="campanha-grid">
-        {campanhas.map((campanha) => (
+        {campanhas?.map((campanha) => (
           <CampanhaCard
             key={campanha.id}
-            titulo={campanha.titulo}
+            campanha={campanha}
             onIniciar={() => handleIniciar(campanha.id)}
             onDeletar={() => handleDeletar(campanha.id)}
+            onEditar={() => handleAbrirEdicao(campanha.id)}
           />
         ))}
       </div>
-       <CadastrarClienteModal 
-    isOpen={isCadastroModalOpen} 
+
+      <CadastrarClienteModal 
+        isOpen={isCadastroModalOpen} 
         onClose={() => setIsCadastroModalOpen(false)} 
         onSalvar={handleSalvarCliente}
       />
+
+      <CadastrarCampanhaModal 
+        isOpen={isCriarModalOpen} 
+        onClose={() => setIsCriarModalOpen(false)} 
+        onSalvar={handleSalvarCampanha}
+      />
+
+      <EditarCampanhaModal 
+        isOpen={isEditarModalOpen}
+        onClose={() => setIsEditarModalOpen(false)}
+        campanhaId={campanhaEditandoId}
+        onAtualizada={carregarCampanhas}
+      />
     </div>
-   
   );
 }
