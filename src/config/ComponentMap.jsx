@@ -7,6 +7,7 @@ const Comissao = lazy(() => import('../pages/Comissao/index.jsx'));
 const Desempenho = lazy(() => import('../components/common/Desempenho/index.jsx'));
 const PainelDeVendas = lazy(() => import('../pages/PainelDeVendas/index.jsx'));
 const Estrategica = lazy(() => import('../pages/Estrategica/index.jsx'));
+const Campanha = lazy(() => import('../pages/Campanha/index.jsx'));
 
 const NotFound = () => (
   <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}> 
@@ -23,6 +24,6 @@ export const COMPONENT_MAP = {
   'COMISSAO_PAGE': Comissao,
   'DESEMPENHO_PAGE': Desempenho,
   'ESTRATEGICA_PAGE': Estrategica,
-  
+  'CAMPANHA_PAGE': Campanha,
   'DEFAULT': NotFound
 };

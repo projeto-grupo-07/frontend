@@ -1,0 +1,169 @@
+/* Fundo escuro atrás do modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Container Principal do Modal */
+.modal-cadastro-content {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  font-family: sans-serif;
+}
+
+/* Cabeçalho */
+.modal-cadastro-header {
+  background-color: #6C7A9C; /* Azul acinzentado escuro */
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+}
+
+.modal-cadastro-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.btn-close-header {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.btn-close-header:hover {
+  color: #e2e8f0;
+}
+
+/* Corpo do Formulário */
+.modal-cadastro-body {
+  background-color: #DFE8FB; /* Fundo azul bem claro */
+  padding: 24px;
+}
+
+/* Linha padrão do formulário */
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.form-row > label {
+  width: 140px; /* Largura fixa para alinhar os inputs */
+  font-weight: 600;
+  color: #2e3b55;
+  font-size: 1rem;
+}
+
+/* Inputs de texto padrão */
+.input-field {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.input-field:focus {
+  box-shadow: 0 0 0 2px #93c5fd;
+}
+
+/* Seletor de Gênero (Pílula) */
+.gender-toggle {
+  display: flex;
+  background-color: #FCD3E6; /* Fundo rosinha claro */
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.gender-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ec4899;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gender-btn.active {
+  background-color: #F475B1; /* Rosa forte */
+  color: white;
+  border-radius: 20px;
+}
+
+/* Inputs de Data (Dia, Mês, Ano) */
+.date-inputs {
+  display: flex;
+  gap: 8px;
+}
+
+.small-input {
+  width: 50px;
+  flex: none; /* Impede que cresça no flexbox */
+  text-align: center;
+}
+
+/* Linha Dupla: CEP e Complemento */
+.dual-field-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.field-group {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.field-group label {
+  font-weight: 600;
+  color: #2e3b55;
+  margin-right: 12px;
+  width: auto;
+}
+
+.field-group .label-complemento {
+  margin-left: 8px;
+}
+
+/* Rodapé/Botão Salvar */
+.modal-cadastro-footer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-salvar-cadastro {
+  background-color: #6C7A9C;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-salvar-cadastro:hover {
+  background-color: #55627f;
+}
