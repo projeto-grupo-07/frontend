@@ -8,6 +8,7 @@ import {
 import { KpiService } from '../../services/KpiService';
 import EmitirRelatorioModal from './EmitirRelatorioModal';
 import RelatorioService from '../../services/RelatorioService';
+import api from '../../services/api/api';
 
 const CORES_PAGAMENTO = {
   'PIX': '#10B981',       // Verde (Sem taxa)
@@ -127,23 +128,30 @@ export default function Estrategica() {
   const totalVendasQtd = pagamentos.reduce((acc, item) => acc + (item.qtdVendas || 0), 0);
 
   const handleGerarRelatorio = (event) => {
-    event.preventDefault();
-    (async () => {
-      setIsSubmittingRelatorio(true);
-      try {
-        const mesParaEnviar = mesRelatorio ? String(Number(mesRelatorio)) : mesRelatorio;
-        console.log('Relatório solicitado', { mes: mesParaEnviar, ano: anoRelatorio });
-        await RelatorioService.solicitarRelatorioLambda({ mes: mesParaEnviar, ano: anoRelatorio });
-        alert('Solicitação de relatório enviada com sucesso.');
-        setIsRelatorioOpen(false);
-      } catch (error) {
-        console.error('Erro ao solicitar relatório:', error);
-        alert('Erro ao emitir relatório. Tente novamente.');
-      } finally {
-        setIsSubmittingRelatorio(false);
-      }
-    })();
-  };
+  event.preventDefault();
+  (async () => {
+    setIsSubmittingRelatorio(true);
+    try {
+      const mesParaEnviar = mesRelatorio ? String(Number(mesRelatorio)) : mesRelatorio;
+      console.log('Relatório solicitado', { mes: mesParaEnviar, ano: anoRelatorio });
+
+      const resultado = await api.post("/relatorio/gerar", {
+        ano: anoRelatorio,
+        mes: mesParaEnviar
+      });
+
+      console.log('Resultado emitirEAtivarRelatorio', resultado);
+
+      alert('Solicitação de relatório enviada com sucesso.');
+      setIsRelatorioOpen(false);
+    } catch (error) {
+      console.error('Erro ao solicitar relatório:', error);
+      alert('Erro ao emitir relatório. Tente novamente.');
+    } finally {
+      setIsSubmittingRelatorio(false);
+    }
+  })();
+};
 
   const [isSubmittingRelatorio, setIsSubmittingRelatorio] = useState(false);
 

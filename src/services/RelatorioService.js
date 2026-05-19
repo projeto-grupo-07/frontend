@@ -1,16 +1,20 @@
 import api from './api/api';
 
-const ENDPOINT = '/relatorio';
+const ENDPOINT_BACKEND = '/relatorio';
+const ENDPOINT_MS_IMPORT = '/import/report/trusted';
 
 const RelatorioService = {
-  solicitarRelatorioLambda: async (payload) => {
+  async solicitarRelatorioLambdaEenfileirar(payload) {
     try {
-      return await api.post(`${ENDPOINT}/gerar`, payload);
+      console.debug('RelatorioService.solicitarRelatorioLambdaEenfileirar: payload', payload);
+      const data = await api.post(`${ENDPOINT_BACKEND}/gerar`, payload);
+      console.debug('RelatorioService.solicitarRelatorioLambda: response', data);
+      return data;
     } catch (error) {
       console.error('RelatorioService: erro ao solicitar via Lambda', error);
       throw error;
     }
-  }
-};
+  },
+}
 
 export default RelatorioService;
