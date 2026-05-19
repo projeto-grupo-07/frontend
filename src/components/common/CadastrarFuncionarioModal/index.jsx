@@ -130,3 +130,4 @@ function CadastrarFuncionarioModal({ show, onClose, onSuccess }) {
         </div>
     );
 }
+export default CadastrarFuncionarioModal;
