@@ -3,16 +3,18 @@
    ========================================================================== */
 .estrategica-wrapper {
   background-color: #ffffff;
-  
+
   /* Hack para escapar do max-width e padding da tag <main> no App.jsx */
   position: fixed;
-  top: 70px; /* Altura exata abaixo da sua Navbar */
+  top: 70px;
+  /* Altura exata abaixo da sua Navbar */
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 10;
-  
-  overflow: hidden; /* Remove o scroll da página inteira */
+
+  overflow: hidden;
+  /* Remove o scroll da página inteira */
   padding: 24px;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
@@ -28,7 +30,7 @@
   background: #ffffff;
   padding: 16px 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   border: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
@@ -52,7 +54,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .btn-icon-filtro:hover {
@@ -92,8 +94,11 @@
    ========================================================================== */
 .estr-modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,16 +235,19 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  flex: 1; /* Divide o espaço da tela... */
-  min-height: 0; /* ...e permite encolher sem forçar scroll */
+  flex: 1;
+  /* Divide o espaço da tela... */
+  min-height: 0;
+  /* ...e permite encolher sem forçar scroll */
 }
 
 .estr-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  flex: 1; /* ...igualmente com a linha de cima */
-  min-height: 0; 
+  flex: 1;
+  /* ...igualmente com a linha de cima */
+  min-height: 0;
 }
 
 /* ==========================================================================
@@ -248,7 +256,7 @@
 .estr-card {
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid #f0f4f8;
   display: flex;
   flex-direction: column;
@@ -275,7 +283,8 @@
 .estr-card-body {
   padding: 10px 16px;
   flex: 1;
-  min-height: 0;
+  min-height: 200px;
+  /* garante altura mínima para os gráficos Recharts */
 }
 
 /* ==========================================================================
@@ -284,7 +293,7 @@
 .estr-pill-tabs {
   display: flex;
   gap: 4px;
-  background-color: #5B6F8A; 
+  background-color: #5B6F8A;
   padding: 3px;
   border-radius: 20px;
 }
@@ -302,8 +311,8 @@
 }
 
 .estr-pill-tabs button.active {
-  background: #DCE4F2; 
-  color: #5B6F8A; 
+  background: #DCE4F2;
+  color: #5B6F8A;
 }
 
 /* ==========================================================================

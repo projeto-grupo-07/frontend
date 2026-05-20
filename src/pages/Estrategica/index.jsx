@@ -128,30 +128,75 @@ export default function Estrategica() {
   const totalVendasQtd = pagamentos.reduce((acc, item) => acc + (item.qtdVendas || 0), 0);
 
   const handleGerarRelatorio = (event) => {
-  event.preventDefault();
-  (async () => {
-    setIsSubmittingRelatorio(true);
-    try {
-      const mesParaEnviar = mesRelatorio ? String(Number(mesRelatorio)) : mesRelatorio;
-      console.log('Relatório solicitado', { mes: mesParaEnviar, ano: anoRelatorio });
+    event.preventDefault();
+    (async () => {
+      setIsSubmittingRelatorio(true);
+      try {
+        const mesParaEnviar = mesRelatorio ? String(Number(mesRelatorio)) : mesRelatorio;
+        console.log('Relatório solicitado', { mes: mesParaEnviar, ano: anoRelatorio });
 
-      const resultado = await api.post("/relatorio/gerar", {
-        ano: anoRelatorio,
-        mes: mesParaEnviar
-      });
+        // Pedimos explicitamente arraybuffer para receber o PDF bruto
+        // e aumentamos o timeout pois a geração pode demorar
+        const resultado = await api.post("/relatorio/gerar", {
+          ano: anoRelatorio,
+          mes: mesParaEnviar
+        }, { responseType: 'arraybuffer', timeout: 150000 });
 
-      console.log('Resultado emitirEAtivarRelatorio', resultado);
+        // `resultado` pode ser um ArrayBuffer ou um objeto/string com base64.
+        let arrayBuffer = null;
+        if (resultado instanceof ArrayBuffer || (resultado && resultado.byteLength !== undefined)) {
+          arrayBuffer = resultado;
+        } else if (resultado && typeof resultado === 'object' && typeof resultado.data === 'string') {
+          // { data: 'base64...' }
+          const base64 = resultado.data;
+          const binary = window.atob(base64);
+          const len = binary.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+          arrayBuffer = bytes.buffer;
+        } else if (typeof resultado === 'string') {
+          // possivelmente uma string base64 ou um Data URI
+          let base64 = resultado;
+          const idx = resultado.indexOf('base64,');
+          if (idx !== -1) base64 = resultado.slice(idx + 7);
+          try {
+            const binary = window.atob(base64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+            arrayBuffer = bytes.buffer;
+          } catch (e) {
+            // fallback: criar blob a partir da string (menos provável)
+            arrayBuffer = new TextEncoder().encode(resultado).buffer;
+          }
+        }
 
-      alert('Solicitação de relatório enviada com sucesso.');
-      setIsRelatorioOpen(false);
-    } catch (error) {
-      console.error('Erro ao solicitar relatório:', error);
-      alert('Erro ao emitir relatório. Tente novamente.');
-    } finally {
-      setIsSubmittingRelatorio(false);
-    }
-  })();
-};
+        if (arrayBuffer) {
+          const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          const nomeArquivo = `relatorio_${anoRelatorio || 'anonimo'}_${mesParaEnviar || 'todos'}.pdf`;
+          a.download = nomeArquivo;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+
+          alert('Relatório gerado e baixado com sucesso.');
+          setIsRelatorioOpen(false);
+        } else {
+          console.warn('Resposta do relatório não pôde ser interpretada como PDF:', resultado);
+          alert('Relatório emitido, mas formato da resposta não é um PDF. Verifique o console.');
+        }
+      } catch (error) {
+        console.error('Erro ao solicitar relatório:', error);
+        alert('Erro ao emitir relatório. Tente novamente.');
+      } finally {
+        setIsSubmittingRelatorio(false);
+      }
+    })();
+  };
 
   const [isSubmittingRelatorio, setIsSubmittingRelatorio] = useState(false);
 
