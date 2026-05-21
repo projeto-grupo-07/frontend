@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FuncionarioService } from '../../../services/FuncionarioService';
 
-function CadastrarFuncionarioModal({ show, onClose, onSuccess }) {
+export default function CadastrarFuncionarioModal({ show, onClose, onSuccess }) {
     const [formData, setFormData] = useState({
         nome: '',
         email: '',

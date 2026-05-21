@@ -91,5 +91,21 @@ export const CampanhaService = {
       console.error("Erro ao remover cliente da campanha:", error);
       throw error;
     }
+  },
+
+  filtrar: async (filtros) => {
+    const params = new URLSearchParams();
+    
+    if (filtros.assunto) params.append('assunto', filtros.assunto);
+    if (filtros.status) params.append('status', filtros.status);
+
+    const response = await api.get(`/campanhas/filtro?${params.toString()}`);
+    return response;
+  },
+  gerarTextoIA: async (tema) => {
+    const response = await api.post(`${ENDPOINT}/gerar-texto`, { tema }, { timeout: 60000 });
+    return response;
   }
+
+  
 };

@@ -24,8 +24,9 @@ function DetalhesVendaModal({ show, onClose, venda }) {
 
                 <div className="modal-body">
                     <div className="info-venda-topo">
-                        <p><strong>Vendedor:</strong> {venda.nomeVendedor}</p>
-                        <p><strong>Data:</strong> {venda.dataExibicao}</p> 
+                        <p><strong>Vendedor:</strong> {venda.funcionarioNome || venda.nomeVendedor}</p>
+                        <p><strong>Cliente:</strong> {venda.clienteNome || "Não identificado"}</p>
+                        <p><strong>Data:</strong> {venda.dataExibicao || new Date(venda.dataHora).toLocaleString()}</p> 
                         <p><strong>Pagamento:</strong> {venda.formaPagamento}</p>
                     </div>
 
@@ -42,7 +43,6 @@ function DetalhesVendaModal({ show, onClose, venda }) {
                         <tbody>
                             {venda.itensDaVenda?.map((item) => (
                                 <tr key={item.id}>
-                                    {/* AQUI ESTÁ A CORREÇÃO: Usando a função para exibir o nome */}
                                     <td>{formatarNomeProduto(item.produto)}</td>
                                     
                                     <td>{item.quantidadeVendaProduto}</td>
@@ -65,7 +65,7 @@ function DetalhesVendaModal({ show, onClose, venda }) {
                             </span>
                         )}
                         <div className="total-destaque">
-                            Total Final: {venda.valorTotalExibicao}
+                            Total Final: {venda.valorTotalExibicao || `R$ ${venda.valorTotalDaVenda?.toFixed(2).replace('.', ',')}`}
                         </div>
                     </div>
                     <button className="btn-fechar" onClick={onClose}>Fechar</button>

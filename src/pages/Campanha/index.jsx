@@ -13,6 +13,35 @@ export default function Campanha() {
   const [isEditarModalOpen, setIsEditarModalOpen] = useState(false);
   const [campanhaEditandoId, setCampanhaEditandoId] = useState(null);
   const [campanhas, setCampanhas] = useState([]);
+  const [filtros, setFiltros] = useState({ assunto: '', status: '' });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFiltroChange = (e) => {
+    const { name, value } = e.target;
+    setFiltros(prev => ({ ...prev, [name]: value }));
+  };
+
+  const aplicarFiltros = async () => {
+    setIsLoading(true);
+    try {
+      const response = await CampanhaService.filtrar(filtros);
+      if (response.status === 204) {
+        setCampanhas([]);
+      } else {
+        setCampanhas(response.data || response || []);
+      }
+    } catch (error) {
+      console.error(error);
+      setCampanhas([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const limparFiltros = () => {
+    setFiltros({ assunto: '', status: '' });
+    carregarCampanhas();
+  };
 
   const carregarCampanhas = () => {
     CampanhaService.listarCampanhas()
@@ -31,7 +60,7 @@ export default function Campanha() {
 
   const handleSalvarCliente = (dadosCliente) => {
     console.log("Enviando cliente para o Spring Boot:", dadosCliente);
-    setIsCadastroModalOpen(false); 
+    setIsCadastroModalOpen(false);
   };
 
   const handleSalvarCampanha = async (dadosCampanha) => {
@@ -85,54 +114,80 @@ export default function Campanha() {
     <div className="campanha-page">
       <div className="top-bar">
         <div className="btn-group">
-          <button className="btn-action" onClick={() => setIsCadastroModalOpen(true)}>
-            Cadastrar cliente
-          </button>
           <button className="btn-action" onClick={() => setIsCriarModalOpen(true)}>
             Criar campanha
           </button>
-          <button className="btn-action">
-            Buscar cliente
-          </button>
         </div>
 
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Pesquisar..."
-            className="search-input"
-          />
-          <button className="search-icon-btn">
-            <Search size={20} />
-          </button>
+        <div className="filtros-container" style={{ display: 'flex', gap: '15px', marginBottom: '20px', padding: '15px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px', color: '#64748b' }}>Assunto</label>
+            <input
+              type="text"
+              name="assunto"
+              value={filtros.assunto}
+              onChange={handleFiltroChange}
+              className="input-field"
+              placeholder="Digite parte do assunto..."
+            />
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '5px', color: '#64748b' }}>Status</label>
+            <select
+              name="status"
+              value={filtros.status}
+              onChange={handleFiltroChange}
+              className="input-field"
+            >
+              <option value="">Todos</option>
+              <option value="PENDENTE">Pendente</option>
+              <option value="EM_ANDAMENTO">Em Andamento</option>
+              <option value="CONCLUIDA">Concluída</option>
+              <option value="CANCELADA">Cancelada</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
+            <button onClick={aplicarFiltros} className="btn-novo-cliente">
+              Filtrar
+            </button>
+            <button onClick={limparFiltros} className="btn-novo-cliente" style={{ backgroundColor: '#94a3b8' }}>
+              Limpar
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="campanha-grid">
-        {campanhas?.map((campanha) => (
-          <CampanhaCard
-            key={campanha.id}
-            campanha={campanha}
-            onIniciar={() => handleIniciar(campanha.id)}
-            onDeletar={() => handleDeletar(campanha.id)}
-            onEditar={() => handleAbrirEdicao(campanha.id)}
-          />
-        ))}
+        {isLoading ? (
+          <p>Carregando campanhas...</p>
+        ) : (
+          campanhas?.map((campanha) => (
+            <CampanhaCard
+              key={campanha.id}
+              campanha={campanha}
+              onIniciar={() => handleIniciar(campanha.id)}
+              onDeletar={() => handleDeletar(campanha.id)}
+              onEditar={() => handleAbrirEdicao(campanha.id)}
+            />
+          ))
+        )}
       </div>
 
-      <CadastrarClienteModal 
-        isOpen={isCadastroModalOpen} 
-        onClose={() => setIsCadastroModalOpen(false)} 
+      <CadastrarClienteModal
+        isOpen={isCadastroModalOpen}
+        onClose={() => setIsCadastroModalOpen(false)}
         onSalvar={handleSalvarCliente}
       />
 
-      <CadastrarCampanhaModal 
-        isOpen={isCriarModalOpen} 
-        onClose={() => setIsCriarModalOpen(false)} 
+      <CadastrarCampanhaModal
+        isOpen={isCriarModalOpen}
+        onClose={() => setIsCriarModalOpen(false)}
         onSalvar={handleSalvarCampanha}
       />
 
-      <EditarCampanhaModal 
+      <EditarCampanhaModal
         isOpen={isEditarModalOpen}
         onClose={() => setIsEditarModalOpen(false)}
         campanhaId={campanhaEditandoId}

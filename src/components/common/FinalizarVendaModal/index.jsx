@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Modal } from "../Modal"; 
 import { FuncionarioService } from '../../../services/FuncionarioService';
-import { VendaService } from '../../../services/VendaService'; // <-- IMPORTADO AQUI
+import { VendaService } from '../../../services/VendaService';
+import { ClienteService } from '../../../services/ClienteService';
 import { AuthContext } from "../../../contexts/AuthContext";
+import { Search, UserCheck, X } from 'lucide-react';
 
 export default function FinalizarVendaModal({ show, onClose, onConfirm, itensVenda = [] }) {
     const { user } = useContext(AuthContext);
     const [vendedores, setVendedores] = useState([]);
     const [idVendedor, setIdVendedor] = useState("");
     
-    // Novos estados para a forma de pagamento
     const [formasPagamentoOptions, setFormasPagamentoOptions] = useState([]);
     const [formaPagamento, setFormaPagamento] = useState("");
+
+    const [cpfBusca, setCpfBusca] = useState("");
+    const [clienteSelecionado, setClienteSelecionado] = useState(null);
 
     const totalVenda = Array.isArray(itensVenda)
         ? itensVenda.reduce((acc, item) => acc + (Number(item.total) || 0), 0)
@@ -23,7 +27,6 @@ export default function FinalizarVendaModal({ show, onClose, onConfirm, itensVen
 
     useEffect(() => {
         if (show) {
-            // 1. Busca os Vendedores
             const fetchVendedores = async () => {
                 try {
                     const res = await FuncionarioService.getAll();
@@ -39,39 +42,54 @@ export default function FinalizarVendaModal({ show, onClose, onConfirm, itensVen
                         }
                     }
                 } catch (err) {
-                    console.error("Erro ao carregar funcionários:", err);
+                    console.error(err);
                 }
             };
 
-            // 2. Busca os tipos de Pagamento
             const fetchFormasPagamento = async () => {
                 try {
                     const formas = await VendaService.getFormasPagamento();
                     setFormasPagamentoOptions(formas);
                     
-                    // Se a API retornar a lista, já deixa a primeira opção selecionada por padrão
                     if (formas && formas.length > 0) {
                         setFormaPagamento(formas[0]);
                     }
                 } catch (err) {
-                    console.error("Erro ao carregar formas de pagamento:", err);
+                    console.error(err);
                 }
             };
 
             fetchVendedores();
             fetchFormasPagamento();
+            setClienteSelecionado(null);
+            setCpfBusca("");
         }
     }, [show, user]);
 
-    // Função auxiliar para deixar o texto do Enum mais bonito na tela
     const formatarNomePagamento = (nomeCru) => {
         switch (nomeCru) {
             case 'DEBITO': return 'Cartão de Débito';
             case 'CREDITO': return 'Cartão de Crédito';
             case 'PIX': return 'PIX';
             case 'DINHEIRO': return 'Dinheiro à Vista';
-            default: return nomeCru; // Fallback caso você adicione um novo e esqueça de colocar aqui
+            default: return nomeCru;
         }
+    };
+
+    const handleBuscarCliente = async () => {
+        if (!cpfBusca.trim()) return;
+        try {
+            const res = await ClienteService.buscarPorCpf(cpfBusca);
+            setClienteSelecionado(res.data || res);
+        } catch (error) {
+            alert("Cliente não encontrado com este CPF.");
+            setClienteSelecionado(null);
+        }
+    };
+
+    const handleRemoverCliente = () => {
+        setClienteSelecionado(null);
+        setCpfBusca("");
     };
 
     const handleFinalizar = () => {
@@ -86,7 +104,7 @@ export default function FinalizarVendaModal({ show, onClose, onConfirm, itensVen
 
         const payload = {
             idVendedor: Number(idVendedor),
-            // Envia a string exata do Enum ("PIX", "CREDITO", etc)
+            idCliente: clienteSelecionado ? clienteSelecionado.id : null,
             formaPagamento: formaPagamento, 
             itensVenda: itensLimposParaBackend
         };
@@ -99,6 +117,43 @@ export default function FinalizarVendaModal({ show, onClose, onConfirm, itensVen
     return (
         <Modal show={show} title="Finalizar Venda" onClose={onClose}>
             
+            <div className="form-group" style={{ marginBottom: '15px', backgroundColor: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Identificar Cliente (Opcional)</label>
+                
+                {!clienteSelecionado ? (
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <input
+                            type="text"
+                            placeholder="Digite o CPF..."
+                            value={cpfBusca}
+                            onChange={(e) => setCpfBusca(e.target.value)}
+                            style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
+                        />
+                        <button 
+                            type="button" 
+                            onClick={handleBuscarCliente} 
+                            style={{ padding: '0 15px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        >
+                            <Search size={18} />
+                        </button>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#ecfdf5', padding: '10px', borderRadius: '6px', border: '1px solid #a7f3d0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#065f46' }}>
+                            <UserCheck size={20} />
+                            <span><strong>Cliente:</strong> {clienteSelecionado.nome}</span>
+                        </div>
+                        <button 
+                            type="button" 
+                            onClick={handleRemoverCliente} 
+                            style={{ background: 'none', border: 'none', color: '#991b1b', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
+                )}
+            </div>
+
             <div className="form-group" style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Funcionário que vendeu</label>
                 <select
@@ -125,7 +180,6 @@ export default function FinalizarVendaModal({ show, onClose, onConfirm, itensVen
                     onChange={(e) => setFormaPagamento(e.target.value)}
                     style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
                 >
-                    {/* Renderiza dinamicamente as opções que vieram do Backend */}
                     {formasPagamentoOptions.length === 0 ? (
                         <option value="">Carregando...</option>
                     ) : (
