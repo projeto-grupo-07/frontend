@@ -3,13 +3,30 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: inter;
-    src: url('assets/fonts/Inter-VariableFont_opsz\,wght.ttf');
+    font-family: 'Inter';
+    src: url('./assets/fonts/Inter-VariableFont_opsz\,wght.ttf');
 }
 
-* {
-    font-family: inter;
-
+html {
+    font-size: 17px;
 }
 
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+}
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
