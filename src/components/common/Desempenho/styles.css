@@ -3,16 +3,18 @@
    ========================================================================== */
 .dashboard-wrapper {
   background-color: #ffffff;
-  
+
   /* Hack para escapar do max-width e padding da tag <main> no App.jsx */
   position: fixed;
-  top: 70px; /* Altura exata abaixo da sua Navbar */
+  top: 70px;
+  /* Altura exata abaixo da sua Navbar */
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 10;
 
-  overflow: hidden; /* Proíbe o scroll da página inteira */
+  overflow: hidden;
+  /* Proíbe o scroll da página inteira */
   padding: 24px;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
@@ -21,10 +23,12 @@
 .dashboard-container {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 16px; /* Diminui o gap para sobrar mais espaço pros gráficos */
+  gap: 16px;
+  /* Diminui o gap para sobrar mais espaço pros gráficos */
   max-width: 1400px;
   margin: 0 auto;
-  height: 100%; /* Força o container a preencher exatamente os 100% disponíveis */
+  height: 100%;
+  /* Força o container a preencher exatamente os 100% disponíveis */
 }
 
 /* ==========================================================================
@@ -42,7 +46,8 @@
   background-color: #DCE4F2;
   border-radius: 20px;
   padding: 4px;
-  flex-shrink: 0; /* Impede os botões de amassarem */
+  flex-shrink: 0;
+  /* Impede os botões de amassarem */
 }
 
 .period-toggle-large button {
@@ -55,39 +60,41 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .period-toggle-large button.active {
-  background-color: #5B6F8A; 
+  background-color: #5B6F8A;
   color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .kpi-stack {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex: 1; /* Preenche a altura que sobrar da coluna */
+  flex: 1;
+  /* Preenche a altura que sobrar da coluna */
 }
 
 .kpi-card {
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid #f0f4f8;
   display: flex;
   flex-direction: column;
-  flex: 1; /* Faz todos os 4 cartões terem exatamente a mesma altura */
+  flex: 1;
+  /* Faz todos os 4 cartões terem exatamente a mesma altura */
   overflow: hidden;
 }
 
 .kpi-header {
-  background-color: #FFE5F0; 
-  color: #FF70A6; 
+  background-color: #FFE5F0;
+  color: #FF70A6;
   padding: 10px 16px;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 13px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -102,17 +109,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
 }
 
 .kpi-body {
   padding: 10px 16px;
-  font-size: 28px; /* Fonte levemente menor para garantir que caiba */
+  font-size: 30px;
+  /* Fonte levemente menor para garantir que caiba */
   font-weight: 900;
   color: #2D3748;
   text-align: center;
-  flex: 1; /* Centraliza verticalmente o número */
+  flex: 1;
+  /* Centraliza verticalmente o número */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,19 +133,22 @@
 .main-content-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr; /* Divide a altura restante meio a meio */
+  grid-template-rows: 1fr 1fr;
+  /* Divide a altura restante meio a meio */
   gap: 16px;
-  height: 100%; /* Trava na altura do pai */
+  height: 100%;
+  /* Trava na altura do pai */
 }
 
 .content-card {
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   border: 1px solid #f0f4f8;
-  overflow: hidden; /* Se a tabela for muito grande, o scroll acontece DENTRO dela, não na página */
+  overflow: hidden;
+  /* Se a tabela for muito grande, o scroll acontece DENTRO dela, não na página */
 }
 
 .card-header {
@@ -158,14 +170,14 @@
 .card-header h3 {
   margin: 0;
   color: #FF70A6;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
 }
 
 .pill-tabs {
   display: flex;
   gap: 4px;
-  background-color: #5B6F8A; 
+  background-color: #5B6F8A;
   padding: 3px;
   border-radius: 20px;
 }
@@ -177,20 +189,22 @@
   background: transparent;
   color: #A0AEC0;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .pill-tabs button.active {
-  background: #DCE4F2; 
-  color: #5B6F8A; 
+  background: #DCE4F2;
+  color: #5B6F8A;
 }
 
 .card-body {
   padding: 10px 16px;
-  flex: 1; /* O gráfico vai preencher toda a área restante do cartão */
-  min-height: 0; /* Macete do Flexbox: permite que o filho encolha além do seu conteúdo se necessário */
+  flex: 1;
+  /* O gráfico vai preencher toda a área restante do cartão */
+  min-height: 0;
+  /* Macete do Flexbox: permite que o filho encolha além do seu conteúdo se necessário */
 }
 
 /* ==========================================================================
@@ -205,7 +219,7 @@
 .custom-table th {
   padding: 8px;
   color: #FF70A6;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   border-bottom: 2px solid #EDF2F7;
 }
@@ -213,7 +227,7 @@
 .custom-table td {
   padding: 8px;
   color: #2D3748;
-  font-size: 12px;
+  font-size: 13px;
   border-bottom: 1px solid #EDF2F7;
   font-weight: 600;
 }
@@ -223,7 +237,7 @@
   color: #fff;
   padding: 3px 8px;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -237,7 +251,7 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   transition: all 0.2s ease;
   width: 100%;
   text-align: left;

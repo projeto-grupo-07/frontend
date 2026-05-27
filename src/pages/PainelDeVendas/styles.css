@@ -22,38 +22,51 @@
 .painel-content {
     display: flex;
     justify-content: center;
-    gap: 50px; /* Espaço entre os cards conforme o protótipo */
+    gap: 50px;
+    /* Espaço entre os cards conforme o protótipo */
     width: 100%;
     max-width: 1200px;
 }
 
 /* Estilo dos Cards */
-.card-cadastro, .card-itens {
+.card-cadastro,
+.card-itens {
     background: #FFFFFF;
-    border-radius: 25px; /* Bordas bem arredondadas */
+    border-radius: 25px;
+    /* Bordas bem arredondadas */
     width: 450px;
     min-height: 580px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     overflow: hidden;
 }
 
 /* Cores e Bordas Específicas */
-.card-cadastro { border: 2px solid #F2A7C3; }
-.card-itens { border: 2px solid #C5D3F7; }
+.card-cadastro {
+    border: 2px solid #F2A7C3;
+}
+
+.card-itens {
+    border: 2px solid #C5D3F7;
+}
 
 .card-header {
     padding: 15px;
     text-align: center;
 }
 
-.card-header.rosa { background-color: #F2A7C3; }
-.card-header.azul { background-color: #C5D3F7; }
+.card-header.rosa {
+    background-color: #F2A7C3;
+}
+
+.card-header.azul {
+    background-color: #C5D3F7;
+}
 
 .card-header h3 {
     color: #2D3E50;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 700;
 }
 
@@ -66,7 +79,7 @@
 }
 
 .input-field label {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #4A4A4A;
     margin-bottom: 8px;
@@ -81,12 +94,12 @@
     padding: 0 15px;
     width: 100%;
     box-sizing: border-box;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .helper-link {
     color: #F2A7C3;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     text-decoration: underline;
     margin-top: 5px;
     display: inline-block;
@@ -100,11 +113,12 @@
 }
 
 .vendas-table th {
-    background-color: #8CA9D3; /* Azul mais forte para o header da tabela */
+    background-color: #8CA9D3;
+    /* Azul mais forte para o header da tabela */
     color: white;
     padding: 12px;
     text-align: left;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
 }
 
 .vendas-table td {
@@ -112,7 +126,7 @@
     color: #5D78A9;
     font-weight: 500;
     border-bottom: 1px solid #F0F0F0;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 /* Botões Customizados */
@@ -124,7 +138,8 @@
     border-radius: 12px;
     font-weight: 600;
     cursor: pointer;
-    margin: 40px auto 0; /* Centraliza no final do card */
+    margin: 40px auto 0;
+    /* Centraliza no final do card */
     width: fit-content;
 }
 
@@ -149,7 +164,7 @@
     padding: 14px 28px;
     border-radius: 12px;
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
     z-index: 9999;
@@ -169,6 +184,13 @@
 }
 
 @keyframes fadeInDown {
-    from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
