@@ -22,12 +22,21 @@ const Chart = ({ data, xKey, yKey }) => {
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart data={data} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-        <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{fill: '#A0AEC0', fontSize: 11, fontWeight: 'bold'}} dy={10} />
-        <YAxis axisLine={false} tickLine={false} tick={{fill: '#A0AEC0', fontSize: 11, fontWeight: 'bold'}} />
-        <Tooltip cursor={{fill: '#EDF2F7'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} formatter={(value) => `R$ ${value}`} />
-        
-        <Bar dataKey={yKey} fill="#5B6F8A" radius={[4, 4, 0, 0]} barSize={40} />
-        <Line type="monotone" dataKey={yKey} stroke="#FF70A6" strokeWidth={3} dot={{r: 4, fill: "#FF70A6", strokeWidth: 2}} activeDot={{r: 6}} />
+        {/* Aumenta legibilidade dos eixos */}
+        <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{ fill: '#2D3748', fontSize: 14, fontWeight: '700' }} dy={12} />
+        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#2D3748', fontSize: 14, fontWeight: '700' }} />
+        {/* Tooltip com texto maior e mais contraste */}
+        <Tooltip
+          cursor={{ fill: '#EDF2F7' }}
+          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 6px 18px rgba(0,0,0,0.12)' }}
+          labelStyle={{ fontSize: 13, fontWeight: 800, color: '#2D3748' }}
+          itemStyle={{ fontSize: 13, color: '#2D3748', fontWeight: 700 }}
+          formatter={(value) => `R$ ${value}`}
+        />
+
+        {/* Barras e linha com tamanho levemente maior para destacar os valores */}
+        <Bar dataKey={yKey} fill="#5B6F8A" radius={[6, 6, 0, 0]} barSize={48} />
+        <Line type="monotone" dataKey={yKey} stroke="#FF70A6" strokeWidth={3} dot={{ r: 5, fill: "#FF70A6", strokeWidth: 2 }} activeDot={{ r: 7 }} />
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -50,7 +59,7 @@ const Table = ({ columns, data }) => {
               </tr>
             ))
           ) : (
-             <tr><td colSpan={columns.length} style={{textAlign: 'center', color: '#a0aec0', padding: '20px'}}>Nenhum registro encontrado...</td></tr>
+            <tr><td colSpan={columns.length} style={{ textAlign: 'center', color: '#a0aec0', padding: '20px' }}>Nenhum registro encontrado...</td></tr>
           )}
         </tbody>
       </table>
@@ -66,13 +75,13 @@ export default function Dashboard() {
   // --- Estados do Filtro Global ---
   const [modalFiltroAberto, setModalFiltroAberto] = useState(false);
   const [filtroPeriodo, setFiltroPeriodo] = useState({ tipo: "Este Mês", inicio: null, fim: null });
-  
+
   const [topProductsTab, setTopProductsTab] = useState("Produtos");
 
   // --- Estados dos Dados ---
   const [kpiData, setKpiData] = useState({ revenue: 0, discount: 0, avgTicket: 0, totalSales: 0 });
   const [loadingKpis, setLoadingKpis] = useState(true);
-  
+
   const [topProductsData, setTopProductsData] = useState([]);
   const [revenueData, setRevenueData] = useState([]);
   const [employeeData, setEmployeeData] = useState([]);
@@ -92,7 +101,7 @@ export default function Dashboard() {
         if (filtroPeriodo.tipo === "Hoje") {
           reqFat = KpiService.getFaturamentoDiario();
           reqDesc = KpiService.getDescontoDiario();
-          reqVendas = KpiService.getUnidadesDiario(); 
+          reqVendas = KpiService.getUnidadesDiario();
           reqTicket = KpiService.getTicketMedioDiario();
         } else if (filtroPeriodo.tipo === "Esta Semana") {
           reqFat = KpiService.getFaturamentoSemanal();
@@ -127,12 +136,12 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchTopRanking = async () => {
       try {
-        const res = topProductsTab === "Produtos" 
-          ? await KpiService.getRankingProdutosDinamico(filtroPeriodo) 
+        const res = topProductsTab === "Produtos"
+          ? await KpiService.getRankingProdutosDinamico(filtroPeriodo)
           : await KpiService.getRankingMarcasDinamico(filtroPeriodo);
-        
+
         const formatted = (res || []).map((item, index) => ({
-          "": <span className="ranking-badge">{index+1}</span>, 
+          "": <span className="ranking-badge">{index + 1}</span>,
           "Nome": <span style={{ fontWeight: 'bold', color: '#4a5568' }}>{item.nome || item.Nome || "-"}</span>,
           "Total (Un)": <span style={{ backgroundColor: '#FFE5F0', color: '#FF70A6', padding: '4px 12px', borderRadius: '16px', fontWeight: '900', fontSize: '12px' }}>{item.totalVendidas || item.TotalVendidas || 0}</span>
         }));
@@ -140,14 +149,14 @@ export default function Dashboard() {
       } catch (error) { console.error("Erro no Ranking:", error); }
     };
     fetchTopRanking();
-  }, [topProductsTab, filtroPeriodo]); 
+  }, [topProductsTab, filtroPeriodo]);
 
   // 3. Gráfico Faturamento Dinâmico
   useEffect(() => {
     const fetchRevenueTime = async () => {
       try {
         const res = await KpiService.getGraficoFaturamentoDinamico(filtroPeriodo);
-              
+
         const formatted = (res || []).map(item => ({
           "Período": item.periodo || item.Periodo || "S/D",
           "Faturamento": Number(item.faturamento || item.Faturamento || 0)
@@ -163,12 +172,12 @@ export default function Dashboard() {
     const fetchTeam = async () => {
       try {
         const res = await KpiService.getDesempenhoEquipeDinamico(filtroPeriodo);
-        
+
         const formatted = (res || []).map(emp => ({
           "Nome": emp.vendedor || emp.Vendedor || "Desconhecido",
           "Nº Vendas": emp.totalVendas || emp.TotalVendas || 0,
-          "Total R$": Number(emp.totalFaturado || emp.TotalFaturado || 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}),
-          "Comissão R$": Number(emp.comissaoTotal || emp.ComissaoTotal || 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})
+          "Total R$": Number(emp.totalFaturado || emp.TotalFaturado || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+          "Comissão R$": Number(emp.comissaoTotal || emp.ComissaoTotal || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
         }));
         setEmployeeData(formatted);
       } catch (error) { console.error("Erro na Tabela de Equipe:", error); }
@@ -180,8 +189,8 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchPeakDay = async () => {
       try {
-       const res = await KpiService.getGraficoPicoDiaDinamico(filtroPeriodo);
-       
+        const res = await KpiService.getGraficoPicoDiaDinamico(filtroPeriodo);
+
         const formatted = (res || []).map(item => ({
           "Dia": (item.diaSemana || item.DiaSemana || "").substring(0, 3),
           "Faturamento": Number(item.faturamento || item.Faturamento || 0)
@@ -193,7 +202,7 @@ export default function Dashboard() {
   }, [filtroPeriodo]);
 
   // Formata o texto do botão de filtro
-  const textoBotaoFiltro = filtroPeriodo.tipo === "Personalizado" 
+  const textoBotaoFiltro = filtroPeriodo.tipo === "Personalizado"
     ? `${filtroPeriodo.inicio.split('-').reverse().join('/')} até ${filtroPeriodo.fim.split('-').reverse().join('/')}`
     : filtroPeriodo.tipo;
 
@@ -203,12 +212,12 @@ export default function Dashboard() {
   return (
     <div className="dashboard-wrapper">
       <div className="dashboard-container">
-        
+
         {/* --- COLUNA ESQUERDA --- */}
         <div className="left-column">
-          
+
           <button className="btn-filtro-global" onClick={() => setModalFiltroAberto(true)}>
-            <span style={{ fontSize: '18px' }}>📅</span> 
+            <span style={{ fontSize: '18px' }}>📅</span>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
               <span style={{ fontSize: '11px', color: '#718096', fontWeight: 'bold', textTransform: 'uppercase' }}>Período Atual</span>
               <span style={{ fontSize: '14px', color: '#d53f8c', fontWeight: '900' }}>{textoBotaoFiltro}</span>
@@ -216,20 +225,20 @@ export default function Dashboard() {
           </button>
 
           <div className="kpi-stack" style={{ opacity: loadingKpis ? 0.5 : 1, transition: 'opacity 0.3s' }}>
-            
+
             <div className="kpi-card">
               <div className="kpi-header">Faturamento Bruto (R$)</div>
-              <div className="kpi-body">{loadingKpis ? "..." : kpiData.revenue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+              <div className="kpi-body">{loadingKpis ? "..." : kpiData.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
             </div>
 
             <div className="kpi-card">
               <div className="kpi-header">Total em Descontos (R$)</div>
-              <div className="kpi-body">{loadingKpis ? "..." : kpiData.discount.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+              <div className="kpi-body">{loadingKpis ? "..." : kpiData.discount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
             </div>
 
             <div className="kpi-card">
               <div className="kpi-header">Ticket Médio (R$)</div>
-              <div className="kpi-body">{loadingKpis ? "..." : kpiData.avgTicket.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+              <div className="kpi-body">{loadingKpis ? "..." : kpiData.avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
             </div>
 
             <div className="kpi-card">
@@ -242,7 +251,7 @@ export default function Dashboard() {
 
         {/* --- COLUNA DIREITA --- */}
         <div className="main-content-grid">
-          
+
           {/* CARD 1: Mais Vendidos */}
           <div className="content-card">
             <div className="card-header">
@@ -256,7 +265,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="card-body">
-               <Table columns={["", "Nome", "Total (Un)"]} data={topProductsData} />
+              <Table columns={["", "Nome", "Total (Un)"]} data={topProductsData} />
             </div>
           </div>
 
@@ -286,7 +295,7 @@ export default function Dashboard() {
               <h3>Distribuição por Dia</h3>
             </div>
             <div className="card-body">
-               <Chart data={weekData} xKey="Dia" yKey="Faturamento" />
+              <Chart data={weekData} xKey="Dia" yKey="Faturamento" />
             </div>
           </div>
 
@@ -294,7 +303,7 @@ export default function Dashboard() {
       </div>
 
       {/* MODAL DE FILTRO */}
-      <FiltroPeriodoModal 
+      <FiltroPeriodoModal
         show={modalFiltroAberto}
         onClose={() => setModalFiltroAberto(false)}
         filtroAtual={filtroPeriodo}

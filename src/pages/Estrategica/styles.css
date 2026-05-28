@@ -73,7 +73,7 @@
   background: linear-gradient(135deg, #FF70A6 0%, #D53F8C 100%);
   color: #ffffff;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(213, 63, 140, 0.18);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
@@ -129,7 +129,7 @@
 .estr-report-modal-kicker {
   margin: 0 0 6px 0;
   color: #D53F8C;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -138,7 +138,7 @@
 .estr-report-modal-title {
   margin: 0;
   color: #2D3748;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 900;
 }
 
@@ -157,7 +157,7 @@
 .estr-report-modal-description {
   margin: 0 0 18px 0;
   color: #718096;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
 }
 
@@ -181,7 +181,7 @@
 
 .estr-report-field label {
   color: #4A5568;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -193,7 +193,7 @@
   border: 1px solid #E2E8F0;
   background: #ffffff;
   color: #2D3748;
-  font-size: 14px;
+  font-size: 15px;
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -216,7 +216,7 @@
   border: 1px solid #E2E8F0;
   background: #F7FAFC;
   color: #4A5568;
-  padding: 11px 16px;
+  padding: 12px 16px;
   border-radius: 12px;
   font-weight: 800;
   cursor: pointer;
@@ -276,7 +276,7 @@
 .estr-card-header h3 {
   margin: 0;
   color: #FF70A6;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
 }
 
@@ -305,7 +305,7 @@
   background: transparent;
   color: #A0AEC0;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -327,7 +327,7 @@
 .estr-table th {
   padding: 8px;
   color: #FF70A6;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   border-bottom: 2px solid #EDF2F7;
 }
@@ -335,7 +335,7 @@
 .estr-table td {
   padding: 8px;
   color: #2D3748;
-  font-size: 12px;
+  font-size: 13px;
   border-bottom: 1px solid #EDF2F7;
   font-weight: 600;
 }
