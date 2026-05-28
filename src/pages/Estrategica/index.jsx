@@ -24,6 +24,20 @@ const formatarNomePagamento = (nomeCru) => {
   return map[nomeCru.toUpperCase()] || nomeCru;
 };
 
+const formatarNumero2Casas = (valor) =>
+  Number(valor || 0).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const formatarMoeda2Casas = (valor) =>
+  Number(valor || 0).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
 export default function Estrategica() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isRelatorioOpen, setIsRelatorioOpen] = useState(false);
@@ -235,10 +249,10 @@ export default function Estrategica() {
               <BarChart data={sazonalidade} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
                 <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} tickFormatter={(val) => `R$${val / 1000}k`} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} tickFormatter={(val) => `R$${formatarNumero2Casas(val / 1000)}k`} />
                 <RechartsTooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Volume de Vendas']}
+                  formatter={(value) => [`R$ ${formatarNumero2Casas(value)}`, 'Volume de Vendas']}
                 />
                 <Bar dataKey="faturamento" name="Volume de Vendas" fill="#DCE4F2" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
@@ -266,7 +280,7 @@ export default function Estrategica() {
                   </thead>
                   <tbody>
                     {pagamentos.map((pag) => {
-                      const frequencia = totalVendasQtd > 0 ? ((pag.qtdVendas / totalVendasQtd) * 100).toFixed(1) : 0;
+                      const frequencia = totalVendasQtd > 0 ? ((pag.qtdVendas / totalVendasQtd) * 100) : 0;
                       const valorMedio = pag.qtdVendas > 0 ? pag.valorTotal / pag.qtdVendas : 0;
                       const metodoEnum = (pag.metodo || "").toUpperCase();
                       return (
@@ -275,10 +289,10 @@ export default function Estrategica() {
                             <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CORES_PAGAMENTO[metodoEnum] || '#CBD5E0', marginRight: '8px' }}></span>
                             {formatarNomePagamento(pag.metodo)}
                           </td>
-                          <td>{frequencia}%</td>
+                          <td>{formatarNumero2Casas(frequencia)}%</td>
                           <td>{pag.qtdVendas}</td>
-                          <td style={{ fontWeight: 'bold', color: '#2D3748' }}>R$ {Number(pag.valorTotal || 0).toLocaleString('pt-BR')}</td>
-                          <td>R$ {valorMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                          <td style={{ fontWeight: 'bold', color: '#2D3748' }}>{formatarMoeda2Casas(pag.valorTotal || 0)}</td>
+                          <td>{formatarMoeda2Casas(valorMedio)}</td>
                         </tr>
                       );
                     })}
@@ -306,10 +320,10 @@ export default function Estrategica() {
               <BarChart data={margemCategoria} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
                 <XAxis dataKey="categoria" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#FF70A6' }} tickFormatter={(val) => `${val}%`} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#FF70A6' }} tickFormatter={(val) => `${formatarNumero2Casas(val)}%`} />
                 <RechartsTooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value) => [`${value}%`, 'Margem Média']}
+                  formatter={(value) => [`${formatarNumero2Casas(value)}%`, 'Margem Média']}
                 />
                 <Bar dataKey="margem" name="Margem Média" fill="#FF70A6" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
@@ -337,9 +351,7 @@ export default function Estrategica() {
                     <tr key={idx}>
                       <td style={{ fontWeight: '600' }}>{prod.nome}</td>
                       <td>{prod.vendas} un.</td>
-                      <td style={{ color: '#38A169', fontWeight: 'bold' }}>
-                        R$ {Number(prod.lucro || 0).toLocaleString('pt-BR')}
-                      </td>
+                      <td style={{ color: '#38A169', fontWeight: 'bold' }}>{formatarMoeda2Casas(prod.lucro || 0)}</td>
                     </tr>
                   ))}
                 </tbody>

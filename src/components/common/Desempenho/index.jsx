@@ -4,6 +4,20 @@ import { KpiService } from "../../../services/KpiService";
 import FiltroPeriodoModal from "../FiltroPeriodoModal"; // Ajuste o caminho se necessário
 import './styles.css';
 
+const formatarNumero2Casas = (valor) =>
+  Number(valor || 0).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const formatarMoeda2Casas = (valor) =>
+  Number(valor || 0).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
 // ============================================================================
 // 1. SUBCOMPONENTES LOCAIS
 // ============================================================================
@@ -24,14 +38,14 @@ const Chart = ({ data, xKey, yKey }) => {
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
         {/* Aumenta legibilidade dos eixos */}
         <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{ fill: '#2D3748', fontSize: 14, fontWeight: '700' }} dy={12} />
-        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#2D3748', fontSize: 14, fontWeight: '700' }} />
+        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#2D3748', fontSize: 14, fontWeight: '700' }} tickFormatter={(value) => formatarNumero2Casas(value)} />
         {/* Tooltip com texto maior e mais contraste */}
         <Tooltip
           cursor={{ fill: '#EDF2F7' }}
           contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 6px 18px rgba(0,0,0,0.12)' }}
           labelStyle={{ fontSize: 13, fontWeight: 800, color: '#2D3748' }}
           itemStyle={{ fontSize: 13, color: '#2D3748', fontWeight: 700 }}
-          formatter={(value) => `R$ ${value}`}
+          formatter={(value) => `R$ ${formatarNumero2Casas(value)}`}
         />
 
         {/* Barras e linha com tamanho levemente maior para destacar os valores */}
@@ -176,8 +190,8 @@ export default function Dashboard() {
         const formatted = (res || []).map(emp => ({
           "Nome": emp.vendedor || emp.Vendedor || "Desconhecido",
           "Nº Vendas": emp.totalVendas || emp.TotalVendas || 0,
-          "Total R$": Number(emp.totalFaturado || emp.TotalFaturado || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-          "Comissão R$": Number(emp.comissaoTotal || emp.ComissaoTotal || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+          "Total R$": formatarMoeda2Casas(emp.totalFaturado || emp.TotalFaturado || 0),
+          "Comissão R$": formatarMoeda2Casas(emp.comissaoTotal || emp.ComissaoTotal || 0)
         }));
         setEmployeeData(formatted);
       } catch (error) { console.error("Erro na Tabela de Equipe:", error); }
@@ -228,17 +242,17 @@ export default function Dashboard() {
 
             <div className="kpi-card">
               <div className="kpi-header">Faturamento Bruto (R$)</div>
-              <div className="kpi-body">{loadingKpis ? "..." : kpiData.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+              <div className="kpi-body">{loadingKpis ? "..." : formatarNumero2Casas(kpiData.revenue)}</div>
             </div>
 
             <div className="kpi-card">
               <div className="kpi-header">Total em Descontos (R$)</div>
-              <div className="kpi-body">{loadingKpis ? "..." : kpiData.discount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+              <div className="kpi-body">{loadingKpis ? "..." : formatarNumero2Casas(kpiData.discount)}</div>
             </div>
 
             <div className="kpi-card">
               <div className="kpi-header">Ticket Médio (R$)</div>
-              <div className="kpi-body">{loadingKpis ? "..." : kpiData.avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+              <div className="kpi-body">{loadingKpis ? "..." : formatarNumero2Casas(kpiData.avgTicket)}</div>
             </div>
 
             <div className="kpi-card">
