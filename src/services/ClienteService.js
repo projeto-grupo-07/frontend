@@ -45,5 +45,9 @@ export const ClienteService = {
    buscarPorCpf: async (cpf) => {
     const response = await api.get(`${ENDPOINT}/cpf/${cpf}`);
     return response;
+  },
+  getPaginated: async (pagina = 0, tamanho = 15) => {
+    const response = await api.get(`${ENDPOINT}/paginas?pagina=${pagina}&tamanho=${tamanho}`);
+    return response;
   }
 };
