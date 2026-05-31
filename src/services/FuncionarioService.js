@@ -51,6 +51,15 @@ export const FuncionarioService = {
             console.error("Erro ao deletar funcionário:", error);
             throw error;
         }
+    },
+    getPaginated: async (pagina = 0, tamanho = 15) => {
+        try {
+            const response = await api.get(`${ENDPOINT}/paginas?pagina=${pagina}&tamanho=${tamanho}`);
+            return response;
+        } catch (error) {
+            console.error("Erro ao buscar funcionários paginados:", error);
+            throw error;
+        }
     }
 }
 

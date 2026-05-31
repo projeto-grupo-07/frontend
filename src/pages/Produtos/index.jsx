@@ -287,7 +287,6 @@ function Produtos() {
                             />
                         </div>
 
-                        {/* NOVO: Checkbox para habilitar a visualização de todos os registros (Filtro Global) */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, color: '#4A4A4A', fontWeight: '500' }}>
                             <input
                                 type="checkbox"
@@ -327,7 +326,6 @@ function Produtos() {
                             <div className="empty-table-placeholder">Nenhum produto encontrado.</div>
                         )}
 
-                        {/* NOVO: A paginação só é exibida se 'verTodos' for false */}
                         {!verTodos && totalPaginas > 0 && (
                             <div className="pagination-wrapper">
                                 <button
@@ -370,9 +368,34 @@ function Produtos() {
                                     Próxima
                                 </button>
 
-                                <span className="btn-paginacao-info">
-                                    {totalElementos} produto{totalElementos !== 1 ? 's' : ''}
-                                </span>
+                                {/* CORREÇÃO: Bloco movido para dentro do pagination-wrapper */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#5D78A9' }}>
+                                        <label htmlFor="itensPorPagina">Itens por página:</label>
+                                        <input
+                                            type="number"
+                                            id="itensPorPagina"
+                                            min="1"
+                                            value={tamanhoPagina}
+                                            onChange={(e) => setTamanhoPagina(e.target.value)}
+                                            onBlur={handleAplicarTamanho}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleAplicarTamanho()}
+                                            style={{
+                                                width: '60px',
+                                                padding: '4px 8px',
+                                                borderRadius: '6px',
+                                                border: '1px solid #C5D3F7',
+                                                outline: 'none',
+                                                color: '#2D3E50',
+                                                textAlign: 'center'
+                                            }}
+                                        />
+                                    </div>
+
+                                    <span className="btn-paginacao-info">
+                                        {totalElementos} produto{totalElementos !== 1 ? 's' : ''}
+                                    </span>
+                                </div>
                             </div>
                         )}
                     </>
@@ -417,35 +440,7 @@ function Produtos() {
                     fetchProdutos(paginaAtual);
                 }}
             />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#5D78A9' }}>
-                    <label htmlFor="itensPorPagina">Itens por página:</label>
-                    <input
-                        type="number"
-                        id="itensPorPagina"
-                        min="1"
-                        value={tamanhoPagina}
-                        onChange={(e) => setTamanhoPagina(e.target.value)}
-                        onBlur={handleAplicarTamanho}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAplicarTamanho()}
-                        style={{
-                            width: '60px',
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            border: '1px solid #C5D3F7',
-                            outline: 'none',
-                            color: '#2D3E50',
-                            textAlign: 'center'
-                        }}
-                    />
-                </div>
-
-                <span className="btn-paginacao-info">
-                    {totalElementos} produto{totalElementos !== 1 ? 's' : ''}
-                </span>
-            </div>
         </div>
-
     );
 }
 
