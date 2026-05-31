@@ -12,7 +12,7 @@ import FilterModal from "../../components/common/FilterModal";
 import { CategoriesService } from "../../services/CategoriaService";
 import EditarProdutoModal from "../../components/common/EditarProdutoModal";
 
-const TAMANHO_PAGINA = 15;
+const TAMANHO_PAGINA = 5;
 
 function Produtos() {
     const [produtos, setProdutos] = useState([]);
@@ -20,6 +20,8 @@ function Produtos() {
     const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [verTodos, setVerTodos] = useState(false);
+    const [tamanhoPagina, setTamanhoPagina] = useState(15)
 
     // ESTADOS DE FILTRO (Arrays para múltipla escolha)
     const [filtrosCategorias, setFiltrosCategorias] = useState([]);
@@ -41,24 +43,74 @@ function Produtos() {
         setIdEditando(id);
     }
 
-    const fetchProdutos = async (pagina = 0) => {
+    const fetchProdutos = async (pagina = 0, isAll = verTodos) => {
         try {
             setLoading(true);
-            const dados = await ProductService.getPaginated(pagina, TAMANHO_PAGINA);
-            const produtosPreparados = (dados.conteudo || []).map(p => ({
-                ...p,
-                nomeMarca: p.marca || p.nome || "-",
-                modeloDescricao: p.modelo || p.descricao || "-",
-            }));
+
+            let produtosPreparados = [];
+
+            if (isAll) {
+                // Busca TODOS os registros (sem paginação)
+                // Obs: Certifique-se de que ProductService.getAll() existe no seu frontend
+                const dados = await ProductService.getAll();
+                const safeDados = Array.isArray(dados) ? dados : [];
+
+                produtosPreparados = safeDados.map(p => ({
+                    ...p,
+                    nomeMarca: p.marca || p.nome || "-",
+                    modeloDescricao: p.modelo || p.descricao || "-",
+                }));
+
+                setPaginaAtual(0);
+                setTotalPaginas(1);
+                setTotalElementos(produtosPreparados.length);
+
+            } else {
+                const dados = await ProductService.getPaginated(pagina, tamanhoPagina);
+                produtosPreparados = (dados.conteudo || []).map(p => ({
+                    ...p,
+                    nomeMarca: p.marca || p.nome || "-",
+                    modeloDescricao: p.modelo || p.descricao || "-",
+                }));
+
+                setPaginaAtual(dados.pagina ?? pagina);
+                setTotalPaginas(dados.totalPaginas ?? 1);
+                setTotalElementos(dados.total ?? 0);
+            }
+
             setProdutos(produtosPreparados);
-            setPaginaAtual(dados.pagina ?? pagina);
-            setTotalPaginas(dados.totalPaginas ?? 1);
-            setTotalElementos(dados.total ?? 0);
+
         } catch (err) {
             console.error("Erro ao buscar produtos:", err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleMudarTamanhoPagina = (e) => {
+        const novoTamanho = Number(e.target.value);
+        setTamanhoPagina(novoTamanho);
+        setTimeout(() => fetchProdutos(0, verTodos, novoTamanho), 0);
+    };
+
+    const handleToggleVerTodos = () => {
+        const novoStatus = !verTodos;
+        setVerTodos(novoStatus);
+        fetchProdutos(0, novoStatus);
+    };
+
+    const handleAplicarTamanho = () => {
+        let novoTamanho = Number(tamanhoPagina);
+
+        if (novoTamanho < 1) {
+            novoTamanho = 1;
+            setTamanhoPagina(1);
+        } else if (novoTamanho > 1000) {
+            novoTamanho = 1000;
+            setTamanhoPagina(1000);
+        }
+
+        fetchProdutos(0, verTodos, novoTamanho);
     };
 
     useEffect(() => {
@@ -235,6 +287,20 @@ function Produtos() {
                             />
                         </div>
 
+                        {/* NOVO: Checkbox para habilitar a visualização de todos os registros (Filtro Global) */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, color: '#4A4A4A', fontWeight: '500' }}>
+                            <input
+                                type="checkbox"
+                                id="toggleVerTodos"
+                                checked={verTodos}
+                                onChange={handleToggleVerTodos}
+                                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            <label htmlFor="toggleVerTodos" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                                Ver todos (Filtro Global)
+                            </label>
+                        </div>
+
                         <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
                             <Button onClick={() => setIsFilterOpen(true)}>Filtrar</Button>
                         </div>
@@ -261,7 +327,8 @@ function Produtos() {
                             <div className="empty-table-placeholder">Nenhum produto encontrado.</div>
                         )}
 
-                        {totalPaginas > 0 && (
+                        {/* NOVO: A paginação só é exibida se 'verTodos' for false */}
+                        {!verTodos && totalPaginas > 0 && (
                             <div className="pagination-wrapper">
                                 <button
                                     className="btn-paginacao"
@@ -350,7 +417,35 @@ function Produtos() {
                     fetchProdutos(paginaAtual);
                 }}
             />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#5D78A9' }}>
+                    <label htmlFor="itensPorPagina">Itens por página:</label>
+                    <input
+                        type="number"
+                        id="itensPorPagina"
+                        min="1"
+                        value={tamanhoPagina}
+                        onChange={(e) => setTamanhoPagina(e.target.value)}
+                        onBlur={handleAplicarTamanho}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAplicarTamanho()}
+                        style={{
+                            width: '60px',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            border: '1px solid #C5D3F7',
+                            outline: 'none',
+                            color: '#2D3E50',
+                            textAlign: 'center'
+                        }}
+                    />
+                </div>
+
+                <span className="btn-paginacao-info">
+                    {totalElementos} produto{totalElementos !== 1 ? 's' : ''}
+                </span>
+            </div>
         </div>
+
     );
 }
 
