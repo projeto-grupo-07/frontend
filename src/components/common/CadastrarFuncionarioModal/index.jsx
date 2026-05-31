@@ -19,8 +19,24 @@ function CadastrarFuncionarioModal({ show, onClose, onSuccess }) {
     };
 
     const handleSave = async () => {
+
+        const validacaoSenha = (senha) => {
+            const tamanhoMin = senha.length >= 8;
+            const temLetraMaiuscula = /[A-Z]/.test(senha);
+            const temLetraMinuscula = /[a-z]/.test(senha);
+            const temNumero = /[0-9]/.test(senha);
+            const temCaracterEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+            return tamanhoMin && temLetraMaiuscula && temLetraMinuscula && temNumero && temCaracterEspecial;
+        }
+
         if (formData.cpf.length < 11) {
             alert("Por favor, insira um CPF válido (11 dígitos).");
+            return;
+        }
+
+        // Validação de senha
+        if (!validacaoSenha(formData.senha)) {
+            alert("A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais.");
             return;
         }
 
