@@ -105,7 +105,11 @@ export const CampanhaService = {
   gerarTextoIA: async (tema) => {
     const response = await api.post(`${ENDPOINT}/gerar-texto`, { tema }, { timeout: 60000 });
     return response;
-  }
+  },
+  getPaginated: async (pagina = 0, tamanho = 15) => {
+    const response = await api.get(`${ENDPOINT}/paginas?pagina=${pagina}&tamanho=${tamanho}`);
+    return response;
+  },
 
   
 };
