@@ -78,8 +78,37 @@ function PainelDeVendas() {
         if (!produtoSelecionado) return exibirErro("Selecione um produto primeiro.");
         if (Number(quantidade) < 1) return exibirErro("A quantidade deve ser pelo menos 1.");
 
-        const descricao = `${produtoSelecionado.marca} ${produtoSelecionado.modelo} - Nº ${produtoSelecionado.numero}`;
+        // 🔴 NOVA VALIDAÇÃO: Impede adicionar se não houver estoque suficiente
+        if (produtoSelecionado.quantidade <= 0) {
+            return exibirErro("Este produto está com o estoque zerado e não pode ser vendido.");
+        }
+        if (Number(quantidade) > produtoSelecionado.quantidade) {
+            return exibirErro(`Quantidade solicitada indisponível. Estoque atual: ${produtoSelecionado.quantidade}`);
+        }
 
+        const itemJaNoCarrinho = itensVenda.find(item => item.idProduto === produtoSelecionado.id);
+        const qtdTotalAoAdicionar = (itemJaNoCarrinho ? itemJaNoCarrinho.quantidadeVendaProduto : 0) + Number(quantidade);
+
+        if (qtdTotalAoAdicionar > produtoSelecionado.quantidade) {
+            return exibirErro(`Você já tem este item no carrinho. A quantidade total ultrapassa o estoque disponível (${produtoSelecionado.quantidade}).`);
+        }
+
+        // Substitua a linha antiga da 'descricao' por este bloco:
+        let descricao = produtoSelecionado.nome || "";
+
+        // Se tiver marca e modelo, formata bonitinho como calçado
+        if (produtoSelecionado.marca || produtoSelecionado.modelo) {
+            const marca = produtoSelecionado.marca || "";
+            const modelo = produtoSelecionado.modelo || "";
+            const numero = produtoSelecionado.numero ? `- Nº ${produtoSelecionado.numero}` : "";
+
+            descricao = `${marca} ${modelo} ${numero}`.trim();
+        }
+
+        // Fallback de segurança caso tudo falhe
+        if (!descricao || descricao.trim() === "") {
+            descricao = produtoSelecionado.categoriaPai || "Produto não identificado";
+        }
         const novoItem = {
             idProduto: produtoSelecionado.id,
             nome: descricao,
@@ -89,12 +118,11 @@ function PainelDeVendas() {
             total: (produtoSelecionado.valorUnitario || 0) * quantidade
         };
 
-    setItensVenda([...itensVenda, novoItem]);
-    
-    // Limpar seleção após adicionar
-    setProdutoSelecionado(null);
-    setQuantidade("");
-};
+        setItensVenda([...itensVenda, novoItem]);
+
+        setProdutoSelecionado(null);
+        setQuantidade("1");
+    };
 
     const handleAtualizarDesconto = (index, novoDesconto) => {
         const valorDesconto = Number(novoDesconto);

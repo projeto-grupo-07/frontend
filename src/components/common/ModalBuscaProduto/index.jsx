@@ -1,23 +1,19 @@
-import React, { useState } from 'react'; // Adicionado
-import './styles.css'; // Corrigido (ponto antes da barra)
+import React, { useState } from 'react'; 
+import './styles.css'; 
 
 const ModalBuscaProduto = ({ produtos, onSelect, onClose }) => {
     const [filtro, setFiltro] = useState('');
 
     const getNomeExibicao = (p) => {
         if (!p) return "";
-
-        // Lógica para Calçados (que possuem marca e modelo)
         if (p.tipo === "calcado" || (p.marca && p.modelo)) {
             return `${p.marca} ${p.modelo} ${p.cor ? `- ${p.cor}` : ''} ${p.numero ? `(Nº ${p.numero})` : ''}`;
         }
 
-        // Lógica para Outros (que possuem a propriedade 'nome')
         if (p.nome) {
             return p.nome;
         }
 
-        // Fallback caso não encontre nenhuma das opções acima
         return p.categoriaPai || "Produto sem nome";
     };
 
@@ -25,7 +21,10 @@ const ModalBuscaProduto = ({ produtos, onSelect, onClose }) => {
 
     const filtrados = listaSegura.filter(p => {
         const nomeCompleto = getNomeExibicao(p).toLowerCase();
-        return nomeCompleto.includes(filtro.toLowerCase());
+        const correspondeAoFiltro = nomeCompleto.includes(filtro.toLowerCase());
+        const temEstoque = p.quantidade && p.quantidade > 0; 
+
+        return correspondeAoFiltro && temEstoque;
     });
 
     return (
@@ -43,14 +42,22 @@ const ModalBuscaProduto = ({ produtos, onSelect, onClose }) => {
                     {filtrados.map(p => (
                         <div key={p.id} onClick={() => onSelect(p)} className="produto-item">
                             <span>{getNomeExibicao(p)}</span>
-                            <div className="produto-badges">
+                            <div className="produto-badges" style={{ display: 'flex', gap: '8px' }}>
+                                {/* 🔴 NOVO: Badge indicando a quantidade de estoque disponível */}
+                                <span className="produto-estoque-badge" style={{ backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', fontSize: '12px' }}>
+                                    Qtd: {p.quantidade}
+                                </span>
                                 <span className="produto-preco-badge">
                                     R$ {p.valorUnitario?.toFixed(2)}
                                 </span>
-
                             </div>
                         </div>
                     ))}
+                    {filtrados.length === 0 && (
+                        <div style={{ textAlign: 'center', padding: '20px', color: '#718096' }}>
+                            Nenhum produto disponível em estoque encontrado.
+                        </div>
+                    )}
                 </div>
                 <button className="btn-fechar-modal" onClick={onClose}>Fechar</button>
             </div>
