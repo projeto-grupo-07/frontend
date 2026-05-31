@@ -34,12 +34,11 @@ function Vendas() {
     const [modalEditarAberto, setModalEditarAberto] = useState(false);
     const [vendaSelecionada, setVendaSelecionada] = useState(null);
 
-    const TAMANHO_PAGINA = 15;
-
-    // PAGINAÇÃO CURSOR
-    const [pilhaAnterior, setPilhaAnterior] = useState([]);
-    const [proximoCursor, setProximoCursor] = useState(null);
-    const [cursorAtual, setCursorAtual] = useState(null);
+    const [paginaAtual, setPaginaAtual] = useState(0);
+    const [totalPaginas, setTotalPaginas] = useState(1);
+    const [totalElementos, setTotalElementos] = useState(0);
+    const [verTodos, setVerTodos] = useState(false);
+    const [tamanhoPagina, setTamanhoPagina] = useState(15);
 
     const limparFiltros = () => {
         setFiltroDataInicio("");
@@ -68,11 +67,31 @@ function Vendas() {
         }
     };
 
-    const fetchVendas = async (cursor = null) => {
+    const fetchVendas = async (pagina = 0, isAll = verTodos, tamanhoAtual = tamanhoPagina) => {
         try {
             setLoading(true);
-            const dados = await VendaService.getCursor(cursor, TAMANHO_PAGINA);
-            const listaVendas = dados.conteudo || [];
+            let listaVendas = [];
+
+            if (isAll) {
+                const dados = await VendaService.getAll();
+                listaVendas = Array.isArray(dados) ? dados : (dados?.data || []);
+                setPaginaAtual(0);
+                setTotalPaginas(1);
+                setTotalElementos(listaVendas.length);
+            } else {
+                const dados = await VendaService.getPaginated(pagina, tamanhoAtual);
+                
+                // 👀 Log para descobrirmos o que o backend realmente mandou
+                console.log("Retorno da API Paginada:", dados); 
+
+                // Tenta buscar o array em diversas nomenclaturas comuns do Spring e do seu projeto
+                listaVendas = dados?.conteudo || dados?.vendas || dados?.itens || dados?.content || [];
+                
+                // Mapeia as propriedades da paginação com rotas de fallback
+                setPaginaAtual(dados?.pagina ?? dados?.number ?? pagina);
+                setTotalPaginas(dados?.totalPaginas ?? dados?.totalPages ?? 1);
+                setTotalElementos(dados?.total ?? dados?.totalElements ?? 0);
+            }
 
             if (listaVendas.length > 0) {
                 const vendasComNomes = listaVendas.map((venda) => ({
@@ -87,8 +106,6 @@ function Vendas() {
             } else {
                 setVendas([]);
             }
-
-            setProximoCursor(dados.proximoCursor ?? null);
         } catch (err) {
             console.error("Erro no processamento das vendas:", err);
         } finally {
@@ -98,30 +115,43 @@ function Vendas() {
 
     useEffect(() => {
         carregarDadosApoio();
-        fetchVendas(null);
+        fetchVendas(0);
     }, []);
 
-    const irParaProxima = () => {
-        if (!proximoCursor) return;
-        setPilhaAnterior(prev => [...prev, cursorAtual]);
-        setCursorAtual(proximoCursor);
-        fetchVendas(proximoCursor);
+    const irParaPagina = (pagina) => {
+        if (pagina >= 0 && pagina < totalPaginas && pagina !== paginaAtual) {
+            fetchVendas(pagina, verTodos, tamanhoPagina);
+        }
     };
 
-    const irParaAnterior = () => {
-        if (pilhaAnterior.length === 0) return;
-        const pilha = [...pilhaAnterior];
-        const cursorVoltar = pilha.pop();
-        setPilhaAnterior(pilha);
-        setCursorAtual(cursorVoltar);
-        fetchVendas(cursorVoltar);
+    const paginasVisiveis = () => {
+        const paginas = [];
+        const inicio = Math.max(0, paginaAtual - 2);
+        const fim = Math.min(totalPaginas - 1, paginaAtual + 2);
+        for (let i = inicio; i <= fim; i++) {
+            paginas.push(i);
+        }
+        return paginas;
     };
 
-    const voltarParaPrimeira = () => {
-        setPilhaAnterior([]);
-        setCursorAtual(null);
-        fetchVendas(null);
+    const handleToggleVerTodos = () => {
+        const novoStatus = !verTodos;
+        setVerTodos(novoStatus);
+        fetchVendas(0, novoStatus, tamanhoPagina);
     };
+
+    const handleAplicarTamanho = () => {
+        let novoTamanho = Number(tamanhoPagina);
+        if (novoTamanho < 1) {
+            novoTamanho = 1;
+            setTamanhoPagina(1);
+        } else if (novoTamanho > 1000) {
+            novoTamanho = 1000;
+            setTamanhoPagina(1000);
+        }
+        fetchVendas(0, verTodos, novoTamanho);
+    };
+
 
     const dadosFiltrados = vendas.filter(v => {
         if (filtrosVendedores.length > 0 && !filtrosVendedores.includes(v.idVendedor)) return false;
@@ -148,14 +178,12 @@ function Vendas() {
         if (!window.confirm(`Deseja realmente excluir a venda #${venda.id}?`)) return;
         try {
             await VendaService.delete(venda.id);
-            voltarParaPrimeira();
+            fetchVendas(paginaAtual);
         } catch (err) {
             alert("Erro ao excluir venda.");
         }
     };
 
-    const primeiraPagina = pilhaAnterior.length === 0;
-    const ultimaPagina = proximoCursor === null;
 
     return (
         <div className="page-container">
@@ -182,6 +210,18 @@ function Vendas() {
                                 onChange={(e) => setTermoBusca(e.target.value)}
                             />
                         </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, color: '#4A4A4A', fontWeight: '500' }}>
+                            <input 
+                                type="checkbox" 
+                                id="toggleVerTodosVendas" 
+                                checked={verTodos}
+                                onChange={handleToggleVerTodos}
+                                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            <label htmlFor="toggleVerTodosVendas" style={{ cursor: 'pointer', userSelect: 'none' }}>
+                                Ver todas
+                            </label>
+                        </div>
                         <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
                             <Button onClick={() => setIsFilterOpen(true)}>Filtrar</Button>
                         </div>
@@ -204,29 +244,73 @@ function Vendas() {
                             )}
                         />
 
-                        <div className="pagination-wrapper">
-                            <button
-                                className="btn-paginacao"
-                                disabled={primeiraPagina}
-                                onClick={voltarParaPrimeira}
-                            >
-                                « Primeira
-                            </button>
-                            <button
-                                className="btn-paginacao"
-                                disabled={primeiraPagina}
-                                onClick={irParaAnterior}
-                            >
-                                Anterior
-                            </button>
-                            <button
-                                className="btn-paginacao"
-                                disabled={ultimaPagina}
-                                onClick={irParaProxima}
-                            >
-                                Próxima
-                            </button>
-                        </div>
+                        {!verTodos && totalPaginas > 0 && (
+                            <div className="pagination-wrapper">
+                                <button
+                                    className="btn-paginacao"
+                                    disabled={paginaAtual === 0}
+                                    onClick={() => irParaPagina(paginaAtual - 1)}
+                                >
+                                    Anterior
+                                </button>
+
+                                {paginaAtual > 2 && (
+                                    <>
+                                        <button className="btn-paginacao" onClick={() => irParaPagina(0)}>1</button>
+                                        {paginaAtual > 3 && <span className="btn-paginacao-separator">...</span>}
+                                    </>
+                                )}
+
+                                {paginasVisiveis().map(p => (
+                                    <button
+                                        key={p}
+                                        className={`btn-paginacao ${p === paginaAtual ? 'btn-paginacao-ativo' : ''}`}
+                                        onClick={() => irParaPagina(p)}
+                                    >
+                                        {p + 1}
+                                    </button>
+                                ))}
+
+                                {paginaAtual < totalPaginas - 3 && (
+                                    <>
+                                        {paginaAtual < totalPaginas - 4 && <span className="btn-paginacao-separator">...</span>}
+                                        <button className="btn-paginacao" onClick={() => irParaPagina(totalPaginas - 1)}>{totalPaginas}</button>
+                                    </>
+                                )}
+
+                                <button
+                                    className="btn-paginacao"
+                                    disabled={paginaAtual === totalPaginas - 1}
+                                    onClick={() => irParaPagina(paginaAtual + 1)}
+                                >
+                                    Próxima
+                                </button>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#5D78A9' }}>
+                                        <label htmlFor="itensPorPaginaVendas">Itens por página:</label>
+                                        <input 
+                                            type="number"
+                                            id="itensPorPaginaVendas"
+                                            min="1"
+                                            value={tamanhoPagina} 
+                                            onChange={(e) => setTamanhoPagina(e.target.value)}
+                                            onBlur={handleAplicarTamanho}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleAplicarTamanho()}
+                                            style={{ 
+                                                width: '60px', padding: '4px 8px', borderRadius: '6px', 
+                                                border: '1px solid #C5D3F7', outline: 'none', 
+                                                color: '#2D3E50', textAlign: 'center'
+                                            }}
+                                        />
+                                    </div>
+
+                                    <span className="btn-paginacao-info">
+                                        {totalElementos} venda{totalElementos !== 1 ? 's' : ''}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </>
                 )}
             </TableContainer>
@@ -240,7 +324,7 @@ function Vendas() {
                 show={modalEditarAberto}
                 onClose={() => setModalEditarAberto(false)}
                 venda={vendaSelecionada}
-                onUpdateSuccess={voltarParaPrimeira}
+                onUpdateSuccess={() => fetchVendas(paginaAtual)}
             />
             <FilterVendaModal
                 show={isFilterOpen}

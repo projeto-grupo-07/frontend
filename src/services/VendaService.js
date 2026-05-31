@@ -56,7 +56,7 @@ export const VendaService = {
   getPaginated: async (pagina = 0, tamanho = 15) => {
   try {
     const response = await api.get(`${ENDPOINT}/paginas?pagina=${pagina}&tamanho=${tamanho}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Erro ao buscar vendas paginadas:", error);
     throw error;
