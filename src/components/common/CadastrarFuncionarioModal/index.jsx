@@ -29,14 +29,37 @@ function CadastrarFuncionarioModal({ show, onClose, onSuccess }) {
             return tamanhoMin && temLetraMaiuscula && temLetraMinuscula && temNumero && temCaracterEspecial;
         }
 
+
         if (formData.cpf.length < 11) {
             alert("Por favor, insira um CPF válido (11 dígitos).");
+            return;
+        }
+
+        const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailValido.test(formData.email)) {
+            alert("Por favor, insira um email válido.");
             return;
         }
 
         // Validação de senha
         if (!validacaoSenha(formData.senha)) {
             alert("A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais.");
+            return;
+        }
+
+        if (!formData.salario || Number(formData.salario) <= 0) {
+           alert("O salário base deve ser maior que zero.");
+            return;
+        }
+
+        const comissao = Number(formData.comissao);
+        if (isNaN(comissao) || comissao < 0 || comissao > 100) {
+            alert("A taxa de comissão deve ser entre 0% e 100%.");
+            return;
+        }
+
+        if (!formData.nome) {
+           alert("Por favor, insira o nome do funcionário.");
             return;
         }
 
