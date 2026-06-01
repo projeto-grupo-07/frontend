@@ -29,6 +29,10 @@ function CadastrarFuncionarioModal({ show, onClose, onSuccess }) {
             return tamanhoMin && temLetraMaiuscula && temLetraMinuscula && temNumero && temCaracterEspecial;
         }
 
+        if (!formData.nome) {
+           alert("Por favor, insira o nome do funcionário.");
+            return;
+        }
 
         if (formData.cpf.length < 11) {
             alert("Por favor, insira um CPF válido (11 dígitos).");
@@ -55,11 +59,6 @@ function CadastrarFuncionarioModal({ show, onClose, onSuccess }) {
         const comissao = Number(formData.comissao);
         if (isNaN(comissao) || comissao < 0 || comissao > 100) {
             alert("A taxa de comissão deve ser entre 0% e 100%.");
-            return;
-        }
-
-        if (!formData.nome) {
-           alert("Por favor, insira o nome do funcionário.");
             return;
         }
 
