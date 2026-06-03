@@ -6,12 +6,19 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: 10px 0;
+    /* Ajuste de padding para não colar a barra de rolagem nas bordas */
+    padding: 10px 4px; 
+    
+    /* --- ADIÇÕES PARA CABER NA TELA --- */
+    max-height: 75vh; /* O modal ocupará no máximo 75% da altura da tela */
+    overflow-y: auto; /* Cria uma barra de rolagem vertical apenas aqui dentro */
+    overflow-x: hidden; /* Trava rolagem horizontal indesejada */
 }
 
-/* Coloca dois campos lado a lado */
+/* Coloca dois campos lado a lado de forma responsiva */
 .create-product-content .form-row-duplo {
     display: flex;
+    flex-wrap: wrap; /* Permite que os campos quebrem linha em telas menores */
     gap: 16px;
     width: 100%;
 }
@@ -20,7 +27,8 @@
 .create-product-content .form-group {
     display: flex !important;
     flex-direction: column !important;
-    flex: 1;
+    /* O flex-basis garante que não encolham ao ponto de quebrar o layout */
+    flex: 1 1 min(100%, 200px); 
     gap: 6px !important;
     text-align: left !important;
 }
@@ -78,10 +86,17 @@
 .create-product-content form > div:last-child {
     display: flex !important;
     justify-content: flex-end !important;
+    flex-wrap: wrap !important; /* Quebra linha dos botões se não couberem */
     gap: 12px !important;
     margin-top: 20px !important;
     padding-top: 16px !important;
     border-top: 1px solid #e2e8f0 !important;
+    
+    /* Prende os botões no final do modal em vez de rolarem junto, se desejar (opcional): 
+       position: sticky; 
+       bottom: 0; 
+       background: white; 
+    */
 }
 
 .create-product-content button[type="submit"],
@@ -95,7 +110,7 @@
     cursor: pointer !important;
     font-size: 0.95rem !important;
     transition: background-color 0.2s !important;
-    width: auto !important; /* Mata o botão gigante */
+    width: auto !important;
 }
 
 .create-product-content button[type="submit"]:hover,

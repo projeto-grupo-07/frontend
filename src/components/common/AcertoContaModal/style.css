@@ -1,6 +1,13 @@
+/* =========================================
+   MODAL PRINCIPAL E CORPO
+   ========================================= */
 .acerto-modal {
-    max-width: 800px !important; /* Modal mais largo para caber as duas colunas */
+    max-width: 800px !important; 
     width: 90%;
+    /* ADIÇÕES PARA CABER NA TELA: */
+    max-height: 85vh; /* O modal ocupa no máximo 85% da altura da tela */
+    display: flex; 
+    flex-direction: column; /* Necessário para o corpo rolar corretamente */
 }
 
 .acerto-body {
@@ -8,8 +15,14 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    /* ADIÇÕES PARA SCROLL INTERNO: */
+    overflow-y: auto; /* Cria barra de rolagem vertical se precisar */
+    overflow-x: hidden;
 }
 
+/* =========================================
+   RESTANTE DO SEU CSS INTACTO
+   ========================================= */
 .saldo-container {
     display: flex;
     justify-content: space-between;
@@ -39,11 +52,11 @@
 }
 
 .saldo-item.destaque strong.text-danger {
-    color: #e53e3e; /* Vermelho se a loja deve o funcionário */
+    color: #e53e3e; 
 }
 
 .saldo-item.destaque strong.text-success {
-    color: #38a169; /* Verde se está tudo pago */
+    color: #38a169; 
 }
 
 .acerto-grid {
@@ -94,4 +107,21 @@
     color: #a0aec0;
     font-style: italic;
     padding: 20px 0;
+}
+
+/* =========================================
+   DICA PRO: RESPONSIVIDADE PARA TELAS MENORES
+   ========================================= */
+@media (max-width: 768px) {
+    .acerto-grid {
+        /* Se a tela for pequena (notebook pequeno ou celular), coloca o formulário em cima do histórico */
+        grid-template-columns: 1fr; 
+    }
+    
+    .saldo-container {
+        /* Empilha os saldos em telas pequenas para não espremer os números */
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
 }

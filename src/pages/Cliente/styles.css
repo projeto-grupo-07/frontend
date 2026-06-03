@@ -66,3 +66,18 @@
 .btn-delete:hover {
   background-color: #fef2f2;
 }
+
+.page-container {
+    padding: 20px 40px;
+    background-color: #f4f7fb; 
+    min-height: 100vh; 
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.table-container-wrapper {
+    flex-grow: 1; 
+    overflow: auto; 
+}

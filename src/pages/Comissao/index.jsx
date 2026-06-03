@@ -191,7 +191,6 @@ function Comissao() {
                                             setModalAberto(true);
                                         }}
                                     />
-                                    <IconButton icon={FiTrash} onClick={() => console.log("Excluir", item.id)} />
                                 </div>
                             )}
                         />
