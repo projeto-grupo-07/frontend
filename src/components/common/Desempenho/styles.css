@@ -270,3 +270,24 @@
   background-color: #fff5f7;
   box-shadow: 0 4px 6px rgba(213, 63, 140, 0.1);
 }
+
+/* ==========================================================================
+   BLINDAGEM DOS CABEÇALHOS DOS GRÁFICOS
+   ========================================================================== */
+
+.card-header {
+  background-color: #FFE5F0 !important; /* Garante o fundo rosa bem clarinho */
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px 12px 0 0;
+  flex-shrink: 0;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: #FF70A6 !important; /* Garante que o texto fique no rosa escuro */
+  font-size: 16px;
+  font-weight: 800;
+}

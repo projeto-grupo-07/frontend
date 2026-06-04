@@ -75,6 +75,10 @@ export default function ClientePage() {
         carregarClientes(0);
     }, []);
 
+    useEffect(() => {
+        document.title = "Clientes | Brink Calçados";
+    }, []);
+
     const irParaPagina = (pagina) => {
         if (pagina >= 0 && pagina < totalPaginas && pagina !== paginaAtual) {
             carregarClientes(pagina, verTodos, tamanhoPagina);

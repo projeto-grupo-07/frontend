@@ -7,7 +7,6 @@ import {
 } from 'recharts';
 import { KpiService } from '../../services/KpiService';
 import EmitirRelatorioModal from './EmitirRelatorioModal';
-import RelatorioService from '../../services/RelatorioService';
 import api from '../../services/api/api';
 
 const CORES_PAGAMENTO = {
@@ -56,26 +55,22 @@ export default function Estrategica() {
   const [margemCategoria, setMargemCategoria] = useState([]);
   const [sazonalidade, setSazonalidade] = useState([]); // Usaremos o faturamento histórico como volume
   const [loading, setLoading] = useState(false);
+  const [isSubmittingRelatorio, setIsSubmittingRelatorio] = useState(false);
 
   useEffect(() => {
+        document.title = "Estratégica | Brink Calçados";
+    }, []);
+  
+  useEffect(() => {
     if (!isRelatorioOpen) return;
+
+  
+  
 
     const hoje = new Date();
     setMesRelatorio(String(hoje.getMonth() + 1));
     setAnoRelatorio(String(hoje.getFullYear()));
   }, [isRelatorioOpen]);
-
-  useEffect(() => {
-    const handleOpenImportReport = () => {
-      setIsRelatorioOpen(true);
-    };
-
-    window.addEventListener('open-relatorio-importacao', handleOpenImportReport);
-
-    return () => {
-      window.removeEventListener('open-relatorio-importacao', handleOpenImportReport);
-    };
-  }, []);
 
   // ========================================================================
   // LÓGICA DE DATAS E INTEGRAÇÃO
@@ -134,7 +129,7 @@ export default function Estrategica() {
       }
     };
     carregarDados();
-  }, [periodoAtual, triggerFetch]); // <-- ADICIONADO O triggerFetch AQUI
+  }, [periodoAtual, triggerFetch]);
 
   // ========================================================================
   // CÁLCULOS DINÂMICOS
@@ -149,19 +144,15 @@ export default function Estrategica() {
         const mesParaEnviar = mesRelatorio ? String(Number(mesRelatorio)) : mesRelatorio;
         console.log('Relatório solicitado', { mes: mesParaEnviar, ano: anoRelatorio });
 
-        // Pedimos explicitamente arraybuffer para receber o PDF bruto
-        // e aumentamos o timeout pois a geração pode demorar
         const resultado = await api.post("/relatorio/gerar", {
           ano: anoRelatorio,
           mes: mesParaEnviar
         }, { responseType: 'arraybuffer', timeout: 150000 });
 
-        // `resultado` pode ser um ArrayBuffer ou um objeto/string com base64.
         let arrayBuffer = null;
         if (resultado instanceof ArrayBuffer || (resultado && resultado.byteLength !== undefined)) {
           arrayBuffer = resultado;
         } else if (resultado && typeof resultado === 'object' && typeof resultado.data === 'string') {
-          // { data: 'base64...' }
           const base64 = resultado.data;
           const binary = window.atob(base64);
           const len = binary.length;
@@ -169,7 +160,6 @@ export default function Estrategica() {
           for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
           arrayBuffer = bytes.buffer;
         } else if (typeof resultado === 'string') {
-          // possivelmente uma string base64 ou um Data URI
           let base64 = resultado;
           const idx = resultado.indexOf('base64,');
           if (idx !== -1) base64 = resultado.slice(idx + 7);
@@ -180,7 +170,6 @@ export default function Estrategica() {
             for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
             arrayBuffer = bytes.buffer;
           } catch (e) {
-            // fallback: criar blob a partir da string (menos provável)
             arrayBuffer = new TextEncoder().encode(resultado).buffer;
           }
         }
@@ -212,8 +201,6 @@ export default function Estrategica() {
     })();
   };
 
-  const [isSubmittingRelatorio, setIsSubmittingRelatorio] = useState(false);
-
   return (
     <div className="estrategica-wrapper">
 
@@ -231,6 +218,16 @@ export default function Estrategica() {
               Foco em eficiência operacional e margem real. Período: <strong style={{ color: '#FF70A6' }}>{periodoAtual}</strong>
             </p>
           </div>
+        </div>
+
+        {/* NOVA ÁREA DE AÇÕES COM O BOTÃO LOCAL */}
+        <div className="estr-top-actions">
+          <button 
+            className="estr-btn-relatorio" 
+            onClick={() => setIsRelatorioOpen(true)}
+          >
+            Emitir Relatório de Importação
+          </button>
         </div>
       </div>
 
@@ -436,12 +433,11 @@ export default function Estrategica() {
                 Cancelar
               </button>
 
-              {/* LÓGICA NOVA: Botão Aplicar agora dispara o triggerFetch */}
               {periodoAtual === 'Personalizado' && (
                 <button
                   onClick={() => {
                     setIsFilterOpen(false);
-                    setTriggerFetch(prev => prev + 1); // <-- A MÁGICA ACONTECE AQUI
+                    setTriggerFetch(prev => prev + 1);
                   }}
                   style={{
                     padding: '10px 20px',

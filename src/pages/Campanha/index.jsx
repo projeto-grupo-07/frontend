@@ -61,6 +61,10 @@ export default function Campanha() {
         carregarCampanhas(0);
     }, []);
 
+    useEffect(() => {
+        document.title = "Campanhas | Brink Calçados";
+    }, []);
+
     const irParaPagina = (pagina) => {
         if (pagina >= 0 && pagina < totalPaginas && pagina !== paginaAtual) {
             carregarCampanhas(pagina, verTodos, tamanhoPagina);

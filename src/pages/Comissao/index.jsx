@@ -81,6 +81,10 @@ function Comissao() {
         carregarDadosComissao(0);
     }, []);
 
+    useEffect(() => {
+        document.title = "Comissões | Brink Calçados";
+    }, []);
+
     // FUNÇÕES DE CONTROLE DE PAGINAÇÃO
     const irParaPagina = (pagina) => {
         if (pagina >= 0 && pagina < totalPaginas && pagina !== paginaAtual) {

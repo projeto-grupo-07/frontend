@@ -58,6 +58,10 @@ function Vendas() {
         { header: "Pagamento", accessor: "formaPagamento" },
     ];
 
+    useEffect(() => {
+        document.title = "Vendas | Brink Calçados";
+    }, []);
+
     const carregarDadosApoio = async () => {
         try {
             const pagRes = await VendaService.getFormasPagamento();

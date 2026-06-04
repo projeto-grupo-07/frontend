@@ -221,6 +221,10 @@ function Produtos() {
         fetchProdutos(0);
     };
 
+    useEffect(() => {
+        document.title = "Produtos | Brink Calçados";
+    }, []);
+
     async function handleDelete(produto) {
         console.log("DELETE PRODUTO:", produto);
         if (!produto?.id) {

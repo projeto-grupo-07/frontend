@@ -4,6 +4,7 @@ import { KpiService } from "../../../services/KpiService";
 import FiltroPeriodoModal from "../FiltroPeriodoModal"; // Ajuste o caminho se necessário
 import './styles.css';
 
+
 const formatarNumero2Casas = (valor) =>
   Number(valor || 0).toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
@@ -18,6 +19,10 @@ const formatarMoeda2Casas = (valor) =>
     maximumFractionDigits: 2,
   });
 
+  
+
+  
+
 // ============================================================================
 // 1. SUBCOMPONENTES LOCAIS
 // ============================================================================
@@ -31,6 +36,7 @@ const Chart = ({ data, xKey, yKey }) => {
       </div>
     );
   }
+
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -101,6 +107,12 @@ export default function Dashboard() {
   const [employeeData, setEmployeeData] = useState([]);
   const [weekData, setWeekData] = useState([]);
 
+  
+  useEffect(() => {
+
+        document.title = "Desempenho | Brink Calçados";
+    }, []);
+
   // ==========================================================================
   // EFEITOS (BUSCA DE DADOS NA API)
   // ==========================================================================
@@ -128,6 +140,10 @@ export default function Dashboard() {
           reqVendas = KpiService.getUnidadesMensal();
           reqTicket = KpiService.getTicketMedioMensal();
         }
+
+        useEffect(() => {
+        document.title = "Desempenho | Brink Calçados";
+    }, []);
 
         const [resFat, resDesc, resVendas, resTicket] = await Promise.all([reqFat, reqDesc, reqVendas, reqTicket]);
 

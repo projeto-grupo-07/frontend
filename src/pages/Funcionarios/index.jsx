@@ -78,6 +78,10 @@ function Funcionarios() {
         loadFuncionarios(0);
     }, []);
 
+    useEffect(() => {
+        document.title = "Funcionários | Brink Calçados";
+    }, []);
+
     const irParaPagina = (pagina) => {
         if (pagina >= 0 && pagina < totalPaginas && pagina !== paginaAtual) {
             loadFuncionarios(pagina, verTodos, tamanhoPagina);
