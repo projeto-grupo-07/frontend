@@ -19,6 +19,11 @@ export const KpiService = {
         const res = await api.get('/kpis/faturamento-mensal');
         return res;
     },
+    getFaturamentoSemestral: async () => {
+        console.log("➡️ Chamando: GET /kpis/faturamento-semestral");
+        const res = await api.get('/kpis/faturamento-semestral');
+        return res;
+    },
 
     // ========================================================================
     // --- KPIs DE VOLUME DE VENDAS (Nº DE PEDIDOS) ---
@@ -38,6 +43,11 @@ export const KpiService = {
         const res = await api.get('/kpis/total-vendas-mensal');
         return res;
     },
+    getTotalVendasSemestral: async () => {
+        console.log("➡️ Chamando: GET /kpis/total-vendas-semestral");
+        const res = await api.get('/kpis/total-vendas-semestral');
+        return res;
+    },
 
     // ========================================================================
     // --- KPIs DE TICKET MÉDIO ---
@@ -55,6 +65,11 @@ export const KpiService = {
     getTicketMedioMensal: async () => {
         console.log("➡️ Chamando: GET /kpis/ticket-medio-mensal");
         const res = await api.get('/kpis/ticket-medio-mensal');
+        return res;
+    },
+    getTicketMedioSemestral: async () => {
+        console.log("➡️ Chamando: GET /kpis/ticket-medio-semestral");
+        const res = await api.get('/kpis/ticket-medio-semestral');
         return res;
     },
 
@@ -95,6 +110,11 @@ export const KpiService = {
         const res = await api.get('/kpis/desconto-mensal');
         return res;
     },
+    getDescontoSemestral: async () => {
+        console.log("➡️ Chamando: GET /kpis/desconto-semestral");
+        const res = await api.get('/kpis/desconto-semestral');
+        return res;
+    },
 
     // ========================================================================
     // --- KPIs DE UNIDADES VENDIDAS ---
@@ -112,6 +132,11 @@ export const KpiService = {
     getUnidadesMensal: async () => {
         console.log("➡️ Chamando: GET /kpis/unidades-mensal");
         const res = await api.get('/kpis/unidades-mensal');
+        return res;
+    },
+    getUnidadesSemestral: async () => {
+        console.log("➡️ Chamando: GET /kpis/unidades-semestral");
+        const res = await api.get('/kpis/unidades-semestral');
         return res;
     },
 
