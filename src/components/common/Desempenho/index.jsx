@@ -118,34 +118,20 @@ export default function Dashboard() {
   // ==========================================================================
 
   // 1. KPIs da Esquerda
+// 1. KPIs da Esquerda (Substitua todo o seu useEffect antigo do fetchKpis por este)
   useEffect(() => {
     const fetchKpis = async () => {
       setLoadingKpis(true);
       try {
-        let reqFat, reqDesc, reqVendas, reqTicket;
+        const tipo = filtroPeriodo.tipo; // Pega o estado atual: "Hoje", "Esta Semana", "Este Mês"
 
-        if (filtroPeriodo.tipo === "Hoje") {
-          reqFat = KpiService.getFaturamentoDiario();
-          reqDesc = KpiService.getDescontoDiario();
-          reqVendas = KpiService.getUnidadesDiario();
-          reqTicket = KpiService.getTicketMedioDiario();
-        } else if (filtroPeriodo.tipo === "Esta Semana") {
-          reqFat = KpiService.getFaturamentoSemanal();
-          reqDesc = KpiService.getDescontoSemanal();
-          reqVendas = KpiService.getUnidadesSemanal();
-          reqTicket = KpiService.getTicketMedioSemanal();
-        } else {
-          reqFat = KpiService.getFaturamentoMensal();
-          reqDesc = KpiService.getDescontoMensal();
-          reqVendas = KpiService.getUnidadesMensal();
-          reqTicket = KpiService.getTicketMedioMensal();
-        }
-
-        useEffect(() => {
-        document.title = "Desempenho | Brink Calçados";
-    }, []);
-
-        const [resFat, resDesc, resVendas, resTicket] = await Promise.all([reqFat, reqDesc, reqVendas, reqTicket]);
+        // Agora chamamos os métodos unificados passando o tipo
+        const [resFat, resDesc, resVendas, resTicket] = await Promise.all([
+          KpiService.getFaturamento(tipo),
+          KpiService.getTotalDescontos(tipo),
+          KpiService.getTotalVendas(tipo),
+          KpiService.getTicketMedio(tipo)
+        ]);
 
         setKpiData({
           revenue: Number(resFat) || 0,
