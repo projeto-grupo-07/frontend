@@ -5,26 +5,30 @@ export const KpiService = {
     // --- MÉTODOS UNIFICADOS (KPIS DOS CARDS DA ESQUERDA) ---
     // ========================================================================
     getFaturamento: async (tipo) => {
-        console.log(`➡️ Chamando: GET /kpis/faturamento?tipo=${tipo}`);
-        const res = await api.get(`/kpis/faturamento?tipo=${tipo}`);
+        const params = new URLSearchParams({ tipo });
+        console.log(`➡️ Chamando: GET /kpis/faturamento?${params.toString()}`);
+        const res = await api.get(`/kpis/faturamento?${params.toString()}`);
         return res;
     },
 
     getTotalVendas: async (tipo) => {
-        console.log(`➡️ Chamando: GET /kpis/total-vendas?tipo=${tipo}`);
-        const res = await api.get(`/kpis/total-vendas?tipo=${tipo}`);
+        const params = new URLSearchParams({ tipo });
+        console.log(`➡️ Chamando: GET /kpis/total-vendas?${params.toString()}`);
+        const res = await api.get(`/kpis/total-vendas?${params.toString()}`);
         return res;
     },
 
     getTicketMedio: async (tipo) => {
-        console.log(`➡️ Chamando: GET /kpis/ticket-medio?tipo=${tipo}`);
-        const res = await api.get(`/kpis/ticket-medio?tipo=${tipo}`);
+        const params = new URLSearchParams({ tipo });
+        console.log(`➡️ Chamando: GET /kpis/ticket-medio?${params.toString()}`);
+        const res = await api.get(`/kpis/ticket-medio?${params.toString()}`);
         return res;
     },
 
     getTotalDescontos: async (tipo) => {
-        console.log(`➡️ Chamando: GET /kpis/total-descontos?tipo=${tipo}`);
-        const res = await api.get(`/kpis/total-descontos?tipo=${tipo}`);
+        const params = new URLSearchParams({ tipo });
+        console.log(`➡️ Chamando: GET /kpis/total-descontos?${params.toString()}`);
+        const res = await api.get(`/kpis/total-descontos?${params.toString()}`);
         return res;
     },
 
@@ -71,12 +75,12 @@ export const KpiService = {
     },
 
     getGraficoPicoDiaDinamico: async (filtro) => {
-    const params = new URLSearchParams({ tipo: filtro.tipo });
-    if (filtro.inicio) params.append('inicio', filtro.inicio);
-    if (filtro.fim) params.append('fim', filtro.fim);
-    console.log(`➡️ Chamando: GET /kpis/grafico-pico-dia?${params.toString()}`);
-    const res = await api.get(`/kpis/grafico-pico-dia?${params.toString()}`);
-    return res;
+        const params = new URLSearchParams({ tipo: filtro.tipo });
+        if (filtro.inicio) params.append('inicio', filtro.inicio);
+        if (filtro.fim) params.append('fim', filtro.fim);
+        console.log(`➡️ Chamando: GET /kpis/grafico-pico-dia?${params.toString()}`);
+        const res = await api.get(`/kpis/grafico-pico-dia?${params.toString()}`);
+        return res;
     },
 
     getRankingMarcasDinamico: async (filtro) => {
