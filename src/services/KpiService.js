@@ -105,5 +105,40 @@ export const KpiService = {
         console.log(`➡️ Chamando: GET /kpis/sazonalidade?ano=${ano}`);
         const res = await api.get(`/kpis/sazonalidade?ano=${ano}`);
         return res; 
+    },
+
+    getGraficoPicoDiaDinamico: async (filtro) => {
+        const params = new URLSearchParams({ tipo: filtro.tipo });
+        if (filtro.inicio) params.append('inicio', filtro.inicio);
+        if (filtro.fim) params.append('fim', filtro.fim);
+        console.log(`➡️ Chamando: GET /kpis/grafico-pico-dia?${params.toString()}`);
+        const res = await api.get(`/kpis/grafico-pico-dia?${params.toString()}`);
+        return res;
+    },
+    // ========================================================================
+    // --- DASHBOARD ESTRATÉGICA ---
+    // ========================================================================
+    getDesempenhoPagamentos: async (filtro) => {
+        const params = new URLSearchParams({ tipo: filtro.tipo });
+        if (filtro.inicio) params.append('inicio', filtro.inicio);
+        if (filtro.fim) params.append('fim', filtro.fim);
+        const res = await api.get(`/kpis/estrategico/pagamentos?${params.toString()}`);
+        return res;
+    },
+    
+    getProdutosRentaveis: async (filtro) => {
+        const params = new URLSearchParams({ tipo: filtro.tipo });
+        if (filtro.inicio) params.append('inicio', filtro.inicio);
+        if (filtro.fim) params.append('fim', filtro.fim);
+        const res = await api.get(`/kpis/estrategico/produtos-rentaveis?${params.toString()}`);
+        return res;
+    },
+    
+    getMargemCategoria: async (filtro) => {
+        const params = new URLSearchParams({ tipo: filtro.tipo });
+        if (filtro.inicio) params.append('inicio', filtro.inicio);
+        if (filtro.fim) params.append('fim', filtro.fim);
+        const res = await api.get(`/kpis/estrategico/margem-categoria?${params.toString()}`);
+        return res;
     }
 };

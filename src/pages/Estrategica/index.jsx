@@ -37,6 +37,9 @@ const formatarMoeda2Casas = (valor) =>
     maximumFractionDigits: 2,
   });
 
+// Extrai dados da resposta do Axios
+const extractData = (res) => (res && res.data !== undefined ? res.data : res) || [];
+
 export default function Estrategica() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isRelatorioOpen, setIsRelatorioOpen] = useState(false);
@@ -47,80 +50,77 @@ export default function Estrategica() {
   // ESTADOS DO FILTRO PERSONALIZADO
   const [dataInicioCustom, setDataInicioCustom] = useState('');
   const [dataFimCustom, setDataFimCustom] = useState('');
-  const [triggerFetch, setTriggerFetch] = useState(0); // Gatilho para recarregar os dados
+  const [triggerFetch, setTriggerFetch] = useState(0); 
 
   // Estados Reais
   const [pagamentos, setPagamentos] = useState([]);
   const [produtosRentaveis, setProdutosRentaveis] = useState([]);
   const [margemCategoria, setMargemCategoria] = useState([]);
-  const [sazonalidade, setSazonalidade] = useState([]); // Usaremos o faturamento histórico como volume
+  const [sazonalidade, setSazonalidade] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [isSubmittingRelatorio, setIsSubmittingRelatorio] = useState(false);
 
   useEffect(() => {
-        document.title = "Estratégica | Brink Calçados";
-    }, []);
+    document.title = "Estratégica | Brink Calçados";
+  }, []);
   
   useEffect(() => {
     if (!isRelatorioOpen) return;
-
-  
-  
-
     const hoje = new Date();
     setMesRelatorio(String(hoje.getMonth() + 1));
     setAnoRelatorio(String(hoje.getFullYear()));
   }, [isRelatorioOpen]);
 
   // ========================================================================
-  // LÓGICA DE DATAS E INTEGRAÇÃO
+  // LÓGICA DE DATAS E INTEGRAÇÃO (ATUALIZADO PARA O NOVO BACKEND)
   // ========================================================================
   useEffect(() => {
     const carregarDados = async () => {
       setLoading(true);
       try {
-        const hoje = new Date();
-        let inicio = new Date(hoje);
-        let fim = new Date(hoje); // Criamos a variável fim
+        let tipoBackend = periodoAtual;
+        let inicioIso = null;
+        let fimIso = null;
 
-        if (periodoAtual === 'Esta Semana') {
-          inicio.setDate(hoje.getDate() - hoje.getDay());
-        } else if (periodoAtual === 'Mês Atual') {
-          inicio.setDate(1);
-        } else if (periodoAtual === 'Últimos 3 Meses') {
-          inicio.setMonth(hoje.getMonth() - 3);
-        } else if (periodoAtual === 'Personalizado') {
-          // LÓGICA NOVA: Pega as datas do input
-          if (dataInicioCustom) inicio = new Date(`${dataInicioCustom}T00:00:00`);
-          if (dataFimCustom) fim = new Date(`${dataFimCustom}T23:59:59`);
-        }
-
-        // Zera as horas se não for personalizado (o personalizado já vem com a hora setada acima)
-        if (periodoAtual !== 'Personalizado') {
-          inicio.setHours(0, 0, 0, 0);
-          fim.setHours(23, 59, 59, 999);
-        }
-
-        // Formata para o LocalDateTime do Spring
+        // Formata data JS para LocalDateTime do Java
         const formatIso = (date) => {
           const pad = (n) => String(n).padStart(2, '0');
           return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
         };
 
-        const filtroObj = { inicio: formatIso(inicio), fim: formatIso(fim) };
+        // De/Para do menu do usuário para o padrão do backend
+        if (periodoAtual === 'Mês Atual') {
+            tipoBackend = 'Este Mês';
+        } else if (periodoAtual === 'Últimos 3 Meses') {
+            // O backend não tem um switch para 3 meses, então forçamos "Personalizado" e enviamos as datas
+            tipoBackend = 'Personalizado';
+            const hoje = new Date();
+            const tresMesesAtras = new Date();
+            tresMesesAtras.setMonth(hoje.getMonth() - 3);
+            tresMesesAtras.setHours(0, 0, 0, 0);
+            hoje.setHours(23, 59, 59, 999);
+            inicioIso = formatIso(tresMesesAtras);
+            fimIso = formatIso(hoje);
+        } else if (periodoAtual === 'Personalizado') {
+            inicioIso = dataInicioCustom ? `${dataInicioCustom}T00:00:00` : null;
+            fimIso = dataFimCustom ? `${dataFimCustom}T23:59:59` : null;
+        }
 
-        // 2. Dispara requisições simultâneas para otimizar tempo
+        const filtroObj = { tipo: tipoBackend, inicio: inicioIso, fim: fimIso };
+
+        // Dispara requisições simultâneas para otimizar tempo
         const [resPag, resProd, resMargem, resSaz] = await Promise.all([
           KpiService.getDesempenhoPagamentos(filtroObj),
           KpiService.getProdutosRentaveis(filtroObj),
           KpiService.getMargemCategoria(filtroObj),
-          KpiService.getGraficoFaturamentoDinamico({ ...filtroObj, tipo: "Mês" })
+          KpiService.getGraficoFaturamentoDinamico(filtroObj) // O seu código original usava faturamento aqui
         ]);
 
-        setPagamentos(resPag || []);
-        setProdutosRentaveis(resProd || []);
-        setMargemCategoria(resMargem || []);
-        setSazonalidade(resSaz || []);
+        // Seta os estados extraindo a .data do Axios
+        setPagamentos(extractData(resPag));
+        setProdutosRentaveis(extractData(resProd));
+        setMargemCategoria(extractData(resMargem));
+        setSazonalidade(extractData(resSaz));
 
       } catch (error) {
         console.error("Erro ao buscar dados estratégicos", error);
@@ -134,7 +134,7 @@ export default function Estrategica() {
   // ========================================================================
   // CÁLCULOS DINÂMICOS
   // ========================================================================
-  const totalVendasQtd = pagamentos.reduce((acc, item) => acc + (item.qtdVendas || 0), 0);
+  const totalVendasQtd = pagamentos.reduce((acc, item) => acc + (item.qtdVendas || item.QtdVendas || 0), 0);
 
   const handleGerarRelatorio = (event) => {
     event.preventDefault();
@@ -276,19 +276,24 @@ export default function Estrategica() {
                     </tr>
                   </thead>
                   <tbody>
-                    {pagamentos.map((pag) => {
-                      const frequencia = totalVendasQtd > 0 ? ((pag.qtdVendas / totalVendasQtd) * 100) : 0;
-                      const valorMedio = pag.qtdVendas > 0 ? pag.valorTotal / pag.qtdVendas : 0;
-                      const metodoEnum = (pag.metodo || "").toUpperCase();
+                    {pagamentos.map((pag, idx) => {
+                      const metodoCru = pag.metodo || pag.Metodo || "";
+                      const qtdVendas = pag.qtdVendas || pag.QtdVendas || 0;
+                      const valorTotal = pag.valorTotal || pag.ValorTotal || 0;
+                      
+                      const frequencia = totalVendasQtd > 0 ? ((qtdVendas / totalVendasQtd) * 100) : 0;
+                      const valorMedio = qtdVendas > 0 ? valorTotal / qtdVendas : 0;
+                      const metodoEnum = metodoCru.toUpperCase();
+                      
                       return (
-                        <tr key={pag.metodo}>
+                        <tr key={idx}>
                           <td style={{ fontWeight: '600', display: 'flex', alignItems: 'center' }}>
                             <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: CORES_PAGAMENTO[metodoEnum] || '#CBD5E0', marginRight: '8px' }}></span>
-                            {formatarNomePagamento(pag.metodo)}
+                            {formatarNomePagamento(metodoCru)}
                           </td>
                           <td>{formatarNumero2Casas(frequencia)}%</td>
-                          <td>{pag.qtdVendas}</td>
-                          <td style={{ fontWeight: 'bold', color: '#2D3748' }}>{formatarMoeda2Casas(pag.valorTotal || 0)}</td>
+                          <td>{qtdVendas}</td>
+                          <td style={{ fontWeight: 'bold', color: '#2D3748' }}>{formatarMoeda2Casas(valorTotal)}</td>
                           <td>{formatarMoeda2Casas(valorMedio)}</td>
                         </tr>
                       );
@@ -316,13 +321,13 @@ export default function Estrategica() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={margemCategoria} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
-                <XAxis dataKey="categoria" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
+                <XAxis dataKey={row => row.categoria || row.Categoria} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#FF70A6' }} tickFormatter={(val) => `${formatarNumero2Casas(val)}%`} />
                 <RechartsTooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   formatter={(value) => [`${formatarNumero2Casas(value)}%`, 'Margem Média']}
                 />
-                <Bar dataKey="margem" name="Margem Média" fill="#FF70A6" radius={[4, 4, 0, 0]} barSize={40} />
+                <Bar dataKey={row => row.margem || row.Margem} name="Margem Média" fill="#FF70A6" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -346,9 +351,9 @@ export default function Estrategica() {
                 <tbody>
                   {produtosRentaveis.map((prod, idx) => (
                     <tr key={idx}>
-                      <td style={{ fontWeight: '600' }}>{prod.nome}</td>
-                      <td>{prod.vendas} un.</td>
-                      <td style={{ color: '#38A169', fontWeight: 'bold' }}>{formatarMoeda2Casas(prod.lucro || 0)}</td>
+                      <td style={{ fontWeight: '600' }}>{prod.nome || prod.Nome}</td>
+                      <td>{prod.vendas || prod.Vendas} un.</td>
+                      <td style={{ color: '#38A169', fontWeight: 'bold' }}>{formatarMoeda2Casas(prod.lucro || prod.Lucro || 0)}</td>
                     </tr>
                   ))}
                 </tbody>

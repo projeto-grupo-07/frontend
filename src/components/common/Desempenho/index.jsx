@@ -217,6 +217,28 @@ export default function Dashboard() {
     fetchPeakDay();
   }, [filtroPeriodo]);
 
+  // 5. Gráfico Dia da Semana Dinâmico
+  useEffect(() => {
+    const fetchPeakDay = async () => {
+      try {
+        const res = await KpiService.getGraficoPicoDiaDinamico(filtroPeriodo);
+        
+        // Garante que pega o array correto do Axios
+        const dataArr = res && res.data ? res.data : (res || []);
+
+        const formatted = dataArr.map(item => ({
+          "Dia": (item.diaSemana || item.DiaSemana || "").substring(0, 3),
+          "Faturamento": Number(item.faturamento || item.Faturamento || 0)
+        }));
+        
+        setWeekData(formatted);
+      } catch (error) { 
+        console.error("Erro no Pico por Dia:", error); 
+      }
+    };
+    fetchPeakDay();
+  }, [filtroPeriodo]);
+
   // Formata o texto do botão de filtro
   const textoBotaoFiltro = filtroPeriodo.tipo === "Personalizado"
     ? `${filtroPeriodo.inicio.split('-').reverse().join('/')} até ${filtroPeriodo.fim.split('-').reverse().join('/')}`
