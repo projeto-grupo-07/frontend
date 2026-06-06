@@ -50,6 +50,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error("Erro ao tentar invalidar cookie no backend:", error);
     } finally {
+      localStorage.removeItem('@BrinksCalcados:carrinho');
       setUser(null);
       window.location.href = "/login";
     }

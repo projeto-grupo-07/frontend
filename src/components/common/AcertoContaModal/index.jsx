@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ComissaoService } from '../../../services/ComissaoService'; // Ajuste o caminho da sua importação
+import { ComissaoService } from '../../../services/ComissaoService'; 
 import './style.css';
 
 export default function AcertoContaModal({ show, onClose, funcionario }) {
@@ -11,7 +11,6 @@ export default function AcertoContaModal({ show, onClose, funcionario }) {
     const [observacao, setObservacao] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
-    // Busca os dados sempre que o modal abrir ou o funcionário mudar
     useEffect(() => {
         if (show && funcionario?.id) {
             carregarDados();
@@ -36,19 +35,28 @@ export default function AcertoContaModal({ show, onClose, funcionario }) {
 
     const handleRegistrarPagamento = async (e) => {
         e.preventDefault();
-        if (!valor || Number(valor) <= 0) {
+        
+        const valorDigitado = Number(valor);
+
+        // 1. Validação de valor nulo ou negativo
+        if (!valor || valorDigitado <= 0) {
             alert("Digite um valor válido maior que zero.");
+            return;
+        }
+
+        // 2. Validação de teto (Não pode pagar mais do que deve)
+        if (valorDigitado > resumo.saldoPendente) {
+            alert(`Erro: O valor informado (R$ ${valorDigitado.toFixed(2)}) é maior que o saldo pendente (R$ ${resumo.saldoPendente.toFixed(2)}).`);
             return;
         }
 
         setSubmitting(true);
         try {
             await ComissaoService.registrarPagamento(funcionario.id, {
-                valor: Number(valor),
+                valor: valorDigitado,
                 observacao: observacao
             });
             
-            // Limpa o formulário e recarrega o extrato
             setValor("");
             setObservacao("");
             await carregarDados();
@@ -79,7 +87,7 @@ export default function AcertoContaModal({ show, onClose, funcionario }) {
                             {/* CAIXA DE SALDO */}
                             <div className="saldo-container">
                                 <div className="saldo-item">
-                                    <span>Total Ganho (Vida)</span>
+                                    <span>Total Acumulado</span>
                                     <strong>{resumo.totalGanho.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
                                 </div>
                                 <div className="saldo-item">
@@ -105,9 +113,11 @@ export default function AcertoContaModal({ show, onClose, funcionario }) {
                                                 type="number" 
                                                 step="0.01"
                                                 min="0.01"
+                                                max={resumo.saldoPendente > 0 ? resumo.saldoPendente : 0} 
                                                 value={valor} 
                                                 onChange={(e) => setValor(e.target.value)} 
                                                 placeholder="Ex: 150.00"
+                                                disabled={resumo.saldoPendente <= 0} 
                                                 required 
                                             />
                                         </div>
@@ -119,12 +129,24 @@ export default function AcertoContaModal({ show, onClose, funcionario }) {
                                                 onChange={(e) => setObservacao(e.target.value)} 
                                                 placeholder="Ex: Adiantamento PIX"
                                                 maxLength="255"
+                                                disabled={resumo.saldoPendente <= 0}
                                             />
                                         </div>
-                                        <button type="submit" className="btn-success" disabled={submitting}>
+                                        <button 
+                                            type="submit" 
+                                            className="btn-success" 
+                                            disabled={submitting || resumo.saldoPendente <= 0}
+                                        >
                                             {submitting ? "Registrando..." : "Confirmar Pagamento"}
                                         </button>
                                     </form>
+                                    
+                                    {/* Aviso amigável caso não haja saldo */}
+                                    {resumo.saldoPendente <= 0 && (
+                                        <p style={{ color: '#38a169', fontSize: '13px', marginTop: '10px', textAlign: 'center', fontWeight: 'bold' }}>
+                                            Este funcionário não possui saldo pendente para receber.
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* TABELA DE HISTÓRICO */}

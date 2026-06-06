@@ -36,6 +36,7 @@ instance.interceptors.request.use(
 );
 
 // INTERCEPTADOR DE RESPOSTA (Trata o Token Expirado) + logs
+// INTERCEPTADOR DE RESPOSTA (Trata o Token Expirado e Permissões) + logs
 instance.interceptors.response.use(
   (response) => {
     try {
@@ -43,28 +44,27 @@ instance.interceptors.response.use(
     } catch (e) {
       // noop
     }
-    return response; // Deu tudo certo, segue o jogo
+    return response;
   },
   (error) => {
     if (error.response) {
       const status = error.response.status;
+      const currentPath = window.location.pathname;
 
-      // Se o backend gritar que o usuário não tem permissão (401/403)
-      if (status === 401 || status === 403) {
-        const currentPath = window.location.pathname;
-
-        // Só avisa e redireciona se o usuário já não estiver na tela de login
+      // 401 = Token Inválido ou Expirado (Desloga o usuário)
+      if (status === 401) {
         if (currentPath !== '/login' && currentPath !== '/') {
           alert("⏳ Sua sessão expirou. Por favor, faça login novamente.");
-
-          // Limpa os dados do usuário (O Cookie HttpOnly o Back-end invalida)
           sessionStorage.removeItem('usuario');
-
-          // Chuta para a tela de login
           window.location.href = '/login';
         }
+      } 
+      // 403 = Sem Permissão de Acesso (Apenas avisa, não desloga)
+      else if (status === 403) {
+        alert("🚫 Acesso negado! Você não tem permissão para realizar esta ação.");
       }
     }
+    
     console.error('[api] response error:', error);
     return Promise.reject(error);
   }

@@ -7,7 +7,6 @@ import CadastrarCampanhaModal from '../../components/common/CadastrarCampanhaMod
 import EditarCampanhaModal from '../../components/common/EditarCampanhaModal';
 import FilterCampanhaModal from '../../components/common/FilterCampanhaModal';
 import { CampanhaService } from '../../services/CampanhaService';
-import './styles.css';
 
 export default function Campanha() {
     const [isCriarModalOpen, setIsCriarModalOpen] = useState(false);

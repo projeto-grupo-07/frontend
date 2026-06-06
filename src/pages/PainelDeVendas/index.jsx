@@ -78,7 +78,6 @@ function PainelDeVendas() {
         if (!produtoSelecionado) return exibirErro("Selecione um produto primeiro.");
         if (Number(quantidade) < 1) return exibirErro("A quantidade deve ser pelo menos 1.");
 
-        // 🔴 NOVA VALIDAÇÃO: Impede adicionar se não houver estoque suficiente
         if (produtoSelecionado.quantidade <= 0) {
             return exibirErro("Este produto está com o estoque zerado e não pode ser vendido.");
         }
@@ -93,22 +92,19 @@ function PainelDeVendas() {
             return exibirErro(`Você já tem este item no carrinho. A quantidade total ultrapassa o estoque disponível (${produtoSelecionado.quantidade}).`);
         }
 
-        // Substitua a linha antiga da 'descricao' por este bloco:
         let descricao = produtoSelecionado.nome || "";
 
-        // Se tiver marca e modelo, formata bonitinho como calçado
         if (produtoSelecionado.marca || produtoSelecionado.modelo) {
             const marca = produtoSelecionado.marca || "";
             const modelo = produtoSelecionado.modelo || "";
             const numero = produtoSelecionado.numero ? `- Nº ${produtoSelecionado.numero}` : "";
-
             descricao = `${marca} ${modelo} ${numero}`.trim();
         }
 
-        // Fallback de segurança caso tudo falhe
         if (!descricao || descricao.trim() === "") {
             descricao = produtoSelecionado.categoriaPai || "Produto não identificado";
         }
+        
         const novoItem = {
             idProduto: produtoSelecionado.id,
             nome: descricao,
@@ -119,7 +115,6 @@ function PainelDeVendas() {
         };
 
         setItensVenda([...itensVenda, novoItem]);
-
         setProdutoSelecionado(null);
         setQuantidade("1");
     };
@@ -182,18 +177,18 @@ function PainelDeVendas() {
                 onCreated={handleProdutoCriado}
             />
 
-            <main className="painel-container">
-                <div className="painel-content">
-                    <section className="card-cadastro">
-                        <div className="card-header rosa">
+            <main className="pdv-container">
+                <div className="pdv-content">
+                    <section className="pdv-card-cadastro">
+                        <div className="pdv-card-header rosa">
                             <h3>Cadastro de Vendas</h3>
                         </div>
 
-                        <div className="card-body">
-                            <div className="input-group-row">
-                                <div className="input-field">
+                        <div className="pdv-card-body">
+                            <div className="pdv-input-group-row">
+                                <div className="pdv-input-field">
                                     <label>Produto</label>
-                                    <div className="input-busca-container" onClick={() => setModalAberto(true)}>
+                                    <div className="pdv-input-busca-container" onClick={() => setModalAberto(true)}>
                                         <input
                                             type="text"
                                             readOnly
@@ -203,23 +198,23 @@ function PainelDeVendas() {
                                                     ? (produtoSelecionado.nome || `${produtoSelecionado.marca} ${produtoSelecionado.modelo}`)
                                                     : ''
                                             }
-                                            className="custom-input cursor-pointer"
+                                            className="pdv-custom-input cursor-pointer"
                                         />
                                     </div>
                                     <span
-                                        className="helper-link"
+                                        className="pdv-helper-link"
                                         onClick={() => setModalCadastroAberto(true)}
                                     >
                                         Cadastrar novo Produto
                                     </span>
                                 </div>
 
-                                <div className="input-field quantity">
+                                <div className="pdv-input-field quantity">
                                     <label>Qtd. (Disponível: {produtoSelecionado?.quantidade || 0})</label>
                                     <input
                                         type="number"
                                         min="1"
-                                        className="custom-input"
+                                        className="pdv-custom-input"
                                         max={produtoSelecionado?.quantidade || 999}
                                         value={quantidade || ''}
                                         onChange={(e) => setQuantidade(e.target.value)}
@@ -227,19 +222,19 @@ function PainelDeVendas() {
                                 </div>
                             </div>
 
-                            <button className="btn-adicionar" onClick={handleAdicionarItem}>
+                            <button className="pdv-btn-adicionar" onClick={handleAdicionarItem}>
                                 Adicionar Item
                             </button>
                         </div>
                     </section>
 
-                    <section className="card-itens">
-                        <div className="card-header azul">
+                    <section className="pdv-card-itens">
+                        <div className="pdv-card-header azul">
                             <h3>Itens da Venda</h3>
                         </div>
 
-                        <div className="card-body no-padding">
-                            <table className="vendas-table">
+                        <div className="pdv-card-body no-padding">
+                            <table className="pdv-vendas-table">
                                 <thead>
                                     <tr>
                                         <th>Produto</th>
@@ -265,13 +260,13 @@ function PainelDeVendas() {
                                                     placeholder="0.00"
                                                     onChange={(e) => handleAtualizarDesconto(index, e.target.value)}
                                                     onKeyDown={(e) => e.key === '-' && e.preventDefault()}
-                                                    className="input-desconto"
+                                                    className="pdv-input-desconto"
                                                     style={{ width: '80px', padding: '4px' }}
                                                 />
                                             </td>
                                             <td>R$ {item.total.toFixed(2)}</td>
                                             <td>
-                                                <button className="btn-delete" onClick={() => removerItem(index)}>🗑️</button>
+                                                <button className="pdv-btn-delete" onClick={() => removerItem(index)}>🗑️</button>
                                             </td>
                                         </tr>
                                     ))}
@@ -283,12 +278,12 @@ function PainelDeVendas() {
                                 </tbody>
                             </table>
 
-                            <div className="card-footer">
-                                <div className="valor-total-venda">
+                            <div className="pdv-card-footer">
+                                <div className="pdv-valor-total-venda">
                                     Total: R$ {itensVenda.reduce((acc, item) => acc + item.total, 0).toFixed(2)}
                                 </div>
                                 <button
-                                    className="btn-concluir"
+                                    className="pdv-btn-concluir"
                                     onClick={() => setModalFinalizarAberto(true)}
                                     disabled={itensVenda.length === 0}
                                 >
