@@ -70,6 +70,15 @@ export const KpiService = {
         return res;
     },
 
+    getGraficoPicoDiaDinamico: async (filtro) => {
+    const params = new URLSearchParams({ tipo: filtro.tipo });
+    if (filtro.inicio) params.append('inicio', filtro.inicio);
+    if (filtro.fim) params.append('fim', filtro.fim);
+    console.log(`➡️ Chamando: GET /kpis/grafico-pico-dia?${params.toString()}`);
+    const res = await api.get(`/kpis/grafico-pico-dia?${params.toString()}`);
+    return res;
+    },
+
     getRankingMarcasDinamico: async (filtro) => {
         const params = new URLSearchParams({ tipo: filtro.tipo });
         if (filtro.inicio) params.append('inicio', filtro.inicio);
