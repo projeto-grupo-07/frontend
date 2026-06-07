@@ -123,14 +123,11 @@ export default function Dashboard() {
     const fetchKpis = async () => {
       setLoadingKpis(true);
       try {
-        const tipo = filtroPeriodo.tipo; // Pega o estado atual: "Hoje", "Esta Semana", "Este Mês"
-
-        // Agora chamamos os métodos unificados passando o tipo
         const [resFat, resDesc, resVendas, resTicket] = await Promise.all([
-          KpiService.getFaturamento(tipo),
-          KpiService.getTotalDescontos(tipo),
-          KpiService.getTotalVendas(tipo),
-          KpiService.getTicketMedio(tipo)
+          KpiService.getFaturamento(filtroPeriodo),
+          KpiService.getTotalDescontos(filtroPeriodo),
+          KpiService.getTotalVendas(filtroPeriodo),
+          KpiService.getTicketMedio(filtroPeriodo)
         ]);
 
         setKpiData({
