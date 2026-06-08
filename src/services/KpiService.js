@@ -124,5 +124,10 @@ export const KpiService = {
     getMargemCategoria: async (filtro) => {
         const query = buildParams(filtro);
         return await api.get(`/kpis/estrategico/margem-categoria?${query}`);
+    },
+    getGraficoVolumeDinamico: async (filtro) => {
+        const query = buildParams(filtro);
+        console.log(`➡️ Chamando: GET /kpis/grafico-volume?${query}`);
+        return await api.get(`/kpis/grafico-volume?${query}`);
     }
 };

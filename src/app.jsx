@@ -1,8 +1,9 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from "./contexts/AuthContext";
 import { Navbar } from "./components/specific/Navbar";
 import { DynamicRoutes } from "./components/common/DynamicRoutes/DynamicRoutes";
+import api from '../src/services/api/api'; // Certifique-se de que o caminho para a instância do Axios está correto
 
 import Login from './pages/Login';
 import AcessoNegado from './pages/AcessoNegado';
@@ -51,6 +52,23 @@ function AppManager() {
 }
 
 export default function App() {
+  useEffect(() => {
+        window.popularBanco = async (quantidade = 2500) => {
+            console.log(`⏳ [DevTools] Mandando o Faker gerar ${quantidade} vendas no servidor...`);
+            
+            try {
+                await api.post(`/admin/seed?qtd=${quantidade}`);
+                console.log(`✅ [DevTools] Sucesso! Banco populado com ${quantidade} registros.`);
+                console.log(`🔄 Dê um F5 na página (ou mude de tela) para ver a mágica nos gráficos.`);
+            } catch (error) {
+                console.error("❌ [DevTools] Erro ao popular o banco:", error);
+            }
+        };
+
+        return () => {
+            delete window.popularBanco;
+        };
+    }, []);
   return (
     <BrowserRouter>
       <AuthProvider>

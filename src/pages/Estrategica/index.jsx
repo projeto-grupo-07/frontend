@@ -92,7 +92,6 @@ export default function Estrategica() {
         if (periodoAtual === 'Mês Atual') {
             tipoBackend = 'Este Mês';
         } else if (periodoAtual === 'Últimos 3 Meses') {
-            // O backend não tem um switch para 3 meses, então forçamos "Personalizado" e enviamos as datas
             tipoBackend = 'Personalizado';
             const hoje = new Date();
             const tresMesesAtras = new Date();
@@ -113,7 +112,8 @@ export default function Estrategica() {
           KpiService.getDesempenhoPagamentos(filtroObj),
           KpiService.getProdutosRentaveis(filtroObj),
           KpiService.getMargemCategoria(filtroObj),
-          KpiService.getGraficoFaturamentoDinamico(filtroObj) // O seu código original usava faturamento aqui
+          // MODIFICAÇÃO 1: Chamando o novo endpoint de Volume!
+          KpiService.getGraficoVolumeDinamico(filtroObj) 
         ]);
 
         // Seta os estados extraindo a .data do Axios
@@ -204,9 +204,7 @@ export default function Estrategica() {
   return (
     <div className="estrategica-wrapper">
 
-      {/* ==========================================
-          TOPO: FILTRO GLOBAL (LARGURA TOTAL)
-          ========================================== */}
+      {/* TOPO: FILTRO GLOBAL */}
       <div className="estr-top-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button className="btn-icon-filtro" onClick={() => setIsFilterOpen(true)} title="Filtrar Período">
@@ -220,7 +218,6 @@ export default function Estrategica() {
           </div>
         </div>
 
-        {/* NOVA ÁREA DE AÇÕES COM O BOTÃO LOCAL */}
         <div className="estr-top-actions">
           <button 
             className="estr-btn-relatorio" 
@@ -231,12 +228,9 @@ export default function Estrategica() {
         </div>
       </div>
 
-      {/* ==========================================
-          LINHA 1: EFICIÊNCIA E PAGAMENTOS (Esquerda/Direita)
-          ========================================== */}
       <div className="estr-row-1">
 
-        {/* CARD ESQUERDA ACIMA: Sazonalidade do Produto (Volume) */}
+        {/* CARD ESQUERDA ACIMA: Sazonalidade de Vendas (Volume) */}
         <div className="estr-card">
           <div className="estr-card-header">
             <h3>Sazonalidade de Vendas (Volume)</h3>
@@ -246,12 +240,23 @@ export default function Estrategica() {
               <BarChart data={sazonalidade} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
                 <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} tickFormatter={(val) => `R$${formatarNumero2Casas(val / 1000)}k`} />
+                
+                {/* MODIFICAÇÃO 2: Removida a máscara de R$ e a divisão por mil (k) do YAxis */}
+                <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 12, fill: '#718096' }} 
+                    tickFormatter={(val) => Math.floor(val)} 
+                />
+                
+                {/* MODIFICAÇÃO 3: Ajustada a formatação da Tooltip (caixinha preta ao passar o mouse) */}
                 <RechartsTooltip
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value) => [`R$ ${formatarNumero2Casas(value)}`, 'Volume de Vendas']}
+                  formatter={(value) => [`${value} vendas`, 'Volume']}
                 />
-                <Bar dataKey="faturamento" name="Volume de Vendas" fill="#DCE4F2" radius={[4, 4, 0, 0]} barSize={40} />
+                
+                {/* MODIFICAÇÃO 4: A dataKey agora busca "volume" em vez de "faturamento" */}
+                <Bar dataKey={(row) => row.volume || row.Volume} name="Volume de Vendas" fill="#DCE4F2" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -307,9 +312,6 @@ export default function Estrategica() {
 
       </div>
 
-      {/* ==========================================
-          LINHA 2: MARGEM DE LUCRO E PRODUTOS RENTÁVEIS (Esquerda/Direita)
-          ========================================== */}
       <div className="estr-row-2">
 
         {/* CARD ESQUERDA ABAIXO: Gráfico de Margem de Lucro */}
@@ -363,9 +365,7 @@ export default function Estrategica() {
         </div>
       </div>
 
-      {/* ==========================================
-          MODAL DE FILTRO 
-          ========================================== */}
+      {/* MODAL DE FILTRO */}
       {isFilterOpen && (
         <div className="estr-modal-overlay">
           <div className="estr-modal-content">
@@ -398,7 +398,6 @@ export default function Estrategica() {
               ))}
             </div>
 
-            {/* Renderiza os inputs de data apenas se "Personalizado" estiver selecionado */}
             {periodoAtual === 'Personalizado' && (
               <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px', padding: '12px', backgroundColor: '#F7FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
