@@ -147,10 +147,10 @@ export default function Campanha() {
         try {
             await CampanhaService.criarCampanha(payload);
             setIsCriarModalOpen(false);
-            alert("Campanha criada com sucesso!");
             carregarCampanhas(paginaAtual);
         } catch (error) {
-            alert("Erro: " + error.message);
+            // Re-lança o erro para que o Modal consiga capturá-lo e exibir na interface
+            throw error;
         }
     };
 
