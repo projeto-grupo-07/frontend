@@ -57,7 +57,7 @@ export default function App() {
             console.log(`⏳ [DevTools] Mandando o Faker gerar ${quantidade} vendas no servidor...`);
             
             try {
-                await api.post(`/admin/seed?qtd=${quantidade}`);
+                await api.post(`/admin/seed?qtd=${quantidade}`, {}, { timeout: 300000 });
                 console.log(`✅ [DevTools] Sucesso! Banco populado com ${quantidade} registros.`);
                 console.log(`🔄 Dê um F5 na página (ou mude de tela) para ver a mágica nos gráficos.`);
             } catch (error) {
