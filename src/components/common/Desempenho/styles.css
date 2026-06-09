@@ -13,9 +13,12 @@
   bottom: 0;
   z-index: 10;
 
-  overflow: hidden;
-  /* Proíbe o scroll da página inteira */
+  /* 1. MUDANÇA: Liberando o scroll vertical e escondendo o horizontal */
+  overflow-y: auto; 
+  overflow-x: hidden;
+  
   padding: 24px;
+  padding-bottom: 80px; /* Respiro extra no final da rolagem */
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
@@ -27,8 +30,9 @@
   /* Diminui o gap para sobrar mais espaço pros gráficos */
   max-width: 1400px;
   margin: 0 auto;
-  height: 100%;
-  /* Força o container a preencher exatamente os 100% disponíveis */
+  
+  /* 2. MUDANÇA: Substituindo height por min-height para deixar a tela crescer */
+  min-height: 100%;
 }
 
 /* ==========================================================================
@@ -38,7 +42,21 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
+  
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 120px); 
+  
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.left-column::-webkit-scrollbar {
+  width: 4px;
+}
+.left-column::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 4px;
 }
 
 .period-toggle-large {
@@ -85,7 +103,9 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  /* Faz todos os 4 cartões terem exatamente a mesma altura */
+  
+  min-height: 110px;
+  flex-shrink: 0; 
   overflow: hidden;
 }
 
@@ -115,16 +135,21 @@
 
 .kpi-body {
   padding: 12px 16px;
-  /* Fonte responsiva para números principais: aumenta a legibilidade sem quebrar o layout */
-  font-size: clamp(28px, 5.5vw, 48px);
+  
+  /* CORREÇÃO 3: Reduzimos o máximo de 48px para 32px e o mínimo para 20px */
+  font-size: clamp(20px, 2vw, 32px);
+  letter-spacing: -1px; /* Aproxima um pouco os números para caberem melhor */
+  
   font-weight: 900;
   color: #2D3748;
   text-align: center;
   flex: 1;
-  /* Centraliza verticalmente o número */
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Pequena melhoria: permitir que o header do KPI tenha um subtítulo menor quando necessário */
@@ -141,11 +166,11 @@
 .main-content-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  /* Divide a altura restante meio a meio */
   gap: 16px;
-  height: 100%;
-  /* Trava na altura do pai */
+  
+  /* 4. MUDANÇA: Apagamos o grid-template-rows e o height: 100% que travavam a tela.
+     Agora definimos uma altura mínima para cada linha de gráfico respirar. */
+  grid-auto-rows: minmax(380px, auto); 
 }
 
 .content-card {
@@ -160,7 +185,7 @@
 }
 
 .card-header {
-  background-color: #FFE5F0;
+  background-color: #FFE5F0 !important; /* Garante o fundo rosa bem clarinho */
   padding: 10px 16px;
   display: flex;
   justify-content: space-between;
@@ -177,7 +202,7 @@
 
 .card-header h3 {
   margin: 0;
-  color: #FF70A6;
+  color: #FF70A6 !important; /* Garante que o texto fique no rosa escuro */
   font-size: 16px;
   font-weight: 800;
 }
@@ -269,25 +294,4 @@
   border-color: #d53f8c;
   background-color: #fff5f7;
   box-shadow: 0 4px 6px rgba(213, 63, 140, 0.1);
-}
-
-/* ==========================================================================
-   BLINDAGEM DOS CABEÇALHOS DOS GRÁFICOS
-   ========================================================================== */
-
-.card-header {
-  background-color: #FFE5F0 !important; /* Garante o fundo rosa bem clarinho */
-  padding: 10px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 12px 12px 0 0;
-  flex-shrink: 0;
-}
-
-.card-header h3 {
-  margin: 0;
-  color: #FF70A6 !important; /* Garante que o texto fique no rosa escuro */
-  font-size: 16px;
-  font-weight: 800;
 }

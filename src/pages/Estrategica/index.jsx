@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './styles.css';
-import { FiFilter } from 'react-icons/fi';
+import { FiFilter, FiMaximize2, FiX } from 'react-icons/fi'; // <-- Ícones importados aqui
 import {
   Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
   BarChart, LineChart, Bar, Line, XAxis, YAxis, CartesianGrid
@@ -16,7 +16,6 @@ const CORES_PAGAMENTO = {
   'CREDITO': '#F43F5E',   // Vermelho (Alta taxa)
 };
 
-// Utilitário para formatar a string do ENUM que vem do Java
 const formatarNomePagamento = (nomeCru) => {
   if (!nomeCru) return "-";
   const map = { 'CREDITO': 'Crédito', 'DEBITO': 'Débito', 'DINHEIRO': 'Dinheiro', 'PIX': 'PIX' };
@@ -37,7 +36,6 @@ const formatarMoeda2Casas = (valor) =>
     maximumFractionDigits: 2,
   });
 
-// Extrai dados da resposta do Axios
 const extractData = (res) => (res && res.data !== undefined ? res.data : res) || [];
 
 export default function Estrategica() {
@@ -47,12 +45,14 @@ export default function Estrategica() {
   const [mesRelatorio, setMesRelatorio] = useState('');
   const [anoRelatorio, setAnoRelatorio] = useState('');
 
-  // ESTADOS DO FILTRO PERSONALIZADO
   const [dataInicioCustom, setDataInicioCustom] = useState('');
   const [dataFimCustom, setDataFimCustom] = useState('');
   const [triggerFetch, setTriggerFetch] = useState(0); 
 
-  // Estados Reais
+  // --- NOVO ESTADO DO MODAL FULLSCREEN ---
+  // Guarda 'sazonalidade' ou 'margem', ou null se estiver fechado
+  const [graficoExpandido, setGraficoExpandido] = useState(null);
+
   const [pagamentos, setPagamentos] = useState([]);
   const [produtosRentaveis, setProdutosRentaveis] = useState([]);
   const [margemCategoria, setMargemCategoria] = useState([]);
@@ -71,9 +71,6 @@ export default function Estrategica() {
     setAnoRelatorio(String(hoje.getFullYear()));
   }, [isRelatorioOpen]);
 
-  // ========================================================================
-  // LÓGICA DE DATAS E INTEGRAÇÃO (ATUALIZADO PARA O NOVO BACKEND)
-  // ========================================================================
   useEffect(() => {
     const carregarDados = async () => {
       setLoading(true);
@@ -82,13 +79,11 @@ export default function Estrategica() {
         let inicioIso = null;
         let fimIso = null;
 
-        // Formata data JS para LocalDateTime do Java
         const formatIso = (date) => {
           const pad = (n) => String(n).padStart(2, '0');
           return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
         };
 
-        // De/Para do menu do usuário para o padrão do backend
         if (periodoAtual === 'Mês Atual') {
             tipoBackend = 'Este Mês';
         } else if (periodoAtual === 'Últimos 3 Meses') {
@@ -107,16 +102,13 @@ export default function Estrategica() {
 
         const filtroObj = { tipo: tipoBackend, inicio: inicioIso, fim: fimIso };
 
-        // Dispara requisições simultâneas para otimizar tempo
         const [resPag, resProd, resMargem, resSaz] = await Promise.all([
           KpiService.getDesempenhoPagamentos(filtroObj),
           KpiService.getProdutosRentaveis(filtroObj),
           KpiService.getMargemCategoria(filtroObj),
-          // MODIFICAÇÃO 1: Chamando o novo endpoint de Volume!
           KpiService.getGraficoVolumeDinamico(filtroObj) 
         ]);
 
-        // Seta os estados extraindo a .data do Axios
         setPagamentos(extractData(resPag));
         setProdutosRentaveis(extractData(resProd));
         setMargemCategoria(extractData(resMargem));
@@ -131,9 +123,6 @@ export default function Estrategica() {
     carregarDados();
   }, [periodoAtual, triggerFetch]);
 
-  // ========================================================================
-  // CÁLCULOS DINÂMICOS
-  // ========================================================================
   const totalVendasQtd = pagamentos.reduce((acc, item) => acc + (item.qtdVendas || item.QtdVendas || 0), 0);
 
   const handleGerarRelatorio = (event) => {
@@ -142,8 +131,6 @@ export default function Estrategica() {
       setIsSubmittingRelatorio(true);
       try {
         const mesParaEnviar = mesRelatorio ? String(Number(mesRelatorio)) : mesRelatorio;
-        console.log('Relatório solicitado', { mes: mesParaEnviar, ano: anoRelatorio });
-
         const resultado = await api.post("/relatorio/gerar", {
           ano: anoRelatorio,
           mes: mesParaEnviar
@@ -185,15 +172,12 @@ export default function Estrategica() {
           a.click();
           a.remove();
           window.URL.revokeObjectURL(url);
-
           alert('Relatório gerado e baixado com sucesso.');
           setIsRelatorioOpen(false);
         } else {
-          console.warn('Resposta do relatório não pôde ser interpretada como PDF:', resultado);
           alert('Relatório emitido, mas formato da resposta não é um PDF. Verifique o console.');
         }
       } catch (error) {
-        console.error('Erro ao solicitar relatório:', error);
         alert('Erro ao emitir relatório. Tente novamente.');
       } finally {
         setIsSubmittingRelatorio(false);
@@ -203,8 +187,6 @@ export default function Estrategica() {
 
   return (
     <div className="estrategica-wrapper">
-
-      {/* TOPO: FILTRO GLOBAL */}
       <div className="estr-top-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button className="btn-icon-filtro" onClick={() => setIsFilterOpen(true)} title="Filtrar Período">
@@ -219,50 +201,39 @@ export default function Estrategica() {
         </div>
 
         <div className="estr-top-actions">
-          <button 
-            className="estr-btn-relatorio" 
-            onClick={() => setIsRelatorioOpen(true)}
-          >
+          <button className="estr-btn-relatorio" onClick={() => setIsRelatorioOpen(true)}>
             Emitir Relatório de Importação
           </button>
         </div>
       </div>
 
       <div className="estr-row-1">
-
-        {/* CARD ESQUERDA ACIMA: Sazonalidade de Vendas (Volume) */}
+        {/* GRÁFICO 1: Sazonalidade */}
         <div className="estr-card">
-          <div className="estr-card-header">
-            <h3>Sazonalidade de Vendas (Volume)</h3>
+          <div className="estr-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Sazonalidade de Vendas (Volume)</h3>
+            <button 
+              onClick={() => setGraficoExpandido('sazonalidade')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0', padding: '4px' }}
+              title="Expandir Gráfico"
+            >
+              <FiMaximize2 size={20} />
+            </button>
           </div>
           <div className="estr-card-body">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sazonalidade} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
                 <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
-                
-                {/* MODIFICAÇÃO 2: Removida a máscara de R$ e a divisão por mil (k) do YAxis */}
-                <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 12, fill: '#718096' }} 
-                    tickFormatter={(val) => Math.floor(val)} 
-                />
-                
-                {/* MODIFICAÇÃO 3: Ajustada a formatação da Tooltip (caixinha preta ao passar o mouse) */}
-                <RechartsTooltip
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value) => [`${value} vendas`, 'Volume']}
-                />
-                
-                {/* MODIFICAÇÃO 4: A dataKey agora busca "volume" em vez de "faturamento" */}
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} tickFormatter={(val) => Math.floor(val)} />
+                <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} formatter={(value) => [`${value} vendas`, 'Volume']} />
                 <Bar dataKey={(row) => row.volume || row.Volume} name="Volume de Vendas" fill="#DCE4F2" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* CARD DIREITA ACIMA: Métodos de Pagamento */}
+        {/* TABELA: Pagamentos */}
         <div className="estr-card">
           <div className="estr-card-header">
             <h3>Desempenho por Método de Pagamento</h3>
@@ -272,24 +243,16 @@ export default function Estrategica() {
               <div style={{ flex: 1, overflowY: 'auto' }}>
                 <table className="estr-table">
                   <thead>
-                    <tr>
-                      <th>Método</th>
-                      <th>Uso (%)</th>
-                      <th>Qtd. Vendas</th>
-                      <th>Valor Total</th>
-                      <th>Ticket Médio</th>
-                    </tr>
+                    <tr><th>Método</th><th>Uso (%)</th><th>Qtd. Vendas</th><th>Valor Total</th><th>Ticket Médio</th></tr>
                   </thead>
                   <tbody>
                     {pagamentos.map((pag, idx) => {
                       const metodoCru = pag.metodo || pag.Metodo || "";
                       const qtdVendas = pag.qtdVendas || pag.QtdVendas || 0;
                       const valorTotal = pag.valorTotal || pag.ValorTotal || 0;
-                      
                       const frequencia = totalVendasQtd > 0 ? ((qtdVendas / totalVendasQtd) * 100) : 0;
                       const valorMedio = qtdVendas > 0 ? valorTotal / qtdVendas : 0;
                       const metodoEnum = metodoCru.toUpperCase();
-                      
                       return (
                         <tr key={idx}>
                           <td style={{ fontWeight: '600', display: 'flex', alignItems: 'center' }}>
@@ -309,15 +272,20 @@ export default function Estrategica() {
             )}
           </div>
         </div>
-
       </div>
 
       <div className="estr-row-2">
-
-        {/* CARD ESQUERDA ABAIXO: Gráfico de Margem de Lucro */}
+        {/* GRÁFICO 2: Margem */}
         <div className="estr-card">
-          <div className="estr-card-header">
-            <h3>Margem de Lucro por Categoria</h3>
+          <div className="estr-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0 }}>Margem de Lucro por Categoria</h3>
+            <button 
+              onClick={() => setGraficoExpandido('margem')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#a0aec0', padding: '4px' }}
+              title="Expandir Gráfico"
+            >
+              <FiMaximize2 size={20} />
+            </button>
           </div>
           <div className="estr-card-body">
             <ResponsiveContainer width="100%" height="100%">
@@ -325,17 +293,14 @@ export default function Estrategica() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
                 <XAxis dataKey={row => row.categoria || row.Categoria} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#718096' }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#FF70A6' }} tickFormatter={(val) => `${formatarNumero2Casas(val)}%`} />
-                <RechartsTooltip
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value) => [`${formatarNumero2Casas(value)}%`, 'Margem Média']}
-                />
+                <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} formatter={(value) => [`${formatarNumero2Casas(value)}%`, 'Margem Média']} />
                 <Bar dataKey={row => row.margem || row.Margem} name="Margem Média" fill="#FF70A6" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* CARD DIREITA ABAIXO: Tabela de Produtos Mais Rentáveis */}
+        {/* TABELA: Produtos Rentáveis */}
         <div className="estr-card">
           <div className="estr-card-header">
             <h3>Produtos Mais Rentáveis</h3>
@@ -344,11 +309,7 @@ export default function Estrategica() {
             {loading ? <div style={{ color: '#a0aec0', padding: '10px' }}>Mapeando produtos...</div> : (
               <table className="estr-table">
                 <thead>
-                  <tr>
-                    <th>Produto</th>
-                    <th>Qtd. Vendas</th>
-                    <th>Lucro Líquido</th>
-                  </tr>
+                  <tr><th>Produto</th><th>Qtd. Vendas</th><th>Lucro Líquido</th></tr>
                 </thead>
                 <tbody>
                   {produtosRentaveis.map((prod, idx) => (
@@ -365,32 +326,84 @@ export default function Estrategica() {
         </div>
       </div>
 
-      {/* MODAL DE FILTRO */}
+
+      {/* =====================================================================
+          MODAL FULLSCREEN DE EXPANSÃO DE GRÁFICO 
+          ===================================================================== */}
+      {graficoExpandido && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.85)',
+          zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '40px', backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            backgroundColor: '#fff', borderRadius: '16px', 
+            width: '100%', maxWidth: '1400px', height: '90%', 
+            display: 'flex', flexDirection: 'column', padding: '24px', 
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
+            {/* Header do Modal */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '16px', marginBottom: '20px' }}>
+              <h2 style={{ margin: 0, color: '#1e293b', fontSize: '24px', fontWeight: '800' }}>
+                {graficoExpandido === 'sazonalidade' ? 'Sazonalidade de Vendas (Volume)' : 'Margem de Lucro por Categoria'}
+              </h2>
+              <button 
+                onClick={() => setGraficoExpandido(null)} 
+                style={{ background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#64748b', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#e2e8f0'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#f1f5f9'}
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            
+            {/* Corpo do Modal: Renderiza o gráfico escolhido com eixos e tooltips ajustados para tela cheia */}
+            <div style={{ flex: 1, minHeight: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                {graficoExpandido === 'sazonalidade' ? (
+                  <BarChart data={sazonalidade} margin={{ top: 20, right: 20, left: 20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
+                    <XAxis dataKey="periodo" axisLine={false} tickLine={false} tick={{ fontSize: 14, fill: '#718096', fontWeight: 'bold' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 14, fill: '#718096', fontWeight: 'bold' }} tickFormatter={(val) => Math.floor(val)} />
+                    <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} formatter={(value) => [`${value} vendas`, 'Volume']} />
+                    <Bar dataKey={(row) => row.volume || row.Volume} name="Volume de Vendas" fill="#DCE4F2" radius={[4, 4, 0, 0]} barSize={60} />
+                  </BarChart>
+                ) : (
+                  <BarChart data={margemCategoria} margin={{ top: 20, right: 20, left: 20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EDF2F7" />
+                    <XAxis dataKey={row => row.categoria || row.Categoria} axisLine={false} tickLine={false} tick={{ fontSize: 14, fill: '#718096', fontWeight: 'bold' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 14, fill: '#FF70A6', fontWeight: 'bold' }} tickFormatter={(val) => `${formatarNumero2Casas(val)}%`} />
+                    <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} formatter={(value) => [`${formatarNumero2Casas(value)}%`, 'Margem Média']} />
+                    <Bar dataKey={row => row.margem || row.Margem} name="Margem Média" fill="#FF70A6" radius={[4, 4, 0, 0]} barSize={60} />
+                  </BarChart>
+                )}
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* MODAL DE FILTRO ORIGINAL */}
       {isFilterOpen && (
         <div className="estr-modal-overlay">
           <div className="estr-modal-content">
             <h3 style={{ margin: '0 0 20px 0', color: '#2D3748', fontSize: '18px', fontWeight: '800' }}>Filtrar Período</h3>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {['Hoje', 'Esta Semana', 'Mês Atual', 'Últimos 3 Meses', 'Personalizado'].map((p) => (
                 <button
                   key={p}
                   onClick={() => {
                     setPeriodoAtual(p);
-                    if (p !== 'Personalizado') {
-                      setIsFilterOpen(false);
-                    }
+                    if (p !== 'Personalizado') setIsFilterOpen(false);
                   }}
                   style={{
-                    padding: '12px',
-                    borderRadius: '8px',
+                    padding: '12px', borderRadius: '8px',
                     border: p === periodoAtual ? '2px solid #FF70A6' : '1px solid #E2E8F0',
                     backgroundColor: p === periodoAtual ? '#FFE5F0' : '#FFF',
                     color: p === periodoAtual ? '#D53F8C' : '#4A5568',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    textAlign: 'center'
+                    fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', textAlign: 'center'
                   }}
                 >
                   {p}
@@ -402,59 +415,19 @@ export default function Estrategica() {
               <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px', padding: '12px', backgroundColor: '#F7FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <label style={{ fontSize: '12px', color: '#4A5568', fontWeight: 'bold', marginBottom: '4px' }}>Data Inicial</label>
-                  <input
-                    type="date"
-                    value={dataInicioCustom}
-                    onChange={(e) => setDataInicioCustom(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #CBD5E0', color: '#2D3748', outline: 'none' }}
-                  />
+                  <input type="date" value={dataInicioCustom} onChange={(e) => setDataInicioCustom(e.target.value)} style={{ padding: '10px', borderRadius: '6px', border: '1px solid #CBD5E0', color: '#2D3748', outline: 'none' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <label style={{ fontSize: '12px', color: '#4A5568', fontWeight: 'bold', marginBottom: '4px' }}>Data Final</label>
-                  <input
-                    type="date"
-                    value={dataFimCustom}
-                    onChange={(e) => setDataFimCustom(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #CBD5E0', color: '#2D3748', outline: 'none' }}
-                  />
+                  <input type="date" value={dataFimCustom} onChange={(e) => setDataFimCustom(e.target.value)} style={{ padding: '10px', borderRadius: '6px', border: '1px solid #CBD5E0', color: '#2D3748', outline: 'none' }} />
                 </div>
               </div>
             )}
 
             <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button
-                onClick={() => setIsFilterOpen(false)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#EDF2F7',
-                  color: '#4A5568',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancelar
-              </button>
-
+              <button onClick={() => setIsFilterOpen(false)} style={{ padding: '10px 20px', backgroundColor: '#EDF2F7', color: '#4A5568', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Cancelar</button>
               {periodoAtual === 'Personalizado' && (
-                <button
-                  onClick={() => {
-                    setIsFilterOpen(false);
-                    setTriggerFetch(prev => prev + 1);
-                  }}
-                  style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#FF70A6',
-                    color: '#FFF',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Aplicar
-                </button>
+                <button onClick={() => { setIsFilterOpen(false); setTriggerFetch(prev => prev + 1); }} style={{ padding: '10px 20px', backgroundColor: '#FF70A6', color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Aplicar</button>
               )}
             </div>
           </div>
